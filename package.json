@@ -1,0 +1,36 @@
+{
+  "name": "plotto",
+  "version": "1.0.0",
+  "description": "This is the (html - css - js) PLOTTO.",
+  "main": "/js/script.js",
+  "scripts": {
+    "lint": "eslint ./js/**/*.js",
+    "build": "rollup ./js/app/app.js --file ./dist/js/app.js --format umd --name PLOTTO"
+  },
+  "author": "SciCave Team",
+  "license": "copyrights reserved - you can not grap any snippet of this project without a compliance.",
+  "devDependencies": {
+    "@babel/core": "^7.7.2",
+    "@babel/preset-env": "^7.7.1",
+    "browser-sync": "^2.26.7",
+    "eslint": "^6.8.0",
+    "eslint-config-p5js": "^1.0.1",
+    "eslint-plugin-import": "^2.18.2",
+    "rollup": "^1.31.0"
+  },
+  "dependencies": {},
+  "keywords": [
+    "drawing",
+    "plotto",
+    "graphmaker",
+    "scicave",
+    "magical-parser",
+    "mathPackage",
+    "graph",
+    "sketch",
+    "functions",
+    "geometry",
+    "algebra",
+    "curves"
+  ]
+}

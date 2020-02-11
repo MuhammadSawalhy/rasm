@@ -1,0 +1,92 @@
+
+/* for tools */
+/* for tools */
+/* for tools */
+.main-tools-container{
+  position: absolute;
+  display: flex;
+  flex-flow: column nowrap;
+  right: 0;
+  top: 0;
+
+    button{
+      height: 50px;
+      width: 50px;
+      border-radius: var(--buttons-radius);
+      margin: var(--buttons-margin);
+      font-size: 1.1em;
+    }
+
+    > [id|='zoom'] {
+      width: 50px;
+    }
+
+    .subtools-btn{
+      display: none;
+    }
+
+}
+
+.subtools-container{
+
+  position: absolute;
+  top: 0;
+  right: 60px;
+  opacity: 0.5;
+  transition: opacity 0.3s;
+
+    &:hover{
+      opacity: 1;
+    }
+
+    #subtools-zoom-rr{
+      display: none;
+
+      &:checked + #label-zoom-rr{
+        background: #97c4fe;
+        color: black;
+      }
+    }
+
+    #label-zoom-rr{
+      display: inline-flex;
+      margin: 0;
+      margin-left: 2px; 
+      border-radius: 3px;
+      opacity: 0.8;
+    }
+
+    button{
+    padding:0;
+    border-radius: var(--buttons-radius);
+    margin: var(--buttons-margin);
+    font-size: 1.1em;
+    transition: background 0.5s;
+
+      > label{
+        padding: 5px 10px;
+        display: inline-block;
+      }
+    }
+
+    input[type*='radio']{
+      display: none;
+    
+      &:checked + button{
+        background: #1e62d0;
+        color: white;
+      }
+    }
+
+}
+
+.do-redo{
+  position: absolute;
+  left: 10px;
+  top: 10px;
+
+  button{
+    color: rgb(83, 83, 83);
+  }
+
+}

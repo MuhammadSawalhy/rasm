@@ -1,0 +1,169 @@
+.control{
+  --script-background: white;
+  --r-side-background: linear-gradient(#f0f0f09a, #ecececf1);
+  --l-side-background: #f0f0f09a;
+
+  min-height: var(--min-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--script-background);
+  border-bottom: 1px solid #adadad75;
+  border-top: 1px solid #adadad75;
+  
+
+    &.dragging{
+      @extend %oc-focused;
+      box-sizing: content-box;
+      border: 4px solid rgba(7, 143, 255, 0.226);
+      border-right: none;
+      border-left: none;
+      //box-shadow: 0 0 15px 0px rgba(42, 195, 255, 0.411) !important;
+      position: relative;
+      left: 2px;
+    }
+
+    &.focus{
+      @extend %oc-focused;
+    }
+
+    .script-container{
+      min-height: var(--oc-min-height);
+      max-width: 100%;
+      --padding-right: 35px;
+      --padding-left: 55px;
+      font-size: 18px;
+      padding: 0;
+      padding-right: var(--padding-right);
+      padding-left: var(--padding-left);
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+        .obj-script{
+          padding: 10px 3px;
+          flex-grow: 1;
+          height: auto;
+          border: none;
+          max-width: 100%;
+          text-align: center;
+        }
+
+    }
+
+    .side-ctrl{
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      width: 30px;
+      display: flex;
+      flex-flow: column nowrap;
+      background: var(--r-side-background);
+      border-left: 1px solid #adadad75;
+
+        button[class^='closebtn']{
+          height: 30px;
+          width: 30px;
+          padding: 4px;
+        }
+        
+        .move{
+
+          cursor: move;
+          flex-grow: 1;
+          width: 100%;
+          font-weight: bolder;
+          color: rgba(128, 128, 128, 0.5);
+          user-select: none;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+
+          > div{
+            display: flex;
+            flex-flow: row wrap;
+            width: 10px;
+            position: relative;
+            top: -10px;
+            > span{
+              width: 10px;
+              height: 8px;
+            }
+          }
+
+        }
+
+    }
+
+    .sideStatus{
+      background: var(--l-side-background);
+      box-shadow: 2px 0 10px 0px rgba(128, 128, 128, 0.411);
+      min-height: var(--oc-min-height);
+      width: 50px;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      flex-flow: column nowrap;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.3s ease-in-out;
+
+      .order-container{
+        position: absolute;
+        padding: 2px;
+        padding-left: 5px;
+        top: 0;
+        left: 0;
+        color: rgb(158, 158, 158);
+        font-size: 12px;
+        user-select: none;
+      }
+      
+      .visible{
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(128, 128, 128, 0.253);
+        border: 1px solid grey;
+        position: relative;
+        top: 3px;
+        overflow: hidden;
+        position: relative;
+      }
+      
+      .visible .inner{
+        position: absolute;
+        width: 100%;
+        height: 100%;
+      }
+      
+      .visible .inner:hover{
+        filter: hue-rotate(10deg);
+      }
+
+    }
+}
+
+%oc-focused{
+
+  --script-background: white;
+  --r-side-background: linear-gradient(#f0f0f09a, #ecececf1);
+  --l-side-background: #49639ba1;
+  border: 4px solid var(--l-side-background);
+  border-right: none;
+  border-left: none;
+
+  .order{
+    color: white;
+  }
+
+}
+
+@import './animation';

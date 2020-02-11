@@ -1,0 +1,97 @@
+
+*, *::before, *::after{
+  box-sizing: border-box;
+}
+
+*:focus{
+  outline: none;
+}
+
+:root{
+  --buttons-radius: 10px;
+  --buttons-margin: 5px;
+  --oc-min-height: 60px;
+  --sidebar-min-width: 300px;
+  --sidebar-max-width: 60vw;
+  --main-color: rgb(0, 86, 214);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body{
+  height: 100vh;
+}
+
+
+/* main layout */
+/* main layout */
+/* main layout */
+.app-container{
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center; 
+  height: 100vh;
+  
+  header{
+    display: flex;
+    justify-content: center;
+    width: 100%;
+
+    .title{
+      text-align: center;
+      user-select: none;
+      font-weight: bolder;
+      font-family: monospace;
+      font-size: 1.2em;
+      color: rgb(255, 255, 255);
+      background: var(--main-color);
+      margin: 0;
+      padding: 5px 0;
+      filter: saturate(0.5);
+      opacity: 0.9;
+      width: 100%;
+    }
+  }
+  
+  .container{
+    display: flex;
+    flex-flow: row nowrap; 
+    flex-grow: 1;
+    width:100%;
+    overflow: hidden;
+  }
+
+}
+
+#loading-layer{
+  position: absolute;
+  top: 0; left: 0; bottom:0; right: 0;
+  z-index: 2000;
+
+  display: grid;
+  place-items: center;
+
+  background: linear-gradient(rgb(167, 89, 89), rgb(65, 133, 197));
+
+  .inner{
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: stretch;
+    .load-wrapp{
+      .letter{
+        font: 20px monospace;
+        color: black;
+      }
+
+      .line{
+        background-color: black;
+      }
+
+      background: transparent;
+    }
+  }
+}
