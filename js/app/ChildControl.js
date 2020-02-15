@@ -1,3 +1,5 @@
+import { addControl, removeControl } from './global.js';
+
 export default class {
    constructor(sketch, value) {
       if (!sketch) throw new Error('sketch is not valid.');
@@ -19,7 +21,7 @@ export default class {
           </div>
         </div>
         <div class="script-container" cancel-move>
-          <span type="text" class="obj-script"></span>
+          <span type="text" class="script"></span>
         </div>
         <div class="side-ctrl">
           <button class="closebtn-2 remove" cancel-move><div class="inner"></div></button>
@@ -50,6 +52,48 @@ export default class {
       }
    }
 
+   __setEvents() {
+      let scriptELT = this.elt.querySelector('.script');
+      this.removeELT = this.elt.querySelector('.remove');
+      this.orderELT = this.elt.querySelector('.order');
+
+      //#region math, script field
+      let checkExpr = (latex) => {
+         this.graphObject = getObject(
+            this.sketch,
+            MathPackage.transformer.latexTOsnode(latex)
+         );
+      };
+      let mathField = MQ.MathField(scriptELT, {
+         sumStartsWithNEquals: true,
+         supSubsRequireOperand: true,
+         // charsThatBreakOutOfSupSub: '+-=<>',
+         autoSubscriptNumerals: true,
+         // autoCommands: 'pi theta sqrt sum int prod',
+         // // autoOperatorNames: '',
+         maxDepth: 10,
+         handlers: {
+            edit: function () {
+               checkExpr(mathField.latex());
+            },
+
+            enter: function () {
+               let newChild = new ChildControl(sketch);
+               addControl(newChild, parseInt(orderELT.textContent));
+               newChild.focus();
+            },
+         }
+      });
+      this.mathField = mathField;
+      //#endregion 
+
+      this.removeELT.addEventListener('click', (e) => {
+         removeControl(this);
+         this.remove();
+      });
+
+   }
+
    focus() {
       this.sketch.focusedObject.blur();
 
@@ -69,8 +113,7 @@ export default class {
       if (removeELT) {
          this.removeELT.click();
       }
-      let me = this.sketch.getChildById(this.id);
-      this.sketch.children.splice(me.index, 1);
+      let me = this.sketch.removeChildById(this.sketchChild.id);
    }
 
    __updateElts() {
@@ -81,4 +124,5 @@ export default class {
       }
    }
 }
+
 

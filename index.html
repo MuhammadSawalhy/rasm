@@ -15,12 +15,9 @@
     <script src="./libraries/SUI/dist/js/all.js"></script>
     <!-- this should be here before MathPackage -->
     <script src="./libraries/MagicalParser.js"></script>
-    <!-- <script src="./libraries/MathPackage.js"></script> -->
-    <script src="E:\Program_Disgner\_Projects\_Mine\mathPackage\lib\MathPackage.js"></script>
+    <script src="./libraries/MathPackage.js"></script>
+    <!-- <script src="E:\Program_Disgner\_Projects\_Mine\mathPackage\lib\MathPackage.js"></script> -->
     <script src="./libraries/tex2max.js"></script>
-
-    <!--plugins -->
-    <script src="./libraries/p5/p5.js"></script>
 
     <!--plugins -->
     <link
@@ -36,7 +33,6 @@
     <!-- my own code -->
     <link href="./dist/styles/style.min.css" rel="stylesheet" />
 
-    <!-- <script src="./dist/js/PLOTTO.js"></script> -->
   </head>
 
   <body>
@@ -108,37 +104,7 @@
 
         <div class="canvas-outer-container">
           <div class="canvas-container">
-            <div class="details" style="display: none;" id="details">
-              <div class="details-inner">
-                <div class="header">
-                  <div class="icon-container">
-                    <span id="icon">
-                      <i class="fas fa-crop-alt"></i>
-                    </span>
-                  </div>
-                  <div class="tools">
-                    <div class="fix">
-                      <input type="checkbox" id="fix-details" />
-                      <label for="fix-details">
-                        <i class="fas fa-crop-alt"></i>
-                      </label>
-                    </div>
-
-                    <div class="drag">
-                      <div class="drag-inner">
-                        <span></span><span></span> <span></span><span></span>
-                        <span></span><span></span>
-                      </div>
-                    </div>
-
-                    <div class="close">
-                      <button class="close-btn-1 transbtn-1"></button>
-                    </div>
-                  </div>
-                </div>
-                <div class="value-container" id="value-container"></div>
-              </div>
-            </div>
+            <canvas id="canvas"></canvas>
           </div>
           <div class="tools">
             <div class="main-tools-container">
@@ -230,14 +196,11 @@
       </footer>
     </div>
 
-    <!-- <script src="./js/app/app.js" type="module"></script> -->
+    <script src="./js/app/app.js" type="module"></script>
 
-    <script src="./dist/js/app.js"></script>
-    <script>
-      var canvas;
-      function setup() {
-        PLOTTO();
-      }
-    </script>
+    <!-- <script src="./dist/js/app.js"></script> -->
+    <!-- <script>
+      PLOTTO(document.querySelector('#canvas'));
+    </script> -->
   </body>
 </html>

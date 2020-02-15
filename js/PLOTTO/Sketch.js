@@ -2,18 +2,18 @@
 /* eslint-disable no-undef */
 import GraphSettings from './GraphSetting/GraphSettings.js';
 import Coordinates from './Coordinates.js';
-
+import Canvas from './Canvas.js';
 export default class Sketch {
 
-    constructor() {
-        this.gs = new GraphSettings(this, width, height);
+    constructor(canvas) {
+        this.gs = new GraphSettings(this, canvas.clientWidth, canvas.clientHeight);
         this.coor = new Coordinates(this.gs);
-        this.canvas = createGraphics(this.gs.width, this.gs.height);
-        this.subcanvas = createGraphics(this.gs.width, this.gs.height);
-        this.childsCanvas = createGraphics(this.gs.width, this.gs.height);
-        this.canvas.textAlign(LEFT, TOP);
-        this.subcanvas.textAlign(LEFT, TOP);
-        this.childsCanvas.textAlign(LEFT, TOP);
+        this.canvas = new Canvas({ canvas: canvas});
+        this.subcanvas = new Canvas();
+        this.childsCanvas = new Canvas();
+        // this.canvas.ctx.textAlign = 'left';
+        // this.subcanvas.ctx.textAlign = 'left';
+        // this.childsCanvas.ctx.textAlign = 'left';
 
         this.children = [];
         this.focusedObject = undefined;
@@ -33,8 +33,8 @@ export default class Sketch {
 
     update() {
         if (this.canvas) {
-            this.canvas.resizeCanvas(this.gs.width, this.gs.height);
-            this.childsCanvas.resizeCanvas(this.gs.width, this.gs.height);
+            this.canvas.resize(this.gs.width, this.gs.height);
+            this.childsCanvas.resize(this.gs.width, this.gs.height);
             this.childsCanvas.clear();
             for (let child of this.children) {
                 if (child.drawable) {
@@ -46,10 +46,9 @@ export default class Sketch {
     }
 
     draw() {
-        this.canvas.background(...this.coor.coorSettings.background.toArray());
+        this.canvas.clear(this.coor.coorSettings.background.toString());
         this.coor.draw(this.canvas);
-        this.canvas.image(this.childsCanvas, 0, 0);
-        image(this.canvas, 0, 0);
+        this.canvas.ctx.drawImage(this.childsCanvas.elt, 0, 0);
     }
 
-};
+}

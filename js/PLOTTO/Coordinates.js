@@ -36,14 +36,14 @@ export default class {
       defaultCoorSettings = {
          ...defaultCoorSettings,
          ...{
-            color: defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 255) : new drawing.color(50, 50, 50, 255),
+            color: defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 255) : new drawing.color(50, 50, 50, 1),
             drawDecimalLines: !defaultCoorSettings.background.isDark(),
-            penDecimalLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 30) : new drawing.color(50, 50, 50, 30), 1),
-            penMainLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100) : new drawing.color(50, 50, 50, 100), 1),
-            penXaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150) : new drawing.color(0, 0, 0, 150), 2),
-            penYaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150) : new drawing.color(0, 0, 0, 150), 2),
-            penPolarCircles: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100) : new drawing.color(50, 50, 50, 50), 1),
-            penPolarLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100) : new drawing.color(50, 50, 50, 50), 1)
+            penDecimalLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 30/255) : new drawing.color(50, 50, 50, 30/255),  1),
+            penMainLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100/255) : new drawing.color(50, 50, 50, 100/255),   1),
+            penXaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150/255) : new drawing.color(0, 0, 0, 150/255),          2),
+            penYaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150/255) : new drawing.color(0, 0, 0, 150/255),          2),
+            penPolarCircles: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100/255) : new drawing.color(50, 50, 50, 50/255), 1),
+            penPolarLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100/255) : new drawing.color(50, 50, 50, 50/255),   1)
          }
       };
 
@@ -55,13 +55,13 @@ export default class {
 
    }
 
-   draw(canvas) {
+   draw(ctx) {
       switch (this.coorSettings.type) {
          case 'default':
-            this.custom(canvas);
+            this.custom(ctx);
             break;
          case 'rad':
-            this.radian(canvas);
+            this.radian(ctx);
             break;
       }
    }
@@ -75,6 +75,7 @@ export default class {
       end_y = Math.ceil(this.gs.viewport.ymax / this.gs.transform.ySpaceValue) * this.gs.transform.ySpaceValue;
 
       if (this.coorSettings.drawDecimalLines) {
+         canvas.ctx.beginPath();
          this.coorSettings.penDecimalLines.setup(canvas);
          // x
          for (let i = start_x; i <= end_x; i += this.gs.transform.xSpaceValue * a / this.coorSettings.decimalLinesSpace)
@@ -84,9 +85,11 @@ export default class {
          for (let i = start_y; i <= end_y; i += this.gs.transform.ySpaceValue / this.coorSettings.decimalLinesSpace)
             canvas.line(this.gs.xToPixel(start_x, i), this.gs.yToPixel(start_x, i),
                this.gs.xToPixel(end_x, i), this.gs.yToPixel(end_x, i));
+         canvas.ctx.stroke();
       }
 
       if (this.coorSettings.drawMainLines) {
+         canvas.ctx.beginPath();
          this.coorSettings.penMainLines.setup(canvas);
          // x
          for (let i = start_x; i <= end_x; i += this.gs.transform.xSpaceValue * a)
@@ -96,15 +99,18 @@ export default class {
          for (let i = start_y; i <= end_y; i += this.gs.transform.ySpaceValue)
             canvas.line(this.gs.xToPixel(start_x, i), this.gs.yToPixel(start_x, i),
                this.gs.xToPixel(end_x, i), this.gs.yToPixel(end_x, i));
+         canvas.ctx.stroke();
       }
 
       if (this.coorSettings.drawAxisesLines) {
+         canvas.ctx.beginPath();
          this.coorSettings.penXaxis.setup(canvas);
          canvas.line(this.gs.xToPixel(start_x, 0), this.gs.yToPixel(start_x, 0),
             this.gs.xToPixel(end_x, 0), this.gs.yToPixel(end_x, 0));
          this.coorSettings.penYaxis.setup(canvas);
          canvas.line(this.gs.xToPixel(0, start_y), this.gs.yToPixel(0, start_y),
             this.gs.xToPixel(0, end_y), this.gs.yToPixel(0, end_y));
+         canvas.ctx.stroke();
       }
 
       start_x = Math.floor(start_x / this.gs.transform.xSpaceValue / a);
@@ -116,13 +122,10 @@ export default class {
       let num;
       if (this.coorSettings.drawNumbers) {
          // label position x
-         canvas.fill(...this.coorSettings.color.toArray())
-            .stroke(...this.coorSettings.background.toArray().splice(0, 3), 200)
-            .strokeWeight(3)
-            .textSize(15); /// setting the label style.
-
-         // canvas.push(); /// to allow rotation
-         // canvas.rotate(this.gs.xAngle);
+         canvas.ctx.fillStyle = this.coorSettings.color.toString();
+         canvas.ctx.strokeStyle = `rgba(${this.coorSettings.background.toArray().splice(0, 3).join(', ')}, 200)`;
+         canvas.ctx.lineWidth = 2;
+         canvas.setFont({ size: 15 }); /// setting the label style.
 
          let xD, yD;
          if (Math.abs(Math.tan(this.gs.transform.yAngle)) > Math.abs(Math.tan(this.gs.transform.xAngle))) { // && Math.tan(Math.abs(this.gs.transform._xAngle - this.gs.transform._yAngle)) >= 1
@@ -130,7 +133,7 @@ export default class {
             xD = 'v'; yD = 'h';
          }
          else {
-            xD = 'h'; yD = 'x';
+            xD = 'h'; yD = 'v';
          }
 
          for (let i = start_x; i <= end_x; i += 1) {
@@ -140,8 +143,9 @@ export default class {
                x.toFixed(3).replace(/0+$/, "").replace(/\.$/, ''); /// .toFixed(3) returns 32146.000 if you input an integer, so I want to remove all the zeros from the end, and if "." remians, then remove it too, other wise keep all thing such as 2343165.123 
             if (x != 0) {
                num += (a === Math.PI / 2 ? 'pi' : '') + this.coorSettings.xUnit;
-               let p = this.__getLabelPos(this.gs.coorTOpx(x, 0), num, xD, this.gs.jVector); /// position of the label of x which the line, which is parallel to yAxis, intersect xAxis;
-               canvas.text(num, p.x + 4, p.y + 4); /// drawing the label
+               let p = this.__getLabelPos(canvas, this.gs.coorTOpx(x, 0), num, xD, this.gs.jVector); /// position of the label of x which the line, which is parallel to yAxis, intersect xAxis;
+               canvas.ctx.fillText(num, p.x, p.y);
+               // canvas.ctx.strokeText(num, p.x + 4, p.y + 4);
             }
          }
          // label position y
@@ -152,11 +156,11 @@ export default class {
                y.toFixed(3).replace(/0+$/, "").replace(/\.$/, '');
             if (y != 0) {
                num += this.coorSettings.yUnit;
-               let p = this.__getLabelPos(this.gs.coorTOpx(0, y), num, yD, this.gs.iVector);
-               canvas.text(num, p.x + 4, p.y + 4);
+               let p = this.__getLabelPos(canvas, this.gs.coorTOpx(0, y), num, yD, this.gs.iVector);
+               canvas.ctx.fillText(num, p.x, p.y);
+               // canvas.ctx.strokeText(num, p.x + 4, p.y + 4);
             }
          }
-         // canvaks.pop();
       }
    }
    radian(canvas) {
@@ -169,13 +173,13 @@ export default class {
     * @param {string} number as string to measure its size.
     * @param {string} dimension which is either 'h' or 'v', so the code will check if the label is out side the horizental view 'h', or the vertical view 'v';
     */
-   __getLabelPos(pos, number, dimension, unitVec) {
-      let size = drawing.measureString(number);
+   __getLabelPos(canvas, pos, number, dimension, unitVec) {
+      let size = canvas.measureString(number);
       size.height = 10; // as there is no properity called height in size, gotten from measureString("string");
       pos = new vector(pos.x, pos.y);
 
       if (dimension === 'h') {
-         let bounds = [4, this.gs.width - size.width - 10];
+         let bounds = [4, this.gs.width - size.width - 4];
          if (pos.x < bounds[0]) {
             let n = (bounds[0] - pos.x) / unitVec.x;
             return pos.add(unitVec.mult(n));
@@ -187,7 +191,7 @@ export default class {
          }
       } else {
          /// if it is 'v' or even anything else.
-         let bounds = [4, this.gs.height - size.height - 10];
+         let bounds = [4, this.gs.height - size.height - 4];
          if (pos.y < bounds[0]) {
             let n = (bounds[0] - pos.y) / unitVec.y;
             return pos.add(unitVec.mult(n));
@@ -198,18 +202,6 @@ export default class {
             return pos;
          }
       }
-
-      // previous trials to fetch the desired mechanism. 
-      // if (point.y < 4) {
-      //    return { x: point.x + (point.y - 4) / Math.tan(this.gs.transform.yAngle), y: 4 };
-      // }
-      // if (point.y + size.height + 8 > this.gs.height) {
-      //    return { x: (point.x + (point.y - (this.gs.height - 8 - size.height)) / Math.tan(this.gs.transform.yAngle)), y: this.gs.height - 8 - size.height };
-      // }
-      // else {
-      //    return point;
-      // }
-
    }
 
 }

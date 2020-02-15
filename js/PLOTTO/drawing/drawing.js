@@ -1,13 +1,14 @@
+import Canvas from './../Canvas.js';
 export class pen{
     constructor(color, weight = 1, style = 'solid'){
         this.color = color;
         this.weight = weight;
         this.style = style;
     }
-    setup(canvas) {
-        canvas.stroke(...this.color.toArray());
-        canvas.strokeWeight(this.weight);
-        canvas.noFill();
+    setup(canvasORctx) {
+        canvasORctx = canvasORctx instanceof Canvas ? canvasORctx.ctx : canvasORctx;
+        canvasORctx.strokeStyle = this.color.toString();
+        canvasORctx.lineWidth = this.weight;
     }
 }
 
@@ -100,6 +101,10 @@ export class color{
 
     toArray() {
         return [this.r, this.g, this.b, this.a];
+    }
+
+    toString() {
+        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
     }
 }
 

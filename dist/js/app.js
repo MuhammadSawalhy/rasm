@@ -13,7 +13,7 @@
          this.value = value;
          this.elt = document.createElement('div');
          this.elt.innerHTML = `
-      <li class="object-control">
+      <li class="control">
         <div class="sideStatus" cancel-move>
           <div class="visible">
             <div class="inner">
@@ -25,10 +25,10 @@
           </div>
         </div>
         <div class="script-container" cancel-move>
-          <span type="text" class="obj-script"></span>
+          <span type="text" class="script"></span>
         </div>
         <div class="side-ctrl">
-          <button class="closebtn-2" cancel-move><div class="inner"></div></button>
+          <button class="closebtn-2 remove" cancel-move><div class="inner"></div></button>
           <span class="move">
             <div>
               <span>..</span>
@@ -57,19 +57,17 @@
       }
 
       __setEvents() {
+         let scriptELT = this.elt.querySelector('.script');
+         this.removeELT = this.elt.querySelector('.remove');
+         this.orderELT = this.elt.querySelector('.order');
 
-         let scriptELT = this.elt.querySelector('.obj-script');
-         let removeELT = this.elt.querySelector('[class^="closebtn"]');
-         let orderELT = this.elt.querySelector('.order');
-         let sketch = this.sketch;
-
+         //#region math, script field
          let checkExpr = (latex) => {
             this.graphObject = getObject(
-               this.gs,
+               this.sketch,
                MathPackage.transformer.latexTOsnode(latex)
             );
          };
-
          let mathField = MQ.MathField(scriptELT, {
             sumStartsWithNEquals: true,
             supSubsRequireOperand: true,
@@ -84,18 +82,19 @@
                },
 
                enter: function () {
-                  let newObj = new ChildControl(sketch);
-                  __addOC(newObj, parseInt(orderELT.textContent));
-                  newObj.focus();
+                  let newChild = new ChildControl(sketch);
+                  addControl(newChild, parseInt(orderELT.textContent));
+                  newChild.focus();
                },
             }
          });
          this.mathField = mathField;
+         //#endregion 
 
-         removeELT.onclick = (e) => {
-            removeOC(this);
+         this.removeELT.addEventListener('click', (e) => {
+            removeControl(this);
             this.remove();
-         };
+         });
 
       }
 
@@ -118,8 +117,7 @@
          if (removeELT) {
             this.removeELT.click();
          }
-         let me = this.sketch.getChildById(this.id);
-         this.sketch.children.splice(me.index, 1);
+         let me = this.sketch.removeChildById(this.sketchChild.id);
       }
 
       __updateElts() {
@@ -761,13 +759,13 @@
 
       }
 
-      draw(canvas) {
+      draw(ctx) {
          switch (this.coorSettings.type) {
             case 'default':
-               this.custom(canvas);
+               this.custom(ctx);
                break;
             case 'rad':
-               this.radian(canvas);
+               this.radian(ctx);
                break;
          }
       }
@@ -780,6 +778,7 @@
          start_y = Math.floor(this.gs.viewport.ymin / this.gs.transform.ySpaceValue) * this.gs.transform.ySpaceValue;
          end_y = Math.ceil(this.gs.viewport.ymax / this.gs.transform.ySpaceValue) * this.gs.transform.ySpaceValue;
 
+         canvas.ctx.beginPath();
          if (this.coorSettings.drawDecimalLines) {
             this.coorSettings.penDecimalLines.setup(canvas);
             // x
@@ -822,10 +821,10 @@
          let num;
          if (this.coorSettings.drawNumbers) {
             // label position x
-            canvas.fill(...this.coorSettings.color.toArray())
-               .stroke(...this.coorSettings.background.toArray().splice(0, 3), 200)
-               .strokeWeight(3)
-               .textSize(15); /// setting the label style.
+            canvas.ctx.fillStyle = this.coorSettings.color.toString();
+            canvas.ctx.strokeStyle = `rgba(${this.coorSettings.background.toArray().splice(0, 3).join(', ')}, 200)`;
+            canvas.ctx.lineWidth = 3;
+            canvas.setFont({ size: 15 }); /// setting the label style.
 
             // canvas.push(); /// to allow rotation
             // canvas.rotate(this.gs.xAngle);
@@ -836,7 +835,7 @@
                xD = 'v'; yD = 'h';
             }
             else {
-               xD = 'h'; yD = 'x';
+               xD = 'h'; yD = 'v';
             }
 
             for (let i = start_x; i <= end_x; i += 1) {
@@ -847,7 +846,8 @@
                if (x != 0) {
                   num += (a === Math.PI / 2 ? 'pi' : '') + this.coorSettings.xUnit;
                   let p = this.__getLabelPos(this.gs.coorTOpx(x, 0), num, xD, this.gs.jVector); /// position of the label of x which the line, which is parallel to yAxis, intersect xAxis;
-                  canvas.text(num, p.x + 4, p.y + 4); /// drawing the label
+                  canvas.ctx.fillText(num, p.x + 4, p.y + 4);
+                  canvas.ctx.strokeText(num, p.x + 4, p.y + 4);
                }
             }
             // label position y
@@ -859,7 +859,8 @@
                if (y != 0) {
                   num += this.coorSettings.yUnit;
                   let p = this.__getLabelPos(this.gs.coorTOpx(0, y), num, yD, this.gs.iVector);
-                  canvas.text(num, p.x + 4, p.y + 4);
+                  canvas.ctx.fillText(num, p.x + 4, p.y + 4);
+                  canvas.ctx.strokeText(num, p.x + 4, p.y + 4);
                }
             }
             // canvaks.pop();
@@ -920,19 +921,64 @@
 
    }
 
-   /* eslint-disable no-unused-vars */
+   class Canvas{
 
+      /**
+       * to create an instance of Canvas class, this offer some good methods and propeties.
+       * @param {Objetc} options 
+       * you can set parent, canvas, attributes which contains any attribute of html. 
+       */
+      constructor(options = {}) {
+         this.elt = options.canvas || document.createElement("canvas");
+         this.ctx = this.elt.getContext('2d');
+         if (options.parent) options.parent.appendChild(this.elt);
+         if (options.attributes) {
+            for (let [name, value] in attributes) {
+               this.elt.setAttribut(name, value);
+            }
+         }
+         this.font = { width: 15, family: 'Georgia' };
+      }
+
+      resize(width, height) {
+         this.elt.width = width;
+         this.elt.height = height;
+      }
+
+      clear(fillStyle) {
+         if (fillStyle) {
+            this.ctx.fillStyle = fillStyle;
+            this.ctx.fillRect(0, 0, this.elt.clientWidth, this.elt.clientHeight);
+         } else {
+            this.ctx.clearRect(0, 0, this.elt.clientWidth, this.elt.clientHeight);
+         }
+      }
+
+      line(x1, y1, x2, y2) {
+         this.ctx.moveTo(x1, y1);
+         this.ctx.lineTo(x2, y2);
+      }
+
+      setFont(font) {
+         if (font.width) this.font.width = font.width;
+         if (font.family) this.font.family = font.family;
+         return `${this.font.width}px ${this.font.family}`;
+      }
+      
+   }
+
+   /* eslint-disable no-unused-vars */
    class Sketch {
 
-       constructor() {
-           this.gs = new GraphSettings(this, width, height);
+       constructor(canvas) {
+           this.gs = new GraphSettings(this, canvas.clientWidth, canvas.clientHeight);
            this.coor = new Coordinates(this.gs);
-           this.canvas = createGraphics(this.gs.width, this.gs.height);
-           this.subcanvas = createGraphics(this.gs.width, this.gs.height);
-           this.childsCanvas = createGraphics(this.gs.width, this.gs.height);
-           this.canvas.textAlign(LEFT, TOP);
-           this.subcanvas.textAlign(LEFT, TOP);
-           this.childsCanvas.textAlign(LEFT, TOP);
+           this.canvas = new Canvas({ canvas: canvas});
+           this.subcanvas = new Canvas();
+           this.childsCanvas = new Canvas();
+           // this.canvas.ctx.textAlign = 'left';
+           // this.subcanvas.ctx.textAlign = 'left';
+           // this.childsCanvas.ctx.textAlign = 'left';
 
            this.children = [];
            this.focusedObject = undefined;
@@ -952,8 +998,8 @@
 
        update() {
            if (this.canvas) {
-               this.canvas.resizeCanvas(this.gs.width, this.gs.height);
-               this.childsCanvas.resizeCanvas(this.gs.width, this.gs.height);
+               this.canvas.resize(this.gs.width, this.gs.height);
+               this.childsCanvas.resize(this.gs.width, this.gs.height);
                this.childsCanvas.clear();
                for (let child of this.children) {
                    if (child.drawable) {
@@ -965,10 +1011,9 @@
        }
 
        draw() {
-           this.canvas.background(...this.coor.coorSettings.background.toArray());
+           this.canvas.clear(this.coor.coorSettings.background.toString());
            this.coor.draw(this.canvas);
-           this.canvas.image(this.childsCanvas, 0, 0);
-           image(this.canvas, 0, 0);
+           this.canvas.ctx.drawImage(this.childsCanvas, 0, 0);
        }
 
    }
@@ -996,7 +1041,7 @@
    var controls = document.querySelector('.controls');
    var newControl = controls.parentElement.querySelector('.new-control');
 
-   function addOC(control, index = 'last') {
+   function addControl(control, index = 'last') {
       let objs = document.querySelectorAll('.controls li');
       index = (math.isNumeric(index) && index > objs.length - 1) ? 'last' : index;
       let i = index === 'last' ? objs.length - 1 : index;
@@ -1014,30 +1059,48 @@
       }
    }
 
-   var canvascontainer = document.querySelector('.canvas-container');
+   function removeControl(control) {
+      control.elt.style.height = control.elt.clientHeight + 'px';
+      control.elt.classList.add('oc-remove');
+
+      setTimeout(() => {
+         control.elt.remove();
+         if (controls.childElementCount === 0) {
+            newControl.classList.add('animate-shake');
+            controls.parentElement.classList.add('blink-error');
+            setTimeout(() => {
+               newControl.classList.remove('animate-shake');
+               controls.parentElement.classList.remove('blink-error');
+               addControl(new ChildControl$1(mySketch));
+            }, 400);
+         }
+      }, 300);
+   }
+
+   var canvasParent = document.querySelector('.canvas-container');
    function resize(setContainment = true) {
 
-      resizeCanvas(canvascontainer.clientWidth, canvascontainer.clientHeight);
+      canvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
+      mySketch.gs.width = canvasParent.clientWidth;
+      mySketch.gs.height = canvasParent.clientHeight;
 
+      
       let vp = mySketch.gs.viewport;
-      mySketch.gs.width = width;
-      mySketch.gs.height = height;
       mySketch.gs.transform.onchange(true);
-
-      if (angles.minAngle(new vector(1, 0), vector.fromAngle(mySketch.gs.transform.xAngle)).toFixed(3) === (0).toFixed(3) && angles.minAngle(new vector(1, 0), vector.fromAngle(mySketch.gs.transform.yAngle)).toFixed(3) === (Math.PI / 2).toFixed(3)) {
-         mySketch.gs.transform.invokeOnchange = false;
-         mySketch.gs.transform.transformOrigin = undefined;
-         let xs = mySketch.gs.transform.xScale;
-         mySketch.gs.transform.setViewport(vp, null, true);
-         mySketch.gs.transform.invokeOnchange = true;
-         mySketch.gs.transform.onchange();
-      }
+      // if (angles.minAngle(new vector(1, 0), vector.fromAngle(mySketch.gs.transform.xAngle)).toFixed(3) === (0).toFixed(3) && angles.minAngle(new vector(1, 0), vector.fromAngle(mySketch.gs.transform.yAngle)).toFixed(3) === (Math.PI / 2).toFixed(3)) {
+      mySketch.gs.transform.invokeOnchange = false;
+      mySketch.gs.transform.transformOrigin = undefined;
+      let xs = mySketch.gs.transform.xScale;
+      mySketch.gs.transform.setViewport(vp, null, true);
+      mySketch.gs.transform.invokeOnchange = true;
+      mySketch.gs.transform.onchange();
+      // }
 
       if (setContainment) {
 
          $(".sidebar-container .resizer")
             .draggable('option', 'containment', getContainment());
-            // .css({ left: document.querySelector('.sidebar-container').clientWidth + 'px' });
+         // .css({ left: document.querySelector('.sidebar-container').clientWidth + 'px' });
       }
 
       mySketch.update();
@@ -1072,10 +1135,9 @@
            this.weight = weight;
            this.style = style;
        }
-       setup(canvas) {
-           canvas.stroke(...this.color.toArray());
-           canvas.strokeWeight(this.weight);
-           canvas.noFill();
+       setup(ctx) {
+           ctx.strokeStyle = this.color.toString();
+           ctx.lineWidth = this.weight;
        }
    }
 
@@ -1168,6 +1230,10 @@
 
        toArray() {
            return [this.r, this.g, this.b, this.a];
+       }
+
+       toString() {
+           return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
        }
    }
 
@@ -1782,7 +1848,7 @@
 
       document.querySelector('.new-control .new-expr').addEventListener('click', (e) => {
          let oc = new ChildControl$1(mySketch);
-         addOC(oc);
+         addControl(oc);
       });
 
       canvasEvents();
@@ -1794,7 +1860,7 @@
     * app folder is associated with PLOTTO folder, both of them depends upon the other.
     */
     
-   function setupAPP() {
+   function setupAPP(canvas) {
 
      window.MP = MathPackage;
      window.angles = MP.Angles;
@@ -1803,9 +1869,9 @@
      window.drawing = drawing$1;
      window.vector = MP.entities.Vector;
      window.MQ = MathQuill.getInterface(2);
-     window.mySketch = new Sketch();
+     window.mySketch = new Sketch(canvas);
      window.canvas = mySketch.canvas;
-     canvas.parent(document.querySelector('.canvas-container'));
+     // canvasParent.appendChild(window.canvas.elt);
 
      let mathFields = $(".math-field");
      for (let i = 0; i < mathFields.length; i++) {

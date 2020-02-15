@@ -1,4 +1,4 @@
-import { getContainment, updateObjsOrder, resize } from './global.js';
+import { getContainment, updateObjsOrder, resize, canvasParent } from './global.js';
 import Sketch from '../PLOTTO/Sketch.js';
 import drawing from '../PLOTTO/drawing/index.js';
 import setEvents from './events/index.js';
@@ -8,8 +8,7 @@ import setupKeypad from './keypad/index.js';
  * """""""""""""""" reminder
  * app folder is associated with PLOTTO folder, both of them depends upon the other.
  */
- 
-export default function setupAPP() {
+export default function setupAPP(canvas) {
 
   window.MP = MathPackage;
   window.angles = MP.Angles;
@@ -18,9 +17,9 @@ export default function setupAPP() {
   window.drawing = drawing;
   window.vector = MP.entities.Vector;
   window.MQ = MathQuill.getInterface(2);
-  window.mySketch = new Sketch();
+  window.mySketch = new Sketch(canvas);
   window.canvas = mySketch.canvas;
-  canvas.parent(document.querySelector('.canvas-container'));
+  // canvasParent.appendChild(window.canvas.elt);
 
   let mathFields = $(".math-field");
   for (let i = 0; i < mathFields.length; i++) {
@@ -129,3 +128,6 @@ function setupSortable(){
   //#endregion
 
 }
+
+
+setupAPP(document.querySelector('#canvas'));

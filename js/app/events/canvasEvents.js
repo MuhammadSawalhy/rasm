@@ -1,6 +1,7 @@
 
 //#region canvas events
 import { subTools } from '../global.js';
+import { mouseX, mouseY } from '../global.js';
 
 export default function canvasEvents() {
    let mousepressed;
