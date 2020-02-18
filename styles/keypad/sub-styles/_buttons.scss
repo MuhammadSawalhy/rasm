@@ -1,0 +1,114 @@
+$background: #eee;
+$radius: var(--kb-radius);
+$lineHeight: var(--line-height);
+@mixin generalStyle() {
+
+  font: 1em -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
+    Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  background-color: $background;
+  color: #777;
+  border: 0;
+  border-radius: $radius;
+  font-size: 1em;
+  height: $lineHeight;
+  vertical-align: top;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  padding: 0;
+  border: 1px solid rgba(31, 31, 31, 0.74);
+  border-bottom: 3px solid rgba(31, 31, 31, 0.74);
+
+  &:not(:last-of-type) {
+    margin-right: var(--gap);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.3s ease-in-out;
+    width: 100%;
+    height: 100%;
+  }
+
+  &:active {
+    border-bottom: 1px solid rgba(31, 31, 31, 0.74);
+    font-weight: bolder;
+  }
+  &:hover,
+  &:focus {
+    outline: 0;
+  }
+}
+
+ button {
+
+  @include generalStyle();
+
+  max-width: 200px;
+  position: relative;
+  flex-grow: 1;
+
+  > span {
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    // transition: transform 0.3s ease-in-out, top 0.3s ease-in-out,
+    //   right 0.3s ease-in-out;
+  }
+
+  &.shiftable {
+    > span:not(.active) {
+      color: #313131aa;
+      font-size: 0.8em;
+      top: 2px;
+      right: 2px;
+      transform: translate(0, 0);
+    }
+  }
+
+  &.double-shiftable > div {
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    display: none;
+    transition: opacity 0.3s ease-in;
+
+    &.active {
+      display: block;
+    }
+
+    > span {
+      display: block;
+    }
+
+    > span:not(.active) {
+      display: none;
+    }
+  }
+
+  &.shift.active,
+  &.double-shift.active {
+    span {
+      color: rgb(42, 141, 255);
+      text-shadow: 1px 2px 4px rgb(98, 182, 255);
+    }
+  }
+
+  &.shift.lock {
+    background-color: rgb(179, 179, 179);
+    color: rgb(0, 110, 153);
+  }
+  
+  &.num-btn{
+      background: darken($background, 15%);;
+  }
+
+}

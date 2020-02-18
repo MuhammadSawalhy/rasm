@@ -1,0 +1,38 @@
+
+
+.main-keypad, .alpha-keypad, .functions-keypad {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+
+  .rows {
+    width: 100%;
+    height: 100%;
+    max-width: 600px;
+  }
+
+}
+
+
+.alpha-keypad {
+  .rows {
+    .shift,
+    .backspace {
+      width: 80%;
+      background: transparent;
+    }
+
+    .shift {
+      float: left;
+    }
+
+    .backspace {
+      float: right;
+    }
+
+    .space {
+      flex-grow: 2.5;
+    }
+  }
+}
+

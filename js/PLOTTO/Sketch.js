@@ -15,20 +15,21 @@ export default class Sketch {
         // this.subcanvas.ctx.textAlign = 'left';
         // this.childsCanvas.ctx.textAlign = 'left';
 
-        this.children = [];
+        this.children = new Map();
         this.focusedObject = undefined;
     }
 
-    appendChild(obj) {
-        this.objs.push(obj);
-        this.update();
+    appendChild(cihld) {
+        if (!child.id) throw new Error('Your sketch child shoyld have had an id :\'(');
+        this.children.set(child.id, child);
     }
 
     getChildById(id) {
-        for (let index = 0; index < this.children.length; index++) {
-            if (this.children[index].id === id) return { child, index };
-            continue;
-        }
+        // for (let index = 0; index < this.children.length; index++) {
+        //     if (this.children[index].id === id) return { child, index };
+        //     continue;
+        // }
+        return this.children.get(id);
     }
 
     update() {
@@ -36,8 +37,8 @@ export default class Sketch {
             this.canvas.resize(this.gs.width, this.gs.height);
             this.childsCanvas.resize(this.gs.width, this.gs.height);
             this.childsCanvas.clear();
-            for (let child of this.children) {
-                if (child.drawable) {
+            for (let child of this.children.values()) {
+                if (child && child.drawable) {
                     child.value.draw(this.childsCanvas);
                 }
             }

@@ -1,0 +1,75 @@
+.sh-keypad {
+  background: var(--kb-background);
+  z-index: 1000;
+  transition: transform 0.3, border-top-right-radius 0.3s;
+  position: absolute;
+  padding: 0;
+  overflow: hidden;
+  color: black;
+  font-size: 1.2em;
+
+  border: none;
+  border-radius: var(--kb-radius);
+
+  &:focus {
+    outline: none;
+  }
+
+  &.show {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translateY(-98%);
+    border-radius: 0;
+    border-top-right-radius: var(--kb-radius);
+    border-right: var(--kb-border);
+    border-top: var(--kb-border);
+
+    .arrow svg {
+      transform: rotate(180deg);
+    }
+  }
+
+  &.hide {
+    position: absolute;
+    bottom: var(--shkbBTNposition);
+    left: var(--shkbBTNposition);
+    animation: animateSH 0.7s;
+    border: var(--kb-border);
+    border-radius: var(--kb-radius);
+
+    @keyframes animateSH {
+      0%, 30% {
+        transform: translateX(-120%);
+        opacity: 0;
+      }
+    }
+  }
+
+  .arrow {
+    padding: 5px;
+    display: grid;
+    place-items: center;
+    svg{
+        transition: transform 3s ease-in-out;
+    }
+  }
+
+  .sh-keypad-content {
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    padding: 5px;
+    font: 1.5em consolas, monosapce;
+
+    height: 100%;
+    width: 100%;
+
+    color: rgb(66, 66, 66);
+
+    z-index: 1000;
+    border: none;
+    border-style: hidden;
+  }
+}

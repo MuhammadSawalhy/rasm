@@ -5,15 +5,16 @@
 }(this, (function () { 'use strict';
 
    class ChildControl$1 {
-      constructor(sketch, value) {
-         if (!sketch) throw new Error('sketch is not valid.');
-         this.sketch = sketch;
-         this.gs = this.sketch.gs;
+      constructor(sketchChild) {
+         this.id = genRandomName();
+         sketchChild.id = this.id;
+         sketchChild.control = this;
+
          // value is the graph object
-         this.value = value;
+         this.sketchChild = sketchChild;
          this.elt = document.createElement('div');
          this.elt.innerHTML = `
-      <li class="control">
+      <li class="control" id="${this.id}">
         <div class="sideStatus" cancel-move>
           <div class="visible">
             <div class="inner">
@@ -24,7 +25,7 @@
             <span class='order'>12</span>
           </div>
         </div>
-        <div class="script-container" cancel-move>
+        <div class="script-container" cancel-move cancel-hiding-keypad>
           <span type="text" class="script"></span>
         </div>
         <div class="side-ctrl">
@@ -44,16 +45,15 @@
          this.__setEvents();
          this.__updateElts(); /// updating elements
       }
-      get graphObject() {
-         return this._graphObject;
+      get sketchChild() {
+         return this._sketchChild;
       }
-      set graphObject(value) {
-         if (value) {
-            if (!this._graphObject) {
-               this.sketch.addObj(value);
-            }
-            this._graphObject = value;
+
+      set sketchChild(value) {
+         if (!this._sketchChild) {
+            this.sketch.children.set(this.id, value);
          }
+         this._sketchChild = value;
       }
 
       __setEvents() {
@@ -62,10 +62,9 @@
          this.orderELT = this.elt.querySelector('.order');
 
          //#region math, script field
-         let checkExpr = (latex) => {
+         let handleScript = (latex) => {
             this.graphObject = getObject(
-               this.sketch,
-               MathPackage.transformer.latexTOsnode(latex)
+               MathPackage.Parser.latexTOnode(latex)
             );
          };
          let mathField = MQ.MathField(scriptELT, {
@@ -78,11 +77,11 @@
             maxDepth: 10,
             handlers: {
                edit: function () {
-                  checkExpr(mathField.latex());
+                  handleScript(mathField.latex());
                },
 
                enter: function () {
-                  let newChild = new ChildControl(sketch);
+                  let newChild = new ChildControl();
                   addControl(newChild, parseInt(orderELT.textContent));
                   newChild.focus();
                },
@@ -740,14 +739,14 @@
          defaultCoorSettings = {
             ...defaultCoorSettings,
             ...{
-               color: defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 255) : new drawing.color(50, 50, 50, 255),
+               color: defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 255) : new drawing.color(50, 50, 50, 1),
                drawDecimalLines: !defaultCoorSettings.background.isDark(),
-               penDecimalLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 30) : new drawing.color(50, 50, 50, 30), 1),
-               penMainLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100) : new drawing.color(50, 50, 50, 100), 1),
-               penXaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150) : new drawing.color(0, 0, 0, 150), 2),
-               penYaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150) : new drawing.color(0, 0, 0, 150), 2),
-               penPolarCircles: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100) : new drawing.color(50, 50, 50, 50), 1),
-               penPolarLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100) : new drawing.color(50, 50, 50, 50), 1)
+               penDecimalLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 30/255) : new drawing.color(50, 50, 50, 30/255),  1),
+               penMainLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100/255) : new drawing.color(50, 50, 50, 100/255),   1),
+               penXaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150/255) : new drawing.color(0, 0, 0, 150/255),          2),
+               penYaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150/255) : new drawing.color(0, 0, 0, 150/255),          2),
+               penPolarCircles: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100/255) : new drawing.color(50, 50, 50, 50/255), 1),
+               penPolarLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100/255) : new drawing.color(50, 50, 50, 50/255),   1)
             }
          };
 
@@ -778,8 +777,8 @@
          start_y = Math.floor(this.gs.viewport.ymin / this.gs.transform.ySpaceValue) * this.gs.transform.ySpaceValue;
          end_y = Math.ceil(this.gs.viewport.ymax / this.gs.transform.ySpaceValue) * this.gs.transform.ySpaceValue;
 
-         canvas.ctx.beginPath();
          if (this.coorSettings.drawDecimalLines) {
+            canvas.ctx.beginPath();
             this.coorSettings.penDecimalLines.setup(canvas);
             // x
             for (let i = start_x; i <= end_x; i += this.gs.transform.xSpaceValue * a / this.coorSettings.decimalLinesSpace)
@@ -789,9 +788,11 @@
             for (let i = start_y; i <= end_y; i += this.gs.transform.ySpaceValue / this.coorSettings.decimalLinesSpace)
                canvas.line(this.gs.xToPixel(start_x, i), this.gs.yToPixel(start_x, i),
                   this.gs.xToPixel(end_x, i), this.gs.yToPixel(end_x, i));
+            canvas.ctx.stroke();
          }
 
          if (this.coorSettings.drawMainLines) {
+            canvas.ctx.beginPath();
             this.coorSettings.penMainLines.setup(canvas);
             // x
             for (let i = start_x; i <= end_x; i += this.gs.transform.xSpaceValue * a)
@@ -801,15 +802,18 @@
             for (let i = start_y; i <= end_y; i += this.gs.transform.ySpaceValue)
                canvas.line(this.gs.xToPixel(start_x, i), this.gs.yToPixel(start_x, i),
                   this.gs.xToPixel(end_x, i), this.gs.yToPixel(end_x, i));
+            canvas.ctx.stroke();
          }
 
          if (this.coorSettings.drawAxisesLines) {
+            canvas.ctx.beginPath();
             this.coorSettings.penXaxis.setup(canvas);
             canvas.line(this.gs.xToPixel(start_x, 0), this.gs.yToPixel(start_x, 0),
                this.gs.xToPixel(end_x, 0), this.gs.yToPixel(end_x, 0));
             this.coorSettings.penYaxis.setup(canvas);
             canvas.line(this.gs.xToPixel(0, start_y), this.gs.yToPixel(0, start_y),
                this.gs.xToPixel(0, end_y), this.gs.yToPixel(0, end_y));
+            canvas.ctx.stroke();
          }
 
          start_x = Math.floor(start_x / this.gs.transform.xSpaceValue / a);
@@ -823,11 +827,8 @@
             // label position x
             canvas.ctx.fillStyle = this.coorSettings.color.toString();
             canvas.ctx.strokeStyle = `rgba(${this.coorSettings.background.toArray().splice(0, 3).join(', ')}, 200)`;
-            canvas.ctx.lineWidth = 3;
+            canvas.ctx.lineWidth = 2;
             canvas.setFont({ size: 15 }); /// setting the label style.
-
-            // canvas.push(); /// to allow rotation
-            // canvas.rotate(this.gs.xAngle);
 
             let xD, yD;
             if (Math.abs(Math.tan(this.gs.transform.yAngle)) > Math.abs(Math.tan(this.gs.transform.xAngle))) { // && Math.tan(Math.abs(this.gs.transform._xAngle - this.gs.transform._yAngle)) >= 1
@@ -845,9 +846,9 @@
                   x.toFixed(3).replace(/0+$/, "").replace(/\.$/, ''); /// .toFixed(3) returns 32146.000 if you input an integer, so I want to remove all the zeros from the end, and if "." remians, then remove it too, other wise keep all thing such as 2343165.123 
                if (x != 0) {
                   num += (a === Math.PI / 2 ? 'pi' : '') + this.coorSettings.xUnit;
-                  let p = this.__getLabelPos(this.gs.coorTOpx(x, 0), num, xD, this.gs.jVector); /// position of the label of x which the line, which is parallel to yAxis, intersect xAxis;
-                  canvas.ctx.fillText(num, p.x + 4, p.y + 4);
-                  canvas.ctx.strokeText(num, p.x + 4, p.y + 4);
+                  let p = this.__getLabelPos(canvas, this.gs.coorTOpx(x, 0), num, xD, this.gs.jVector); /// position of the label of x which the line, which is parallel to yAxis, intersect xAxis;
+                  canvas.ctx.fillText(num, p.x, p.y);
+                  // canvas.ctx.strokeText(num, p.x + 4, p.y + 4);
                }
             }
             // label position y
@@ -858,12 +859,11 @@
                   y.toFixed(3).replace(/0+$/, "").replace(/\.$/, '');
                if (y != 0) {
                   num += this.coorSettings.yUnit;
-                  let p = this.__getLabelPos(this.gs.coorTOpx(0, y), num, yD, this.gs.iVector);
-                  canvas.ctx.fillText(num, p.x + 4, p.y + 4);
-                  canvas.ctx.strokeText(num, p.x + 4, p.y + 4);
+                  let p = this.__getLabelPos(canvas, this.gs.coorTOpx(0, y), num, yD, this.gs.iVector);
+                  canvas.ctx.fillText(num, p.x, p.y);
+                  // canvas.ctx.strokeText(num, p.x + 4, p.y + 4);
                }
             }
-            // canvaks.pop();
          }
       }
       radian(canvas) {
@@ -876,13 +876,13 @@
        * @param {string} number as string to measure its size.
        * @param {string} dimension which is either 'h' or 'v', so the code will check if the label is out side the horizental view 'h', or the vertical view 'v';
        */
-      __getLabelPos(pos, number, dimension, unitVec) {
-         let size = drawing.measureString(number);
+      __getLabelPos(canvas, pos, number, dimension, unitVec) {
+         let size = canvas.measureString(number);
          size.height = 10; // as there is no properity called height in size, gotten from measureString("string");
          pos = new vector(pos.x, pos.y);
 
          if (dimension === 'h') {
-            let bounds = [4, this.gs.width - size.width - 10];
+            let bounds = [4, this.gs.width - size.width - 4];
             if (pos.x < bounds[0]) {
                let n = (bounds[0] - pos.x) / unitVec.x;
                return pos.add(unitVec.mult(n));
@@ -893,8 +893,8 @@
                return pos;
             }
          } else {
-            /// if it is 'v' or even anything else.
-            let bounds = [4, this.gs.height - size.height - 10];
+            /// if dimension is 'v' or even anything else.
+            let bounds = [4, this.gs.height - size.height - 4];
             if (pos.y < bounds[0]) {
                let n = (bounds[0] - pos.y) / unitVec.y;
                return pos.add(unitVec.mult(n));
@@ -905,18 +905,6 @@
                return pos;
             }
          }
-
-         // previous trials to fetch the desired mechanism. 
-         // if (point.y < 4) {
-         //    return { x: point.x + (point.y - 4) / Math.tan(this.gs.transform.yAngle), y: 4 };
-         // }
-         // if (point.y + size.height + 8 > this.gs.height) {
-         //    return { x: (point.x + (point.y - (this.gs.height - 8 - size.height)) / Math.tan(this.gs.transform.yAngle)), y: this.gs.height - 8 - size.height };
-         // }
-         // else {
-         //    return point;
-         // }
-
       }
 
    }
@@ -937,14 +925,13 @@
                this.elt.setAttribut(name, value);
             }
          }
-         this.font = { width: 15, family: 'Georgia' };
+         this.font = { width: 15, family: 'Arial' };
       }
 
       resize(width, height) {
          this.elt.width = width;
          this.elt.height = height;
       }
-
       clear(fillStyle) {
          if (fillStyle) {
             this.ctx.fillStyle = fillStyle;
@@ -953,18 +940,33 @@
             this.ctx.clearRect(0, 0, this.elt.clientWidth, this.elt.clientHeight);
          }
       }
+      setFont(font) {
+         if (font.size) this.font.size = font.size;
+         if (font.family) this.font.family = font.family;
+         this.ctx.font = `${this.font.size}px ${this.font.family}`;
+      }
+      measureString(txt) {
+         let size = this.ctx.measureText(txt);
+         size.height = this.font.size;
+         return size;
+      }
+
+      //#region shapes
 
       line(x1, y1, x2, y2) {
          this.ctx.moveTo(x1, y1);
          this.ctx.lineTo(x2, y2);
       }
 
-      setFont(font) {
-         if (font.width) this.font.width = font.width;
-         if (font.family) this.font.family = font.family;
-         return `${this.font.width}px ${this.font.family}`;
+      ellipse(x, y, radius1, radius2, rotation = 0, startAngle = 0, endAngle = Math.PI*2, counterClockWise = false) {
+         this.ctx.beginPath();
+         this.ctx.ellipse(x, y, radius1, radius2 || radius1, rotation, startAngle, endAngle, counterClockWise);
+         this.ctx.fill();
+         this.ctx.stroke();
       }
-      
+
+      //#endregion
+
    }
 
    /* eslint-disable no-unused-vars */
@@ -980,20 +982,21 @@
            // this.subcanvas.ctx.textAlign = 'left';
            // this.childsCanvas.ctx.textAlign = 'left';
 
-           this.children = [];
+           this.children = new Map();
            this.focusedObject = undefined;
        }
 
-       appendChild(obj) {
-           this.objs.push(obj);
-           this.update();
+       appendChild(cihld) {
+           if (!child.id) throw new Error('Your sketch child shoyld have had an id :\'(');
+           this.children.set(child.id, child);
        }
 
        getChildById(id) {
-           for (let index = 0; index < this.children.length; index++) {
-               if (this.children[index].id === id) return { child, index };
-               continue;
-           }
+           // for (let index = 0; index < this.children.length; index++) {
+           //     if (this.children[index].id === id) return { child, index };
+           //     continue;
+           // }
+           return this.children.get(id);
        }
 
        update() {
@@ -1001,8 +1004,8 @@
                this.canvas.resize(this.gs.width, this.gs.height);
                this.childsCanvas.resize(this.gs.width, this.gs.height);
                this.childsCanvas.clear();
-               for (let child of this.children) {
-                   if (child.drawable) {
+               for (let child of this.children.values()) {
+                   if (child && child.drawable) {
                        child.value.draw(this.childsCanvas);
                    }
                }
@@ -1013,11 +1016,12 @@
        draw() {
            this.canvas.clear(this.coor.coorSettings.background.toString());
            this.coor.draw(this.canvas);
-           this.canvas.ctx.drawImage(this.childsCanvas, 0, 0);
+           this.canvas.ctx.drawImage(this.childsCanvas.elt, 0, 0);
        }
 
    }
 
+   //#region variables
    var subTools = {
       details: SUI.TempMessege({
          layer: false,
@@ -1029,6 +1033,9 @@
          parent: document.querySelector('.canvas-container')
       })
    };
+   //#endregion
+
+   //#region methods
 
    function updateObjsOrder() {
       let objs = document.querySelectorAll('.controls li');
@@ -1039,42 +1046,32 @@
    }
 
    var controls = document.querySelector('.controls');
-   var newControl = controls.parentElement.querySelector('.new-control');
+   var newControlBtn = controls.parentElement.querySelector('.new-control');
 
    function addControl(control, index = 'last') {
-      let objs = document.querySelectorAll('.controls li');
-      index = (math.isNumeric(index) && index > objs.length - 1) ? 'last' : index;
-      let i = index === 'last' ? objs.length - 1 : index;
+      index = (math.isNumeric(index) && index > controls.childElementCount - 1) ? 'last' : index;
+      let i = index === 'last' ? controls.childElementCount - 1 : index;
       if (i > -1 && index !== 'last') {
          control.elt.querySelector('.order').textContent = index + 1;
-         controls.insertBefore(control.elt, objs[i]);
+         controls.insertBefore(control.elt, controls.children[i]);
          updateObjsOrder();
       } else {
-         control.elt.classList.add('oc-add');
-         control.elt.querySelector('.order').textContent = objs.length + 1;
+         control.elt.querySelector('.order').textContent = controls.childElementCount + 1;
          controls.appendChild(control.elt);
-         setTimeout(() => {
-            control.elt.classList.remove('oc-add');
-         }, 300);
       }
    }
 
    function removeControl(control) {
-      control.elt.style.height = control.elt.clientHeight + 'px';
-      control.elt.classList.add('oc-remove');
-
-      setTimeout(() => {
-         control.elt.remove();
-         if (controls.childElementCount === 0) {
-            newControl.classList.add('animate-shake');
-            controls.parentElement.classList.add('blink-error');
-            setTimeout(() => {
-               newControl.classList.remove('animate-shake');
-               controls.parentElement.classList.remove('blink-error');
-               addControl(new ChildControl$1(mySketch));
-            }, 400);
-         }
-      }, 300);
+      control.elt.remove();
+      if (controls.childElementCount === 0) {
+         newControlBtn.classList.add('animate-shake');
+         controls.parentElement.classList.add('blink-error');
+         setTimeout(() => {
+            newControlBtn.classList.remove('animate-shake');
+            controls.parentElement.classList.remove('blink-error');
+            addControl(new ChildControl$1(mySketch));
+         }, 400);
+      }
    }
 
    var canvasParent = document.querySelector('.canvas-container');
@@ -1129,15 +1126,36 @@
 
    }
 
+   function genRandomName() {
+      let num = 0;
+      /// randomNameNum is here to avoid getting the same random name if the code is implemented so fast
+
+      return (Date.now() + genRandomName.randomNameNum++).toString(36)
+            .replace(new RegExp(num++, 'g'), 'a') /// I am using Regex for global replacement.
+            .replace(new RegExp(num++, 'g'), 'b')
+            .replace(new RegExp(num++, 'g'), 'c')
+            .replace(new RegExp(num++, 'g'), 'd')
+            .replace(new RegExp(num++, 'g'), 'e')
+            .replace(new RegExp(num++, 'g'), 'f')
+            .replace(new RegExp(num++, 'g'), 'g')
+            .replace(new RegExp(num++, 'g'), 'h')
+            .replace(new RegExp(num++, 'g'), 'i')
+            .replace(new RegExp(num++, 'g'), 'j');
+   }
+   genRandomName.randomNameNum = 0;
+
+   //#endregion
+
    class pen{
        constructor(color, weight = 1, style = 'solid'){
            this.color = color;
            this.weight = weight;
            this.style = style;
        }
-       setup(ctx) {
-           ctx.strokeStyle = this.color.toString();
-           ctx.lineWidth = this.weight;
+       setup(canvasORctx) {
+           canvasORctx = canvasORctx instanceof Canvas ? canvasORctx.ctx : canvasORctx;
+           canvasORctx.strokeStyle = this.color.toString();
+           canvasORctx.lineWidth = this.weight;
        }
    }
 
@@ -1354,7 +1372,7 @@
       canvas.elt.addEventListener('mousedown', (e) => {
          Object.assign(subTools, {
             type: subTools.type,
-            mouse: new vector(mouseX, mouseY),
+            mouse: new vector(e.x, e.y),
             iVector: new vector(...mySketch.gs.iVector.toArray()),
             jVector: new vector(...mySketch.gs.iVector.toArray())
          });
@@ -1412,6 +1430,34 @@
          e.stopPropagation();
       });
 
+      window.addEventListener('mousemove', (e) => {
+         if (mousepressed) {
+            switch (subTools.type) {
+               case 'move':
+                  {
+                     moveCoor(e);
+                     break;
+                  }
+               case 'scale-axises':
+                  {
+                     scaleAxises(e);
+                     break;
+                  }
+               case 'rotate-axises':
+                  {
+                     rotateAxises(e);
+                     break;
+                  }
+               case 'zoom':
+                  {
+                     zoomBox(e);
+                     break;
+                  }
+            }
+            e.preventDefault();
+         }
+      });
+
       window.addEventListener('mouseup', (e) => {
          if (mousepressed) {
             mousepressed = false;
@@ -1454,43 +1500,15 @@
          }
       });
 
-      window.addEventListener('mousemove', (e) => {
-         if (mousepressed) {
-            switch (subTools.type) {
-               case 'move':
-                  {
-                     moveCoor();
-                     break;
-                  }
-               case 'scale-axises':
-                  {
-                     scaleAxises();
-                     break;
-                  }
-               case 'rotate-axises':
-                  {
-                     rotateAxises();
-                     break;
-                  }
-               case 'zoom':
-                  {
-                     zoomBox(e);
-                     break;
-                  }
-            }
-            e.preventDefault();
-         }
-      });
-
       canvas.elt.addEventListener('mousewheel', (e) => {
          {
             e.preventDefault();
             e.stopPropagation();
             if (e.wheelDelta > 0) {
-               mySketch.gs.transform.zoomIn(new vector(mouseX, mouseY));
+               mySketch.gs.transform.zoomIn(new vector(e.x, e.y));
                mySketch.update();
             } else {
-               mySketch.gs.transform.zoomOut(new vector(mouseX, mouseY));
+               mySketch.gs.transform.zoomOut(new vector(e.x, e.y));
                mySketch.update();
             }
          }
@@ -1499,21 +1517,21 @@
       //#region mouse move (tools'-subtools') functions
 
       function moveCoor(e) {
-         mySketch.gs.transform.translate(new vector(mouseX - subTools.mouse.x, mouseY - subTools.mouse.y));
+         mySketch.gs.transform.translate(new vector(e.x, e.y).subtract(subTools.mouse));
          mySketch.update();
-         ellipse(mouseX, mouseY, 10);
-         subTools.mouse = new vector(mouseX, mouseY);
+         canvas.ellipse(e.x, e.y, 10);
+         subTools.mouse = new vector(e.x, e.y);
       }
 
       function scaleAxises(e) {
          if (subTools.axis == 'x') {
             let rotatedMouse = subTools.mouse;
             let xEq = lines.lineEquation(-mySketch.gs.transform.xAngle, mySketch.gs.center);
-            let incre = (math.dist(mouseX, mouseY, rotatedMouse.x, rotatedMouse.y) ** 2 - lines.distToLine(new vector(mouseX, mouseY), xEq) ** 2) ** 0.5;
+            let incre = (math.dist(e.x, e.y, rotatedMouse.x, rotatedMouse.y) ** 2 - lines.distToLine(new vector(e.x, e.y), xEq) ** 2) ** 0.5;
 
             mySketch.gs.transform.transformOrigin = undefined;
             if (!isNaN(incre)) {
-               let mina = angles.minAngle(vector.fromAngle(-mySketch.gs.transform.xAngle), new vector(mouseX, mouseY).subtract(rotatedMouse));
+               let mina = angles.minAngle(vector.fromAngle(-mySketch.gs.transform.xAngle), new vector(e.x, e.y).subtract(rotatedMouse));
                let dir = mina < Math.PI / 2 ? 1 : (mina > Math.PI / 2 ? -1 : 0);
 
                mySketch.gs.transform.transformOrigin = subTools.transformOrigin;
@@ -1524,8 +1542,8 @@
 
             mySketch.gs.transform.onchange(true);
             mySketch.update();
-            ellipse(rotatedMouse.x, rotatedMouse.y, 10);
-            ellipse(mouseX, mouseY, 10);
+            canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 10);
+            canvas.ellipse(e.x, e.y, 10);
 
             showTransDetails([
                `*${(mySketch.gs.iVector.mag / subTools.iVector.mag).toFixed(2)}`
@@ -1534,11 +1552,11 @@
          } else if (subTools.axis == 'y') {
             let rotatedMouse = subTools.mouse;
             let yEq = lines.lineEquation(-mySketch.gs.transform.yAngle, mySketch.gs.center);
-            let incre = (math.dist(mouseX, mouseY, rotatedMouse.x, rotatedMouse.y) ** 2 - lines.distToLine(new vector(mouseX, mouseY), yEq) ** 2) ** 0.5;
+            let incre = (math.dist(e.x, e.y, rotatedMouse.x, rotatedMouse.y) ** 2 - lines.distToLine(new vector(e.x, e.y), yEq) ** 2) ** 0.5;
 
             mySketch.gs.transform.transformOrigin = undefined;
             if (!isNaN(incre)) {
-               let mina = angles.minAngle(vector.fromAngle(-mySketch.gs.transform.yAngle), new vector(mouseX, mouseY).subtract(rotatedMouse));
+               let mina = angles.minAngle(vector.fromAngle(-mySketch.gs.transform.yAngle), new vector(e.x, e.y).subtract(rotatedMouse));
                let dir = mina < Math.PI / 2 ? 1 : (mina > Math.PI / 2 ? -1 : 0);
 
                mySketch.gs.transform.transformOrigin = subTools.transformOrigin;
@@ -1549,8 +1567,8 @@
 
             mySketch.gs.transform.onchange(true);
             mySketch.update();
-            ellipse(rotatedMouse.x, rotatedMouse.y, 10);
-            ellipse(mouseX, mouseY, 10);
+            canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 10);
+            canvas.ellipse(e.x, e.y, 10);
             showTransDetails([
                `*${(mySketch.gs.jVector.mag / subTools.jVector.mag).toFixed(2)}`
             ]);
@@ -1559,11 +1577,11 @@
             let midEq = lines.lineEquation(-(mySketch.gs.transform.yAngle + mySketch.gs.transform.xAngle) / 2, mySketch.gs.center);
             let rotatedMouse = lines.projectionToLine(subTools.mouse, midEq); // rotatedMouse here is the modified start point which sets on the line between x and y axises 
 
-            let incre = (math.dist(mouseX, mouseY, rotatedMouse.x, rotatedMouse.y) ** 2 - lines.distToLine(new vector(mouseX, mouseY), midEq) ** 2) ** 0.5; // pathagorean's method 
+            let incre = (math.dist(e.x, e.y, rotatedMouse.x, rotatedMouse.y) ** 2 - lines.distToLine(new vector(e.x, e.y), midEq) ** 2) ** 0.5; // pathagorean's method 
 
             mySketch.gs.transform.transformOrigin = undefined;
             if (!isNaN(incre)) {
-               let mina = angles.minAngle(vector.fromAngle(-mySketch.gs.transform.yAngle), new vector(mouseX, mouseY).subtract(rotatedMouse));
+               let mina = angles.minAngle(vector.fromAngle(-mySketch.gs.transform.yAngle), new vector(e.x, e.y).subtract(rotatedMouse));
                let dir = mina < Math.PI / 2 ? 1 : (mina > Math.PI / 2 ? -1 : 0);
 
                mySketch.gs.transform.transformOrigin = subTools.transformOrigin;
@@ -1578,8 +1596,8 @@
 
             mySketch.gs.transform.onchange(true);
             mySketch.update();
-            ellipse(rotatedMouse.x, rotatedMouse.y, 10);
-            ellipse(mouseX, mouseY, 10);
+            canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 10);
+            canvas.ellipse(e.x, e.y, 10);
             showTransDetails([
                `*${(mySketch.gs.jVector.mag / subTools.jVector.mag).toFixed(2)}`
             ]);
@@ -1588,9 +1606,9 @@
 
       function rotateAxises(e) {
          if (subTools.axis == 'x') {
-            if (math.dist(mySketch.gs.center.x, mySketch.gs.center.y, mouseX, mouseY) > 10) {
+            if (math.dist(mySketch.gs.center.x, mySketch.gs.center.y, e.x, e.y) > 10) {
                let rotatedMouse = subTools.mouse;
-               let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(mouseX, mouseY).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), 'vectors');
+               let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(e.x, e.y).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), 'vectors');
                rotationAngle = angles.constrainAngle(rotationAngle);
                if (!isNaN(rotationAngle)) {
                   // mySketch.gs.transform.xAngle = snapAngle(subTools.angle - rotationAngle);
@@ -1604,18 +1622,18 @@
                mySketch.gs.transform.onchange();
                mySketch.update();
 
-               ellipse(rotatedMouse.x, rotatedMouse.y, 10);
-               ellipse(mouseX, mouseY, 10);
+               canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 10);
+               canvas.ellipse(e.x, e.y, 10);
                showTransDetails([
                   `xAngle: ${angles.stringDegAngle(mySketch.gs.transform.xAngle.toFixed(2))}`,
                   `rotationAngle: ${angles.stringDegAngle(-rotationAngle)}`
                ]);
             }
          } else if (subTools.axis == 'y') {
-            if (math.dist(mySketch.gs.center.x, mySketch.gs.center.y, mouseX, mouseY) > 10) {
+            if (math.dist(mySketch.gs.center.x, mySketch.gs.center.y, e.x, e.y) > 10) {
 
                let rotatedMouse = subTools.mouse;
-               let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(mouseX, mouseY).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), 'vectors');
+               let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(e.x, e.y).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), 'vectors');
                rotationAngle = angles.constrainAngle(rotationAngle);
                if (!isNaN(rotationAngle)) {
                   mySketch.gs.transform.yAngle = angles.snapAngle(subTools.angle - rotationAngle);
@@ -1626,17 +1644,17 @@
                mySketch.gs.transform.invokeOnchange = true;
                mySketch.gs.transform.onchange();
                mySketch.update();
-               ellipse(rotatedMouse.x, rotatedMouse.y, 10);
-               ellipse(mouseX, mouseY, 10);
+               canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 10);
+               canvas.ellipse(e.x, e.y, 10);
                showTransDetails([
                   `yAngle: ${angles.stringDegAngle(mySketch.gs.transform.yAngle.toFixed(2))}`,
                   `rotationAngle: ${angles.stringDegAngle(-rotationAngle)}`
                ]);
             }
          } else if (subTools.axis == 'xy') {
-            if (math.dist(mySketch.gs.center.x, mySketch.gs.center.y, mouseX, mouseY) > 10) {
+            if (math.dist(mySketch.gs.center.x, mySketch.gs.center.y, e.x, e.y) > 10) {
                let rotatedMouse = subTools.mouse;
-               let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(mouseX, mouseY).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), 'vectors');
+               let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(e.x, e.y).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), 'vectors');
                rotationAngle = angles.constrainAngle(rotationAngle);
                if (!isNaN(rotationAngle)) {
                   mySketch.gs.transform.xAngle = subTools.xAngle - rotationAngle;
@@ -1648,8 +1666,8 @@
                mySketch.gs.transform.invokeOnchange = true;
                mySketch.gs.transform.onchange();
                mySketch.update();
-               ellipse(rotatedMouse.x, rotatedMouse.y, 10);
-               ellipse(mouseX, mouseY, 10);
+               canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 10);
+               canvas.ellipse(e.x, e.y, 10);
                showTransDetails([
                   `xAngle: ${angles.stringDegAngle(mySketch.gs.transform.xAngle)}`,
                   `yAngle: ${angles.stringDegAngle(mySketch.gs.transform.yAngle)}`,
@@ -1662,7 +1680,7 @@
       function zoomBox(e) {
 
          //#region calculating box
-         let s = { xmin: subTools.mouse.x, ymin: subTools.mouse.y, xmax: mouseX, ymax: mouseY };
+         let s = { xmin: subTools.mouse.x, ymin: subTools.mouse.y, xmax: e.x, ymax: e.y };
 
          subTools.pxViewport.xmin = Math.min(s.xmin, s.xmax); subTools.pxViewport.ymin = Math.min(s.ymin, s.ymax);
          subTools.pxViewport.xmax = Math.max(s.xmin, s.xmax); subTools.pxViewport.ymax = Math.max(s.ymin, s.ymax);
@@ -1678,7 +1696,7 @@
          if (document.querySelector('#subtools-zoom-rr').checked || e.shiftKey) {
             let a = angles.minAngle(vector.fromAngle(0), new vector(mySketch.gs.width, mySketch.gs.height));
             let equ = lines.lineEquation(a, subTools.mouse);
-            let p = lines.projectionToLine(new vector(mouseX, mouseY), equ);
+            let p = lines.projectionToLine(new vector(e.x, e.y), equ);
             s = { xmin: subTools.mouse.x, ymin: subTools.mouse.y, xmax: Math.round(p.x), ymax: Math.round(p.y) };
             subTools.pxViewport.xmin = Math.min(s.xmin, s.xmax); subTools.pxViewport.ymin = Math.min(s.ymin, s.ymax);
             subTools.pxViewport.xmax = Math.max(s.xmin, s.xmax); subTools.pxViewport.ymax = Math.max(s.ymin, s.ymax);
@@ -1844,10 +1862,30 @@
    }
 
    function setEvents () {
+
+      //#region window events
       window.addEventListener('resize', resize);
+      window.addEventListener("mouseup", function (event) {
+         //#region for backspace interval
+         if (keyboardSettings.mouseDownForInterval) {
+            keyboardSettings.mouseDownForInterval = false;
+            clearInterval(keyboardSettings.backspaceInterval);
+         }
+         //#endregion
+      });
+      window.addEventListener('mouseup', function (e) {
+         //#region hide keybad
+         let keypadShown = /\sshow\s|^show\s|\sshow$/.test(keyboardSettings.showHideKeyBtn.className); // hasClass
+         if (keyboardSettings.hideKeyPad && keypadShown) {
+            keyboardSettings.showHideKeyBtn.click();
+         }
+         keyboardSettings.hideKeyPad = true;
+         //#endregion
+      });
+      //#endregion
 
       document.querySelector('.new-control .new-expr').addEventListener('click', (e) => {
-         let oc = new ChildControl$1(mySketch);
+         let oc = new ChildControl$1();
          addControl(oc);
       });
 
@@ -1855,11 +1893,211 @@
       toolsEvents();
    }
 
+   function keypadEvents(){
+      //#region (keypad - showHideBtn) events
+      let keypad = $('.keypad-container'),
+         sh = $(keyboardSettings$1.showHideKeyBtn);
+
+      keypad
+         .on('mousedown', function () {
+            keyboardSettings$1.mathField.focus();
+         });
+
+
+      sh.on("mouseup", function (e) {
+         keyboardSettings$1.hideKeyPad = false;
+      });
+
+      $("[cancel-hiding-keypad]").bind("mousedown touchstart", function (e) {
+         keyboardSettings$1.hideKeyPad = false;
+      });
+
+      $(".script-container").bind("touchstart", function (e) {
+         if (sh.hasClass("hide")) {
+            sh.click();
+         }
+      });
+      //#endregion
+
+      //#region writing
+
+      $(".keypad-container .rows button[mq-cmd]").each(function (index) {
+         $(this).on('click', function () {
+            let $this = $(this);
+            if ($this.hasClass('double-shiftable')) {
+               keyboardSettings$1.mathField.cmd($(' > div.active > span.active', $this).attr('mq-cmd'));
+            } else if ($this.hasClass('shiftable')) {
+               keyboardSettings$1.mathField.cmd($(' > span.active', $this).attr('mq-cmd'));
+            } else {
+               keyboardSettings$1.mathField.cmd(this.getAttribute('mq-cmd'));
+            }
+            keyboardSettings$1.mathField.focus();
+         });
+      });
+
+      $(".keypad-container .rows button[mq-write]").each(function (index) {
+         $(this).on('click', function () {
+            let $this = $(this);
+            if ($this.hasClass('double-shiftable')) {
+               keyboardSettings$1.mathField.write($(' > div.active > span.active', $this).attr('mq-write'));
+            } else if ($this.hasClass('shiftable')) {
+               keyboardSettings$1.mathField.write($(' > span.active', $this).attr('mq-write'));
+            } else {
+               keyboardSettings$1.mathField.write(this.getAttribute('mq-write'));
+            }
+            keyboardSettings$1.mathField.focus();
+         });
+      });
+
+      $(".keypad-container .rows button[mq-func]").each(function (index) {
+         $(this).on("click", function () {
+            let $this = $(this);
+            if ($this.hasClass("double-shiftable")) {
+               keyboardSettings$1.mathField.write($(" > div.active > span.active", $this).attr("mq-func"));
+            } else if ($this.hasClass("shiftable")) {
+               keyboardSettings$1.mathField.write($(" > span.active", $this).attr("mq-func"));
+            } else {
+               keyboardSettings$1.mathField.write(this.getAttribute("mq-func"));
+            }
+            keyboardSettings$1.mathField.cmd("(");
+            keyboardSettings$1.mathField.focus();
+         });
+      });
+
+      $(".space").on("click", function () {
+         keyboardSettings$1.mathField.keystroke("Right");
+      });
+
+      //keystrokes
+      $(".backspace").on("mousedown", function () {
+         keyboardSettings$1.mathField.keystroke("Backspace");
+         keyboardSettings$1.mouseDownForInterval = true;
+         setTimeout(function () {
+            if (keyboardSettings$1.mouseDownForInterval) {
+               keyboardSettings$1.backspaceInterval = setInterval(function () {
+                  keyboardSettings$1.mathField.keystroke("Backspace");
+               }, 120);
+            }
+         }, 400);
+      });
+
+      //#endregion
+
+      //#region direction
+
+      $(".go-left").on("click", function () {
+         keyboardSettings$1.mathField.keystroke("Left");
+      });
+
+      $(".go-right").on("click", function () {
+         keyboardSettings$1.mathField.keystroke("Right");
+      });
+
+      $(".go-up").on("click", function () {
+         keyboardSettings$1.mathField.keystroke("Up");
+      });
+
+      $(".go-down").on("click", function () {
+         keyboardSettings$1.mathField.keystroke("Down");
+      });
+
+      //#endregion
+
+      //#region shift - double-shift
+
+      var shift = $(".shift");
+      shift.on("click", function () {
+         let $this = $(this);
+         let rows = $this.parents(".rows");
+         if ($this.hasClass("active")) {
+            $this.removeClass("active");
+            $this.addClass("lock");
+            rows.removeClass("shift-active");
+            rows.addClass("shift-lock");
+         } else {
+            if ($this.hasClass("lock")) {
+               let spans = $(
+                  ".shiftable > span, .double-shiftable > div > span",
+                  rows
+               );
+               spans.toggleClass("active");
+               $this.removeClass("lock");
+               rows.removeClass("shift-lock");
+            } else {
+               let spans = $(
+                  ".shiftable > span, .double-shiftable > div > span",
+                  rows
+               );
+               spans.toggleClass("active");
+               $this.addClass("active");
+               rows.addClass("shift-active");
+            }
+         }
+      });
+
+      // this for disabling shift if it is not .lock
+      $(".keypad-container .rows button")
+         .not('.shift, .double-shift')
+         .on("click", function () {
+            let $this = $(this);
+            let rows = $this.parents(".rows");
+            if (rows.hasClass("shift-active")) {
+               let shift = $("button.shift", rows);
+               let spans = $(".shiftable > span, .double-shiftable > div > span", rows);
+               spans.toggleClass("active");
+               shift.removeClass("active");
+               rows.removeClass('shift-active');
+            }
+         });
+
+      var dShift = $(".double-shift");
+      dShift.on("click", function () {
+         let $this = $(this);
+         let divs = $(".double-shiftable > div", $this.parents(".rows"));
+         divs.toggleClass("active");
+         $this.toggleClass("active");
+
+      });
+
+         //#endregion
+   }
+
+   function setupKeypad() {
+
+      keyboardSettings$1.showHideKeyBtn.addEventListener("click", function (e) {
+         let parent = document.querySelector(".keypad-container");
+         let __keypadShown = $(this).hasClass("show");
+         let from = __keypadShown ? "show" : "hide",
+            to = __keypadShown ? "hide" : "show";
+
+         keyboardSettings$1.showHideKeyBtn.classList.remove(from);
+         keyboardSettings$1.showHideKeyBtn.classList.add(to);
+
+         parent.classList.remove(from);
+         parent.classList.add(to);
+         if (__keypadShown) {
+            document.body.appendChild(keyboardSettings$1.showHideKeyBtn);
+            $(".sh-keypad-content").attr("aria-label", "show keypad");
+         } else {
+            parent.insertBefore(keyboardSettings$1.showHideKeyBtn, parent.firstElementChild);
+            $(".sh-keypad-content").attr("aria-label", "hide keypad");
+         }
+      });
+
+      keypadEvents();
+   }
+
+   var keyboardSettings$1 = {
+      backspaceInterval: undefined,
+      mouseDownForInterval: false,
+      showHideKeyBtn: document.querySelector(".sh-keypad"),
+      mathField: document.querySelector('.script')
+   };
+
    /**
     * """""""""""""""" reminder
     * app folder is associated with PLOTTO folder, both of them depends upon the other.
     */
-    
    function setupAPP(canvas) {
 
      window.MP = MathPackage;
@@ -1879,6 +2117,7 @@
      }
 
      setEvents();
+     setupKeypad();
 
      setupResizer();
      setupSortable();
@@ -1886,7 +2125,9 @@
      resize();
 
      $('#loading-layer').fadeOut(1000, () => { 
-       document.querySelector('.new-control .new-expr').click();
+       let oc = new ChildControl$1(mySketch);
+       addControl(oc);
+       keyboardSettings$1.mathField = oc.mathField;
      });
 
      console.log('all-done');
@@ -1979,6 +2220,9 @@
      //#endregion
 
    }
+
+
+   setupAPP(document.querySelector('#canvas'));
 
    return setupAPP;
 

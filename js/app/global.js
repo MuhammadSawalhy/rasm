@@ -2,12 +2,6 @@ import ChildControl from './ChildControl.js';
 import Sketch from '../PLOTTO/Sketch.js';
 
 //#region variables
-export var mouseX, mouseY;
-window.addEventListener('mousemove', function (e) {
-   mouseX = e.x;
-   mouseY = e.y;
-});
-
 export var subTools = {
    details: SUI.TempMessege({
       layer: false,
@@ -32,42 +26,40 @@ export function updateObjsOrder() {
 }
 
 var controls = document.querySelector('.controls');
-var newControl = controls.parentElement.querySelector('.new-control');
+var newControlBtn = controls.parentElement.querySelector('.new-control');
 
 export function addControl(control, index = 'last') {
-   let objs = document.querySelectorAll('.controls li');
-   index = (math.isNumeric(index) && index > objs.length - 1) ? 'last' : index;
-   let i = index === 'last' ? objs.length - 1 : index;
+   index = (math.isNumeric(index) && index > controls.childElementCount - 1) ? 'last' : index;
+   let i = index === 'last' ? controls.childElementCount - 1 : index;
    if (i > -1 && index !== 'last') {
       control.elt.querySelector('.order').textContent = index + 1;
-      controls.insertBefore(control.elt, objs[i]);
+      controls.insertBefore(control.elt, controls.children[i]);
       updateObjsOrder();
    } else {
-      control.elt.classList.add('oc-add');
-      control.elt.querySelector('.order').textContent = objs.length + 1;
+      control.elt.querySelector('.order').textContent = controls.childElementCount + 1;
       controls.appendChild(control.elt);
-      setTimeout(() => {
-         control.elt.classList.remove('oc-add');
-      }, 300);
    }
 }
 
 export function removeControl(control) {
-   control.elt.style.height = control.elt.clientHeight + 'px';
-   control.elt.classList.add('oc-remove');
+   control.elt.remove();
+   if (controls.childElementCount === 0) {
+      newControlBtn.classList.add('animate-shake');
+      controls.parentElement.classList.add('blink-error');
+      setTimeout(() => {
+         newControlBtn.classList.remove('animate-shake');
+         controls.parentElement.classList.remove('blink-error');
+         addControl(new ChildControl(mySketch));
+      }, 400);
+   }
+}
 
-   setTimeout(() => {
-      control.elt.remove();
-      if (controls.childElementCount === 0) {
-         newControl.classList.add('animate-shake');
-         controls.parentElement.classList.add('blink-error');
-         setTimeout(() => {
-            newControl.classList.remove('animate-shake');
-            controls.parentElement.classList.remove('blink-error');
-            addControl(new ChildControl(mySketch));
-         }, 400);
-      }
-   }, 300);
+export function addTOsketch(child, controlIndex = 'last' /* the index */) {
+   if ((controlIndex || controlIndex === 0) && !child.control) {
+      let control = new ChildControl(child);
+      addControl(control, controlIndex);
+   }
+   mySketch.appendChild(child);
 }
 
 export var canvasParent = document.querySelector('.canvas-container');
@@ -92,7 +84,7 @@ export function resize(setContainment = true) {
    if (setContainment) {
 
       $(".sidebar-container .resizer")
-         .draggable('option', 'containment', getContainment())
+         .draggable('option', 'containment', getContainment());
       // .css({ left: document.querySelector('.sidebar-container').clientWidth + 'px' });
    }
 
@@ -122,6 +114,22 @@ export function getContainment() {
 
 }
 
-//#endregion
+export function genRandomName() {
+   let num = 0;
+   /// randomNameNum is here to avoid getting the same random name if the code is implemented so fast
 
-export { ChildControl };
+   return (Date.now() + genRandomName.randomNameNum++).toString(36)
+         .replace(new RegExp(num++, 'g'), 'a') /// I am using Regex for global replacement.
+         .replace(new RegExp(num++, 'g'), 'b')
+         .replace(new RegExp(num++, 'g'), 'c')
+         .replace(new RegExp(num++, 'g'), 'd')
+         .replace(new RegExp(num++, 'g'), 'e')
+         .replace(new RegExp(num++, 'g'), 'f')
+         .replace(new RegExp(num++, 'g'), 'g')
+         .replace(new RegExp(num++, 'g'), 'h')
+         .replace(new RegExp(num++, 'g'), 'i')
+         .replace(new RegExp(num++, 'g'), 'j');
+}
+genRandomName.randomNameNum = 0;
+
+//#endregion

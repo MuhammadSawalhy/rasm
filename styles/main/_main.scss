@@ -8,12 +8,20 @@
 }
 
 :root{
+
   --buttons-radius: 10px;
   --buttons-margin: 5px;
   --oc-min-height: 60px;
   --sidebar-min-width: 300px;
   --sidebar-max-width: 60vw;
   --main-color: rgb(0, 86, 214);
+
+    // these are here as the sh button will be outside the keypad container on hiding the keypad
+  --shkbBTNposition: 5px;
+  --kb-background: white;
+  --kb-border: 1px solid #313131aa;
+  --kb-radius: 5px;
+
 }
 
 html, body {
@@ -23,8 +31,8 @@ html, body {
 
 body{
   height: 100vh;
+  overflow: hidden;
 }
-
 
 /* main layout */
 /* main layout */

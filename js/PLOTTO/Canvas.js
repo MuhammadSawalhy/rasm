@@ -21,7 +21,6 @@ export default class Canvas{
       this.elt.width = width;
       this.elt.height = height;
    }
-
    clear(fillStyle) {
       if (fillStyle) {
          this.ctx.fillStyle = fillStyle;
@@ -30,21 +29,31 @@ export default class Canvas{
          this.ctx.clearRect(0, 0, this.elt.clientWidth, this.elt.clientHeight);
       }
    }
+   setFont(font) {
+      if (font.size) this.font.size = font.size;
+      if (font.family) this.font.family = font.family;
+      this.ctx.font = `${this.font.size}px ${this.font.family}`;
+   }
+   measureString(txt) {
+      let size = this.ctx.measureText(txt);
+      size.height = this.font.size;
+      return size;
+   }
+
+   //#region shapes
 
    line(x1, y1, x2, y2) {
       this.ctx.moveTo(x1, y1);
       this.ctx.lineTo(x2, y2);
    }
 
-   setFont(font) {
-      if (font.size) this.font.size = font.size;
-      if (font.family) this.font.family = font.family;
-      this.ctx.font = `${this.font.size}px ${this.font.family}`;
+   ellipse(x, y, radius1, radius2, rotation = 0, startAngle = 0, endAngle = Math.PI*2, counterClockWise = false) {
+      this.ctx.beginPath();
+      this.ctx.ellipse(x, y, radius1, radius2 || radius1, rotation, startAngle, endAngle, counterClockWise);
+      this.ctx.fill();
+      this.ctx.stroke();
    }
 
-   measureString(txt) {
-      let size = this.ctx.measureText(txt);
-      size.height = this.font.size;
-      return size;
-   }
+   //#endregion
+
 }

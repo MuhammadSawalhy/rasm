@@ -1,42 +1,30 @@
 //#region Get a GraphChild;
+import XFuntion from './GraphChilds/functions/XFunction.js';
+var getChildParser = new MagicalParser.CustomParsers.Math();
 
-/// <summary>
-/// To get any supported object from a mere string.
-/// this will not add anything to the sketch and the grahpsetting ( except you pass true for enrollName { To add the name to the GraphSettings } ) 
-/// </summary>
-/// <param name="script">the string that represents the object.</param>
-/// <param name="SelectName">If the object's name is not assigned in the script we will select a one from the avaliable names.</param>
-/// <param name="EnrollName">If you want to SetName for this Object ( this will add the name to the GraphSettings ) </param>
-/// <returns></returns>
+/**
+ * To get any supported sktech child (either drawable or not) from a mere string (the script).
+ * This will not add anything to the sketch and the grahpsetting ( except you pass true for enrollName { To add the name to the GraphSettings } )
+ * @param {*} script the string that represents the sketch child.
+ * @param {*} selectName If the object's name is not assigned in the script we will select a one from the avaliable names.
+ * @param {*} enrollName If you want to SetName for this Object ( this will add the name to the GraphSettings )
+ */
+export function getSketchChild(script, selectName = true, enrollName = true) {
+   let parsed = getChildParser.parse(script);
+   if (parsed.call({ name: '=' })) {
+      let left = parsed.args[0], right = parsed.args[1];
 
-export function GetObject(script, GraphSettings, SelectName, EnrollName) {
-
-   if (script.replace(/==+/g, '').search('=') > -1) {
-      let left, right;
-
-      script.replace(/=+/, (match) => {
-         if (match.length = 1) {
-
-         } else {
-            match.length;
-         }
-      });
-
-      #region points_dependant;
-
-      //such : a = pdType(...)
-      if (left.IsId && IsPD(right)) {
-         LNode b = right, a = left;
-         PointsDependant pd = GetPD(b, GraphSettings, false, false);
-         if (pd == null) // It will happen when the pd title is "Curve", as it may be ParametricFunction.
+      //#region points_dependant; such : childName = pdType(...args)
+      if (left.isId && isPD(right)) {
+         let pd = GetPD(right, false, false);
+         if (!pd) // It will happen when the pd title is "Curve", as it may be ParametricFunction.
             goto Line1;
-         pd.SetName(a.Name.Name);
+         pd.SetName(left);
          return pd;
       }
+      //#endregion
 
-      #endregion;
-
-      #region explicit functions;
+      //#region explicit functions;
                 // to add function  e.g. " y = sin(x) "
                 else if (left.IsId && left.Name == GraphSettings.sy_y && !ContainsSymbol(right, GraphSettings.sy_y)) {
 
@@ -44,12 +32,12 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
          {
             Expression = MathPackage.Transformer.GetNodeFromLoycNode(right, GraphSettings.CalculationSettings);
          };
-         if (SelectName) {
-            if (EnrollName) {
-               f.SetName(GraphSettings.SelectName());
+         if (selectName) {
+            if (enrollName) {
+               f.SetName(GraphSettings.selectName());
             }
             else {
-               f.Name = GraphSettings.SelectName();
+               f.Name = GraphSettings.selectName();
             }
          }
          return f;
@@ -61,12 +49,12 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
          {
             Expression = MathPackage.Transformer.GetNodeFromLoycNode(left, GraphSettings.CalculationSettings);
          };
-         if (SelectName) {
-            if (EnrollName) {
-               f.SetName(GraphSettings.SelectName());
+         if (selectName) {
+            if (enrollName) {
+               f.SetName(GraphSettings.selectName());
             }
             else {
-               f.Name = GraphSettings.SelectName();
+               f.Name = GraphSettings.selectName();
             }
          }
          return f;
@@ -79,7 +67,7 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
          {
             Expression = MathPackage.Transformer.GetNodeFromLoycNode(b, GraphSettings.CalculationSettings);
          };
-         if (EnrollName) {
+         if (enrollName) {
             f.SetName(a.Name.ToString());
          }
          else {
@@ -102,7 +90,7 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
             else {
                throw new Exception("The function expression is not valid.");
             }
-            if (EnrollName) {
+            if (enrollName) {
                f.SetName(left.Target.Name.Name);
             }
             else {
@@ -115,7 +103,7 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
             string name = null;
             List < string > args = new List<string>();
             LNode Process = null;
-            if (EnrollName) {
+            if (enrollName) {
                if (GraphSettings.IsNameUsed(left.Target.Name.Name)) {
                   throw new Exception("This name has been used before.");
                }
@@ -145,9 +133,9 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
             return func;
          }
       }
-      #endregion;
+      //#endregion
 
-      #region implicit functions;
+      //#region implicit functions;
                 // to add function  e.g. " y = sin(x)*y "
                 else if (ContainsSymbol(right, GraphSettings.sy_x)
          || ContainsSymbol(right, GraphSettings.sy_y)
@@ -158,21 +146,21 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
          {
             Expression = MathPackage.Transformer.GetNodeFromLoycNode(node, GraphSettings.CalculationSettings);
          };
-         if (SelectName) {
-            if (EnrollName) {
-               f.SetName(GraphSettings.SelectName());
+         if (selectName) {
+            if (enrollName) {
+               f.SetName(GraphSettings.selectName());
             }
             else {
-               f.Name = GraphSettings.SelectName();
+               f.Name = GraphSettings.selectName();
             }
          }
          return f;
       }
-      #endregion;
+      //#endregion
 
-      #region points;
-                //such : a = (2, 3)
-                else if (left.IsId && right.Calls(CodeSymbols.Tuple) && right.Args.Count == 2) {
+      //#region points;
+      //such : a = (2, 3)
+      else if (left.IsId && right.Calls(CodeSymbols.Tuple) && right.Args.Count == 2) {
          LNode a = right, b = left;
          /// it is a parametricFunction
          if (ContainsSymbol(a.Args[0], (Symbol)"t") || ContainsSymbol(a.Args[1], (Symbol)"t")) {
@@ -185,7 +173,7 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
                   y_Expression = MathPackage.Transformer.GetNodeFromLoycNode(a.Args[1], GraphSettings.CalculationSettings),
                         };
             func.Step = null;
-            if (EnrollName)
+            if (enrollName)
                func.SetName(b.Name.ToString());
             else
                func.Name = b.Name.ToString();
@@ -194,7 +182,7 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
          /// it is a point
          else {
             GPoint point = GetPointFromTuple(a, GraphSettings);
-            if (EnrollName) {
+            if (enrollName) {
                point.SetName(b.Name.ToString());
             }
             else {
@@ -204,11 +192,10 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
 
          }
       }
-      #endregion;
+      //#endregion
 
-      Line1: ;
+      //#region ParametricFunction;
 
-      #region ParametricFunction;
       //such : a = Curve(n,1,20, x_expression, y_expression)
       if (left.IsId && !MathExpression(right)) {
          if (right.Target.Name.ToString() == "Curve") {
@@ -227,7 +214,7 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
                      y_Expression = MathPackage.Transformer.GetNodeFromLoycNode(a.Args[4], GraphSettings.CalculationSettings),
                             };
                func.Step = null;
-               if (EnrollName)
+               if (enrollName)
                   func.SetName(b.Name.ToString());
                else
                   func.Name = b.Name.ToString();
@@ -247,7 +234,7 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
                      x_Expression = MathPackage.Transformer.GetNodeFromLoycNode(a.Args[4], GraphSettings.CalculationSettings),
                      y_Expression = MathPackage.Transformer.GetNodeFromLoycNode(a.Args[5], GraphSettings.CalculationSettings),
                             };
-               if (EnrollName)
+               if (enrollName)
                   func.SetName(b.Name.ToString());
                else
                   func.Name = b.Name.ToString();
@@ -255,15 +242,15 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
             }
          }
       }
-      #endregion;
+      //#endregion
 
-      #region varaibles;
+      //#region varaibles;
                 //such : a = 2 * c + sin( k )
                 else if (left.IsId && MathExpression(right)) {
          LNode b = right, a = left;
          return new Variable(a.Name.Name, MathPackage.Transformer.GetNodeFromLoycNode(b, GraphSettings.CalculationSettings));
       }
-      #endregion;
+      //#endregion
 
    }
    /// like 2+3*x = sin(y)^2
@@ -272,12 +259,12 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
       {
          Expression = MathPackage.Transformer.GetNodeFromLoycNode(node, GraphSettings.CalculationSettings);
       };
-      if (SelectName) {
-         if (EnrollName) {
-            f.SetName(GraphSettings.SelectName());
+      if (selectName) {
+         if (enrollName) {
+            f.SetName(GraphSettings.selectName());
          }
          else {
-            f.Name = GraphSettings.SelectName();
+            f.Name = GraphSettings.selectName();
          }
       }
       return f;
@@ -295,23 +282,23 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
                y_Expression = MathPackage.Transformer.GetNodeFromLoycNode(node.Args[1], GraphSettings.CalculationSettings),
                     };
          func.Step = null;
-         if (SelectName) {
-            if (EnrollName)
-               func.SetName(GraphSettings.SelectName());
+         if (selectName) {
+            if (enrollName)
+               func.SetName(GraphSettings.selectName());
             else
-               func.Name = GraphSettings.SelectName();
+               func.Name = GraphSettings.selectName();
          }
          return func;
       }
       /// it is a point
       else {
          GPoint point = GetPointFromTuple(node, GraphSettings);
-         if (SelectName) {
-            if (EnrollName) {
-               point.SetName(GraphSettings.SelectName());
+         if (selectName) {
+            if (enrollName) {
+               point.SetName(GraphSettings.selectName());
             }
             else {
-               point.Name = GraphSettings.SelectName();
+               point.Name = GraphSettings.selectName();
             }
          }
          return point;
@@ -323,12 +310,12 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
       {
          Expression = MathPackage.Transformer.GetNodeFromLoycNode(node, GraphSettings.CalculationSettings);
       };
-      if (SelectName) {
-         if (EnrollName) {
-            f.SetName(GraphSettings.SelectName());
+      if (selectName) {
+         if (enrollName) {
+            f.SetName(GraphSettings.selectName());
          }
          else {
-            f.Name = GraphSettings.SelectName();
+            f.Name = GraphSettings.selectName();
          }
       }
       return f;
@@ -336,7 +323,7 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
    else {
       #region "Add PointsDependant";
       if (PDsTypes().Contains(node.Target.Name.ToString())) {
-         PointsDependant pd = GetPD(node, GraphSettings, SelectName, EnrollName);
+         PointsDependant pd = GetPD(node, GraphSettings, selectName, enrollName);
          if (pd != null) {
             return pd;
          }
@@ -357,11 +344,11 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
                   y_Expression = MathPackage.Transformer.GetNodeFromLoycNode(node.Args[4], GraphSettings.CalculationSettings),
                         };
             func.Step = null;
-            if (SelectName) {
-               if (EnrollName)
-                  func.SetName(GraphSettings.SelectName());
+            if (selectName) {
+               if (enrollName)
+                  func.SetName(GraphSettings.selectName());
                else
-                  func.Name = GraphSettings.SelectName();
+                  func.Name = GraphSettings.selectName();
             }
             return func;
          }
@@ -379,11 +366,11 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
                   x_Expression = MathPackage.Transformer.GetNodeFromLoycNode(node.Args[4], GraphSettings.CalculationSettings),
                   y_Expression = MathPackage.Transformer.GetNodeFromLoycNode(node.Args[5], GraphSettings.CalculationSettings),
                         };
-            if (SelectName) {
-               if (EnrollName)
-                  func.SetName(GraphSettings.SelectName());
+            if (selectName) {
+               if (enrollName)
+                  func.SetName(GraphSettings.selectName());
                else
-                  func.Name = GraphSettings.SelectName();
+                  func.Name = GraphSettings.selectName();
             }
             return func;
          }
@@ -392,8 +379,8 @@ export function GetObject(script, GraphSettings, SelectName, EnrollName) {
 
    throw new Exception($"Your script \"{script}\" is not valid.");
 }
-
-GetPD(LNode node, GraphSettings GraphSettings, bool SelectName, bool EnrollName);
+/*
+getPD(node, selectName, enrollName);
 {
    if (node.Target.Name.ToString() == "Circle" && node.Args.Count == 3) {
       // Checking the points
@@ -414,12 +401,12 @@ GetPD(LNode node, GraphSettings GraphSettings, bool SelectName, bool EnrollName)
             obj.Points.Add(GetPointFromTuple(node.Args[i], GraphSettings));
          }
       }
-      if (SelectName) {
-         if (EnrollName) {
-            obj.SetName(GraphSettings.SelectName());
+      if (selectName) {
+         if (enrollName) {
+            obj.SetName(GraphSettings.selectName());
          }
          else {
-            obj.Name = GraphSettings.SelectName();
+            obj.Name = GraphSettings.selectName();
          }
       }
       return obj;
@@ -443,12 +430,12 @@ GetPD(LNode node, GraphSettings GraphSettings, bool SelectName, bool EnrollName)
             obj.Points.Add(GetPointFromTuple(node.Args[i], GraphSettings));
          }
       }
-      if (SelectName) {
-         if (EnrollName) {
-            obj.SetName(GraphSettings.SelectName());
+      if (selectName) {
+         if (enrollName) {
+            obj.SetName(GraphSettings.selectName());
          }
          else {
-            obj.Name = GraphSettings.SelectName();
+            obj.Name = GraphSettings.selectName();
          }
       }
       return obj;
@@ -472,12 +459,12 @@ GetPD(LNode node, GraphSettings GraphSettings, bool SelectName, bool EnrollName)
             obj.Points.Add(GetPointFromTuple(node.Args[i], GraphSettings));
          }
       }
-      if (SelectName) {
-         if (EnrollName) {
-            obj.SetName(GraphSettings.SelectName());
+      if (selectName) {
+         if (enrollName) {
+            obj.SetName(GraphSettings.selectName());
          }
          else {
-            obj.Name = GraphSettings.SelectName();
+            obj.Name = GraphSettings.selectName();
          }
       }
       return obj;
@@ -501,12 +488,12 @@ GetPD(LNode node, GraphSettings GraphSettings, bool SelectName, bool EnrollName)
             obj.Points.Add(GetPointFromTuple(node.Args[i], GraphSettings));
          }
       }
-      if (SelectName) {
-         if (EnrollName) {
-            obj.SetName(GraphSettings.SelectName());
+      if (selectName) {
+         if (enrollName) {
+            obj.SetName(GraphSettings.selectName());
          }
          else {
-            obj.Name = GraphSettings.SelectName();
+            obj.Name = GraphSettings.selectName();
          }
       }
       return obj;
@@ -530,12 +517,12 @@ GetPD(LNode node, GraphSettings GraphSettings, bool SelectName, bool EnrollName)
             obj.Points.Add(GetPointFromTuple(node.Args[i], GraphSettings));
          }
       }
-      if (SelectName) {
-         if (EnrollName) {
-            obj.SetName(GraphSettings.SelectName());
+      if (selectName) {
+         if (enrollName) {
+            obj.SetName(GraphSettings.selectName());
          }
          else {
-            obj.Name = GraphSettings.SelectName();
+            obj.Name = GraphSettings.selectName();
          }
       }
       return obj;
@@ -559,12 +546,12 @@ GetPD(LNode node, GraphSettings GraphSettings, bool SelectName, bool EnrollName)
             obj.Points.Add(GetPointFromTuple(node.Args[i], GraphSettings));
          }
       }
-      if (SelectName) {
-         if (EnrollName) {
-            obj.SetName(GraphSettings.SelectName());
+      if (selectName) {
+         if (enrollName) {
+            obj.SetName(GraphSettings.selectName());
          }
          else {
-            obj.Name = GraphSettings.SelectName();
+            obj.Name = GraphSettings.selectName();
          }
       }
       return obj;
@@ -589,12 +576,12 @@ GetPD(LNode node, GraphSettings GraphSettings, bool SelectName, bool EnrollName)
             obj.Points.Add(GetPointFromTuple(node.Args[i], GraphSettings));
          }
       }
-      if (SelectName) {
-         if (EnrollName) {
-            obj.SetName(GraphSettings.SelectName());
+      if (selectName) {
+         if (enrollName) {
+            obj.SetName(GraphSettings.selectName());
          }
          else {
-            obj.Name = GraphSettings.SelectName();
+            obj.Name = GraphSettings.selectName();
          }
       }
       return obj;
@@ -603,7 +590,7 @@ GetPD(LNode node, GraphSettings GraphSettings, bool SelectName, bool EnrollName)
    return null;
 }
 
-IsPoints(LNode node, GraphSettings GraphSettings);
+isPoints(LNode node, GraphSettings GraphSettings);
 {
    if (node.Calls(CodeSymbols.Tuple, 2)) {
       if (MathExpression(node.Args[0]) && MathExpression(node.Args[1])) {
@@ -619,7 +606,7 @@ IsPoints(LNode node, GraphSettings GraphSettings);
    return false;
 }
 
-IsPD(LNode node);
+isPD(LNode node);
 {
    if (IsFuncId(node) && PDsTypes().Contains(node.Target.Name.ToString()))
       return true;
@@ -651,7 +638,7 @@ IsBool(LNode node);
       return true;
    return false;
 }
-
+*/
 ContainsSymbol(LNode node, params Symbol[] symbol);
 {
    if (node.IsId) {
@@ -703,20 +690,24 @@ IsFuncId(LNode node);
 /// <summary>
 /// you should pass a {Tuple} LNode : e.g. : (2, 5*r+6)
 /// </summary>
-
+/*
 GetPointFromTuple(LNode node, GraphSettings GraphSettings);
 {
    return new GPoint(MathPackage.Transformer.GetNodeFromLoycNode(node.Args[0], GraphSettings.CalculationSettings), MathPackage.Transformer.GetNodeFromLoycNode(node.Args[1], GraphSettings.CalculationSettings), GraphSettings);
 }
-
+*/
 //#endregion
 
 //#region Changing Names
 
-CheckName(string Name);
+checkName(name);
 {
-   if (string.IsNullOrEmpty(Name) || !MathPackage.Main.IsAlpha(Name.Replace("_", "")) || RestrictedNames().Contains(Name))
-      throw new Exception($"\"{Name}\" is not avaliable to use.");
+   let valid = false;
+   name.replace(/^\s*([_a-zA-z]+\d*)\s*$/, (match, name) => {
+      valid = true;
+   });
+   if (!valid)
+      throw new Error(`"${Name}" is not valid to use.`);
 }
 
 //#endregion

@@ -1,15 +1,16 @@
-import { addControl, removeControl } from './global.js';
+import { addControl, removeControl, genRandomName } from './global.js';
 
 export default class {
-   constructor(sketch, value) {
-      if (!sketch) throw new Error('sketch is not valid.');
-      this.sketch = sketch;
-      this.gs = this.sketch.gs;
+   constructor(sketchChild) {
+      this.id = genRandomName();
+      sketchChild.id = this.id;
+      sketchChild.control = this;
+
       // value is the graph object
-      this.value = value;
+      this.sketchChild = sketchChild;
       this.elt = document.createElement('div');
       this.elt.innerHTML = `
-      <li class="control">
+      <li class="control" id="${this.id}">
         <div class="sideStatus" cancel-move>
           <div class="visible">
             <div class="inner">
@@ -20,7 +21,7 @@ export default class {
             <span class='order'>12</span>
           </div>
         </div>
-        <div class="script-container" cancel-move>
+        <div class="script-container" cancel-move cancel-hiding-keypad>
           <span type="text" class="script"></span>
         </div>
         <div class="side-ctrl">
@@ -40,16 +41,15 @@ export default class {
       this.__setEvents();
       this.__updateElts(); /// updating elements
    }
-   get graphObject() {
-      return this._graphObject;
+   get sketchChild() {
+      return this._sketchChild;
    }
-   set graphObject(value) {
-      if (value) {
-         if (!this._graphObject) {
-            this.sketch.addObj(value);
-         }
-         this._graphObject = value;
+
+   set sketchChild(value) {
+      if (!this._sketchChild) {
+         this.sketch.children.set(this.id, value);
       }
+      this._sketchChild = value;
    }
 
    __setEvents() {
@@ -58,10 +58,9 @@ export default class {
       this.orderELT = this.elt.querySelector('.order');
 
       //#region math, script field
-      let checkExpr = (latex) => {
+      let handleScript = (latex) => {
          this.graphObject = getObject(
-            this.sketch,
-            MathPackage.transformer.latexTOsnode(latex)
+            MathPackage.Parser.latexTOnode(latex)
          );
       };
       let mathField = MQ.MathField(scriptELT, {
@@ -74,11 +73,11 @@ export default class {
          maxDepth: 10,
          handlers: {
             edit: function () {
-               checkExpr(mathField.latex());
+               handleScript(mathField.latex());
             },
 
             enter: function () {
-               let newChild = new ChildControl(sketch);
+               let newChild = new ChildControl();
                addControl(newChild, parseInt(orderELT.textContent));
                newChild.focus();
             },

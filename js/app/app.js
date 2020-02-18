@@ -1,9 +1,9 @@
-import { getContainment, updateObjsOrder, resize, canvasParent } from './global.js';
+import { getContainment, updateObjsOrder, resize, canvasParent, addControl } from './global.js';
 import Sketch from '../PLOTTO/Sketch.js';
 import drawing from '../PLOTTO/drawing/index.js';
 import setEvents from './events/index.js';
-import setupKeypad from './keypad/index.js';
-
+import { default as setupKeypad, keyboardSettings} from './keypad/index.js';
+import ChildControl from './ChildControl.js';
 /**
  * """""""""""""""" reminder
  * app folder is associated with PLOTTO folder, both of them depends upon the other.
@@ -35,7 +35,9 @@ export default function setupAPP(canvas) {
   resize();
 
   $('#loading-layer').fadeOut(1000, () => { 
-    document.querySelector('.new-control .new-expr').click();
+    let oc = new ChildControl(mySketch);
+    addControl(oc);
+    keyboardSettings.mathField = oc.mathField;
   });
 
   console.log('all-done');

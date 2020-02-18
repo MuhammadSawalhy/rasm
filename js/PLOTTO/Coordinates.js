@@ -190,7 +190,7 @@ export default class {
             return pos;
          }
       } else {
-         /// if it is 'v' or even anything else.
+         /// if dimension is 'v' or even anything else.
          let bounds = [4, this.gs.height - size.height - 4];
          if (pos.y < bounds[0]) {
             let n = (bounds[0] - pos.y) / unitVec.y;
