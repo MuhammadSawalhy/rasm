@@ -191,7 +191,7 @@ export class colorPackage{
     }
 
     static randomColor() {
-        return new drawing.color(random(255), random(255),  random(255));
+        return new color(MathPackage.Core.random(255), MathPackage.Core.random(255),  MathPackage.Core.random(255));
     }
 
     static randomDarkColor() {

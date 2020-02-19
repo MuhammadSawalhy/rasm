@@ -1,41 +1,36 @@
+import { generateName } from './../global.js';
 export default class GraphChild {
-    constructor(graphSettings, name, _pen) {
-        this.gs = graphSettings;
-        this.id = Date.now().toString(36);
-        this.name = name;
-        this.pen = _pen;
-    }
 
-    static from(str) {
-        return null;
-    }
+    constructor(options) {
+        this.checkOptions(options);
 
-    get name() {
-        return this._name;
+        options.id = options.id || generateName();
+        options.handlers = options.handlers || {};
+        options.drawable = options.hasOwnProperty('drawable') ? options.drawable : true;
+
+        Object.assign(this, options);
+        this.gs = this.sketch.gs;
+
     }
-    set name(value) {
-        if (value && value !== this.name) {
-            var this_ = this;
-            (function checkName() {
-                if (value.replace(/^\s*([-a-zA-z][a-zA-z]*\d*)\s*$/, '') !== '' || value === '_') {
-                    throw (`thi name: "${value}" is not valid :(`);
-                }
-                for (let obj of this_.gs.sketch.objs) {
-                    if (obj.name === value) {
-                        throw (`thi name: "${value}" has been used before.`);
-                    }
-                }
-            })();
-            value.replace(/^\s*([-a-zA-z][a-zA-z]*\d*)\s*$/, (match, group1) => {
-                this._name = group1;
-            });
+    checkOptions(options) {
+        let propName;
+        if (!options.sketch) {
+            propName = 'sketch';
+            throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
         }
+    }   
+    get id() {
+        return this._id;
+    }
+    set id(value) {
+        this._id = this.sketch.gs.checkId(value);
     }
 
     /**
      * methods are here
      */
-
-    /** */
-    remove() { }
+    remove(handlerArgs) {
+        this.sketch.children.delete(this.id);
+        if (this.handlers.remove) this.handlers.remove(...handlerArgs);
+     }
 }

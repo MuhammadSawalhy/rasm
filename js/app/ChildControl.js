@@ -1,13 +1,14 @@
 import { addControl, removeControl, genRandomName } from './global.js';
-
+import { Xfunction } from '../PLOTTO/GraphChilds/index.js';
 export default class {
-   constructor(sketchChild) {
-      this.id = genRandomName();
-      sketchChild.id = this.id;
-      sketchChild.control = this;
+   constructor(graphChild) {
+      if (graphChild) {
+         this.graphChild = graphChild;
+      } else {
+         this.id = genRandomName();
+         mySketch.children.set(this.id, null);
+      }
 
-      // value is the graph object
-      this.sketchChild = sketchChild;
       this.elt = document.createElement('div');
       this.elt.innerHTML = `
       <li class="control" id="${this.id}">
@@ -41,15 +42,25 @@ export default class {
       this.__setEvents();
       this.__updateElts(); /// updating elements
    }
-   get sketchChild() {
-      return this._sketchChild;
+   get graphChild() {
+      return this._graphChild;
    }
 
-   set sketchChild(value) {
-      if (!this._sketchChild) {
-         this.sketch.children.set(this.id, value);
+   set graphChild(value) {
+      if (!value) {
+         /// delete the current graphChild from the sketch
+         this._graphChild.remove([false]);
+      } else {
+         value.handlers.onremove = (removeElt) => {
+            if (removeElt) this.remove(false);
+         };
+         mySketch.children.delete(this.id);
+         mySketch.children.set(value.id, value);
+         this._graphChild = value;
+         this.id = value.id;
+         mySketch.update();
       }
-      this._sketchChild = value;
+     
    }
 
    __setEvents() {
@@ -58,11 +69,7 @@ export default class {
       this.orderELT = this.elt.querySelector('.order');
 
       //#region math, script field
-      let handleScript = (latex) => {
-         this.graphObject = getObject(
-            MathPackage.Parser.latexTOnode(latex)
-         );
-      };
+      let handleScript = (latex) => (this.handleScript(latex) );
       let mathField = MQ.MathField(scriptELT, {
          sumStartsWithNEquals: true,
          supSubsRequireOperand: true,
@@ -87,10 +94,21 @@ export default class {
       //#endregion 
 
       this.removeELT.addEventListener('click', (e) => {
-         removeControl(this);
          this.remove();
       });
 
+   }
+
+   handleScript(latex) {
+      let newGC;
+      try {
+         newGC = mySketch.childFromString(
+            MathPackage.Parser.latexTOmaxima(latex)
+         );
+      } catch (e) {
+         this.error(e);
+      }
+      this.graphChild = newGC;
    }
 
    focus() {
@@ -108,17 +126,22 @@ export default class {
       this.elt.classList.remove('focus');
    }
 
-   remove(removeELT) {
-      if (removeELT) {
-         this.removeELT.click();
+   error(e) {
+      console.log(e);
+   }
+
+   remove(removeGraphChild = true) {
+      removeControl(this);
+      if (removeGraphChild) {
+         this.graphChild.remove();
       }
-      let me = this.sketch.removeChildById(this.sketchChild.id);
+      mySketch.update();
    }
 
    __updateElts() {
-      if (this.graphObject) {
-         if (this.graphObject instanceof Xfunction) {
-            this.elt.style.background = this.graphObject.color;
+      if (this.graphChild) {
+         if (this.graphChild instanceof Xfunction) {
+            this.elt.style.background = this.graphChild.color;
          }
       }
    }

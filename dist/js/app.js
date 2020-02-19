@@ -4,14 +4,448 @@
    (global = global || self, global.PLOTTO = factory());
 }(this, (function () { 'use strict';
 
-   class ChildControl$1 {
-      constructor(sketchChild) {
-         this.id = genRandomName();
-         sketchChild.id = this.id;
-         sketchChild.control = this;
+   function generateName() {
+      return (Date.now() + generateName.randomNameNum++).toString(36);
+   }
+   generateName.randomNameNum = 0;
 
-         // value is the graph object
-         this.sketchChild = sketchChild;
+   let mathFunc = {
+      sin: x => Math.sin(x),
+      cos: x => Math.cos(x),
+      tan: x => Math.tan(x),
+      asin: x => Math.asin(x),
+      acos: x => Math.acos(x),
+      atan: x => Math.atan(x),
+      exp: x => Math.exp(x),
+      ln: x => Math.log(x),
+      log: function(x) {
+         let base = arguments[1] || 10;
+         return Math.log10(x) / Math.log(base);
+      },
+   };
+
+   Object.assign(window, mathFunc);
+
+   class GraphChild$1 {
+
+       constructor(options) {
+           this.checkOptions(options);
+
+           options.id = options.id || generateName();
+           options.handlers = options.handlers || {};
+           options.drawable = options.hasOwnProperty('drawable') ? options.drawable : true;
+
+           Object.assign(this, options);
+           this.gs = this.sketch.gs;
+
+       }
+       checkOptions(options) {
+           let propName;
+           if (!options.sketch) {
+               propName = 'sketch';
+               throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
+           }
+       }   
+       get id() {
+           return this._id;
+       }
+       set id(value) {
+           this._id = this.sketch.gs.checkId(value);
+       }
+
+       /**
+        * methods are here
+        */
+       remove(handlerArgs) {
+           this.sketch.children.delete(this.id);
+           if (this.handlers.remove) this.handlers.remove(...handlerArgs);
+        }
+   }
+
+   class Canvas{
+
+      /**
+       * to create an instance of Canvas class, this offer some good methods and propeties.
+       * @param {Objetc} options 
+       * you can set parent, canvas, attributes which contains any attribute of html. 
+       */
+      constructor(options = {}) {
+         this.elt = options.canvas || document.createElement("canvas");
+         this.ctx = this.elt.getContext('2d');
+         if (options.parent) options.parent.appendChild(this.elt);
+         if (options.attributes) {
+            for (let [name, value] in attributes) {
+               this.elt.setAttribut(name, value);
+            }
+         }
+         this.font = { width: 15, family: 'Arial' };
+      }
+
+      resize(width, height) {
+         this.elt.width = width;
+         this.elt.height = height;
+      }
+      clear(fillStyle) {
+         if (fillStyle) {
+            this.ctx.fillStyle = fillStyle;
+            this.ctx.fillRect(0, 0, this.elt.clientWidth, this.elt.clientHeight);
+         } else {
+            this.ctx.clearRect(0, 0, this.elt.clientWidth, this.elt.clientHeight);
+         }
+      }
+      setFont(font) {
+         if (font.size) this.font.size = font.size;
+         if (font.family) this.font.family = font.family;
+         this.ctx.font = `${this.font.size}px ${this.font.family}`;
+      }
+      measureString(txt) {
+         let size = this.ctx.measureText(txt);
+         size.height = this.font.size;
+         return size;
+      }
+
+      //#region shapes
+
+      line(x1, y1, x2, y2) {
+         this.ctx.moveTo(x1, y1);
+         this.ctx.lineTo(x2, y2);
+      }
+
+      ellipse(x, y, radius1, radius2, rotation = 0, startAngle = 0, endAngle = Math.PI*2, counterClockWise = false) {
+         this.ctx.beginPath();
+         this.ctx.ellipse(x, y, radius1, radius2 || radius1, rotation, startAngle, endAngle, counterClockWise);
+         this.ctx.fill();
+         this.ctx.stroke();
+      }
+
+      //#endregion
+
+   }
+
+   class pen{
+       constructor(color, weight = 1, style = 'solid'){
+           this.color = color;
+           this.weight = weight;
+           this.style = style;
+       }
+       setup(canvasORctx) {
+           canvasORctx = canvasORctx instanceof Canvas ? canvasORctx.ctx : canvasORctx;
+           canvasORctx.strokeStyle = this.color.toString();
+           canvasORctx.lineWidth = this.weight;
+       }
+   }
+
+   class color{
+       constructor(r, g, b, a) {
+           this.r = r;
+           this.g = g;
+           this.b = b;
+           this.a = a;
+       }
+
+       brightness() {
+           let num = this.r / 255;
+           let num2 = this.g / 255;
+           let num3 = this.b / 255;
+           let num4 = num;
+           let num5 = num;
+           if (num2 > num4)
+               num4 = num2;
+           if (num3 > num4)
+               num4 = num3;
+           if (num2 < num5)
+               num5 = num2;
+           if (num3 < num5)
+               num5 = num3;
+           return ((num4 + num5) / 2);
+       }
+
+       hue() {
+           if ((this.r == this.g) && (this.g == this.b))
+               return 0;
+           let num = this.r / 255;
+           let num2 = this.g / 255;
+           let num3 = this.b / 255;
+           let num7 = 0;
+           let num4 = num;
+           let num5 = num;
+           if (num2 > num4)
+               num4 = num2;
+           if (num3 > num4)
+               num4 = num3;
+           if (num2 < num5)
+               num5 = num2;
+           if (num3 < num5)
+               num5 = num3;
+           let num6 = num4 - num5;
+           if (num == num4)
+               num7 = (num2 - num3) / num6;
+           else if (num2 == num4)
+               num7 = 2 + ((num3 - num) / num6);
+           else if (num3 == num4)
+               num7 = 4 + ((num - num2) / num6);
+           num7 *= 60;
+           if (num7 < 0)
+               num7 += 360;
+           return num7;
+       }
+
+       saturation() {
+           let num = this.r / 255;
+           let num2 = this.g / 255;
+           let num3 = this.b / 255;
+           let num7 = 0;
+           let num4 = num;
+           let num5 = num;
+           if (num2 > num4)
+               num4 = num2;
+           if (num3 > num4)
+               num4 = num3;
+           if (num2 < num5)
+               num5 = num2;
+           if (num3 < num5)
+               num5 = num3;
+           if (num4 == num5)
+               return num7;
+           let num6 = (num4 + num5) / 2;
+           if (num6 <= 0.5)
+               return ((num4 - num5) / (num4 + num5));
+           return ((num4 - num5) / ((2 - num4) - num5));
+       }
+
+       isDark() {
+           if (this.brightness() > 0.40) {
+               return false;
+           }
+           else {
+               return true;
+           }
+       }
+
+       toArray() {
+           return [this.r, this.g, this.b, this.a];
+       }
+
+       toString() {
+           return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+       }
+   }
+
+   /**
+    * our color is an object has r g b as properties. {r: num, g: num, b: num}
+    */
+   class colorPackage{
+       static brightness(color) {
+           let num = color.r / 255;
+           let num2 = color.g / 255;
+           let num3 = color.b / 255;
+           let num4 = num;
+           let num5 = num;
+           if (num2 > num4)
+               num4 = num2;
+           if (num3 > num4)
+               num4 = num3;
+           if (num2 < num5)
+               num5 = num2;
+           if (num3 < num5)
+               num5 = num3;
+           return ((num4 + num5) / 2);
+       }
+
+       static hue(color) {
+           if ((color.r == color.g) && (color.g == color.b))
+               return 0;
+           let num = color.r / 255;
+           let num2 = color.g / 255;
+           let num3 = color.b / 255;
+           let num7 = 0;
+           let num4 = num;
+           let num5 = num;
+           if (num2 > num4)
+               num4 = num2;
+           if (num3 > num4)
+               num4 = num3;
+           if (num2 < num5)
+               num5 = num2;
+           if (num3 < num5)
+               num5 = num3;
+           let num6 = num4 - num5;
+           if (num == num4)
+               num7 = (num2 - num3) / num6;
+           else if (num2 == num4)
+               num7 = 2 + ((num3 - num) / num6);
+           else if (num3 == num4)
+               num7 = 4 + ((num - num2) / num6);
+           num7 *= 60;
+           if (num7 < 0)
+           num7 += 360;
+           return num7;
+       }
+
+       static saturation(color) {
+           let num = color.r / 255;
+           let num2 = color.g / 255;
+           let num3 = color.b / 255;
+           let num7 = 0;
+           let num4 = num;
+           let num5 = num;
+           if (num2 > num4)
+               num4 = num2;
+           if (num3 > num4)
+               num4 = num3;
+           if (num2 < num5)
+               num5 = num2;
+           if (num3 < num5)
+               num5 = num3;
+           if (num4 == num5)
+               return num7;
+           let num6 = (num4 + num5) / 2;
+           if (num6 <= 0.5)
+               return ((num4 - num5) / (num4 + num5));
+           return ((num4 - num5) / ((2 - num4) - num5));
+       }
+       static isDark(color) {
+           if (colorPackage.brightness(color) > 0.35) {
+               return false;
+           }
+           else {
+               return true;
+           }
+       }
+
+       static randomColor() {
+           return new color(MathPackage.Core.random(255), MathPackage.Core.random(255),  MathPackage.Core.random(255));
+       }
+
+       static randomDarkColor() {
+           let c = colorPackage.randomColor();
+           do { c = colorPackage.randomColor(); } while (!c.isDark());
+           return c;
+       }
+
+       static randomLightColor() {
+           let c = colorPackage.randomColor();
+           do { c = colorPackage.randomColor(); } while (c.isDark());
+           return c;
+       }
+   }
+
+   function measureString(txt) {
+       return canvas.elt.getContext("2d").measureText(txt);
+   }
+
+   var drawing$1 = /*#__PURE__*/Object.freeze({
+      __proto__: null,
+      pen: pen,
+      color: color,
+      colorPackage: colorPackage,
+      measureString: measureString
+   });
+
+   /****************************************************************/
+
+   class Xfunction extends GraphChild$1 {
+      /** 
+       * gs stands for graphSetting.
+      */
+      constructor(options) {
+         //#region 
+         let propName;
+
+         propName = 'expr';
+         if (!options[propName]) {
+            throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
+         }
+
+         if (!options.pen) {
+            let c = options.sketch.coor.coorSettings.background.isDark() ? drawing$1.colorPackage.randomLightColor() : drawing$1.colorPackage.randomDarkColor();
+            c.a = 155;
+            options.pen = new drawing$1.pen(c, 2);
+         }
+         //#endregion
+
+         super(options);
+         this.expression = MathPackage.Parser.maximaTOjsFunction(this.expr, ['x']);
+      }
+
+      static fromString(expr, sketch) {
+         if (str.replace(/==+/, '').indexOf('=') > -1) throw new Error('there is "=" opertor!');
+         return new Xfunction({expr, sketch});
+      }
+
+      async draw(canvas) {
+         let ctx = canvas.ctx;
+         ctx.strokeStyle = this.pen.color.toString();
+         ctx.lineWidth = this.pen.weight;
+         let p, previousP, midP, continous;
+         ctx.beginPath();
+         for (let x = this.gs.viewport.xmin; x <= this.gs.viewport.xmax; x += this.gs.drawingStep) {
+            p = this.gs.coorTOpx(x, this.expression(x));
+            midP = this.gs.coorTOpx(x - this.gs.drawingStep / 2, this.expression(x - this.gs.drawingStep / 2));
+            // if valid add new point, unless add the array of point if has more than point
+            let valid = !isNaN(p.x) && !isNaN(p.y) &&
+               Math.abs(p.x) < 100000 && Math.abs(p.y) < 100000 &&
+               ((continous && (Math.sign(p.y - midP.y) === Math.sign(midP.y - previousP.y) || Math.abs(p.y - previousP.y) / this.gs.drawingStep < 20)) || !continous);
+            if (!valid) {
+               if (continous) {
+                  ctx.stroke();
+                  ctx.beginPath();
+                  continous = false;
+               }
+            }
+            else {
+               if (continous)
+                  ctx.lineTo(p.x, p.y);
+               else
+                  ctx.moveTo(p.x, p.y);
+
+               previousP = { x: p.x, y: p.y };
+               continous = true;
+            }
+         }
+
+         ctx.stroke();
+
+      }
+
+      toString() {
+         return this.expression;
+      }
+
+   }
+
+   class EvalExpr extends GraphChild$1{
+      constructor(options) {
+         //#region 
+         let propName;
+         propName = 'expr';
+         if (!options[propName]) {
+            throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
+         }
+         options.drawable = false;
+         //#endregion
+         super(options);
+         this.eval = this.expr instanceof Function ? this.expr : MathPackage.Parser.maximaTOjsFunction(this.expr);
+      }
+
+      static fromString(str, sketch) {
+         if (str) {
+            return new EvalExpr({ expr: expr });
+         }
+         else
+            throw new Error('your expression is empty :\'(');
+      }
+   }
+
+   class ChildControl$1 {
+      constructor(graphChild) {
+         if (graphChild) {
+            this.graphChild = graphChild;
+         } else {
+            this.id = genRandomName();
+            mySketch.children.set(this.id, null);
+         }
+
          this.elt = document.createElement('div');
          this.elt.innerHTML = `
       <li class="control" id="${this.id}">
@@ -45,15 +479,25 @@
          this.__setEvents();
          this.__updateElts(); /// updating elements
       }
-      get sketchChild() {
-         return this._sketchChild;
+      get graphChild() {
+         return this._graphChild;
       }
 
-      set sketchChild(value) {
-         if (!this._sketchChild) {
-            this.sketch.children.set(this.id, value);
+      set graphChild(value) {
+         if (!value) {
+            /// delete the current graphChild from the sketch
+            this._graphChild.remove([false]);
+         } else {
+            value.handlers.onremove = (removeElt) => {
+               if (removeElt) this.remove(false);
+            };
+            mySketch.children.delete(this.id);
+            mySketch.children.set(value.id, value);
+            this._graphChild = value;
+            this.id = value.id;
+            mySketch.update();
          }
-         this._sketchChild = value;
+        
       }
 
       __setEvents() {
@@ -62,11 +506,7 @@
          this.orderELT = this.elt.querySelector('.order');
 
          //#region math, script field
-         let handleScript = (latex) => {
-            this.graphObject = getObject(
-               MathPackage.Parser.latexTOnode(latex)
-            );
-         };
+         let handleScript = (latex) => (this.handleScript(latex) );
          let mathField = MQ.MathField(scriptELT, {
             sumStartsWithNEquals: true,
             supSubsRequireOperand: true,
@@ -91,10 +531,21 @@
          //#endregion 
 
          this.removeELT.addEventListener('click', (e) => {
-            removeControl(this);
             this.remove();
          });
 
+      }
+
+      handleScript(latex) {
+         let newGC;
+         try {
+            newGC = mySketch.childFromString(
+               MathPackage.Parser.latexTOmaxima(latex)
+            );
+         } catch (e) {
+            this.error(e);
+         }
+         this.graphChild = newGC;
       }
 
       focus() {
@@ -112,17 +563,22 @@
          this.elt.classList.remove('focus');
       }
 
-      remove(removeELT) {
-         if (removeELT) {
-            this.removeELT.click();
+      error(e) {
+         console.log(e);
+      }
+
+      remove(removeGraphChild = true) {
+         removeControl(this);
+         if (removeGraphChild) {
+            this.graphChild.remove();
          }
-         let me = this.sketch.removeChildById(this.sketchChild.id);
+         mySketch.update();
       }
 
       __updateElts() {
-         if (this.graphObject) {
-            if (this.graphObject instanceof Xfunction) {
-               this.elt.style.background = this.graphObject.color;
+         if (this.graphChild) {
+            if (this.graphChild instanceof Xfunction) {
+               this.elt.style.background = this.graphChild.color;
             }
          }
       }
@@ -700,6 +1156,19 @@
 
      //#endregion
 
+     checkId(id) {
+       if (!id) throw new Error('can\'t set a falsy value to the name of this sketch child.');
+       let __id = id.replace(/^\s*([_a-zA-z\d]+)\s*$/, '$1');
+       if (!__id)
+         throw new Error(`"${id}" is not valid to use.`);
+       else {
+         if (this.sketch.children.has(id)) {
+           throw new Error(`"${id}" is used before.`);
+         }
+       }
+       return __id;
+     }
+
    }
 
    class Coordinates {
@@ -909,66 +1378,6 @@
 
    }
 
-   class Canvas{
-
-      /**
-       * to create an instance of Canvas class, this offer some good methods and propeties.
-       * @param {Objetc} options 
-       * you can set parent, canvas, attributes which contains any attribute of html. 
-       */
-      constructor(options = {}) {
-         this.elt = options.canvas || document.createElement("canvas");
-         this.ctx = this.elt.getContext('2d');
-         if (options.parent) options.parent.appendChild(this.elt);
-         if (options.attributes) {
-            for (let [name, value] in attributes) {
-               this.elt.setAttribut(name, value);
-            }
-         }
-         this.font = { width: 15, family: 'Arial' };
-      }
-
-      resize(width, height) {
-         this.elt.width = width;
-         this.elt.height = height;
-      }
-      clear(fillStyle) {
-         if (fillStyle) {
-            this.ctx.fillStyle = fillStyle;
-            this.ctx.fillRect(0, 0, this.elt.clientWidth, this.elt.clientHeight);
-         } else {
-            this.ctx.clearRect(0, 0, this.elt.clientWidth, this.elt.clientHeight);
-         }
-      }
-      setFont(font) {
-         if (font.size) this.font.size = font.size;
-         if (font.family) this.font.family = font.family;
-         this.ctx.font = `${this.font.size}px ${this.font.family}`;
-      }
-      measureString(txt) {
-         let size = this.ctx.measureText(txt);
-         size.height = this.font.size;
-         return size;
-      }
-
-      //#region shapes
-
-      line(x1, y1, x2, y2) {
-         this.ctx.moveTo(x1, y1);
-         this.ctx.lineTo(x2, y2);
-      }
-
-      ellipse(x, y, radius1, radius2, rotation = 0, startAngle = 0, endAngle = Math.PI*2, counterClockWise = false) {
-         this.ctx.beginPath();
-         this.ctx.ellipse(x, y, radius1, radius2 || radius1, rotation, startAngle, endAngle, counterClockWise);
-         this.ctx.fill();
-         this.ctx.stroke();
-      }
-
-      //#endregion
-
-   }
-
    /* eslint-disable no-unused-vars */
    class Sketch {
 
@@ -983,12 +1392,94 @@
            // this.childsCanvas.ctx.textAlign = 'left';
 
            this.children = new Map();
-           this.focusedObject = undefined;
+           this.getChildParser = new MagicalParser.CustomParsers.Math();
        }
 
-       appendChild(cihld) {
-           if (!child.id) throw new Error('Your sketch child shoyld have had an id :\'(');
+       appendChild(child) {
+           if (!child.id) throw new Error('Your sketch child should have had an id :\'(');
+           let append = (child instanceof GraphChild ? child : this.childFromString(child));
            this.children.set(child.id, child);
+       }
+
+       childFromString(script, propsTOset = {}) {
+           propsTOset.sketch = this;
+           let parsedString = this.getChildParser.parse(script);
+           if (parsedString.check({ name: '=' })) {
+               let left = parsedString.args[0], right = parsedString.args[1];
+               
+               if (left.check({ type: 'variable', name: 'y' }) && !right.contains({ type: 'variable', name: 'y' })) {
+                   return new Xfunction({ expr: right.match, ...propsTOset });
+               }
+              
+               //such : area( h , b , theta ) = 0.5 * h * b * sin( theta )
+               //such : f(x) = x^2
+               else if (left.check({ type: 'functionCalling' }) && !this.gs.reservedFunction.find(name => name === left.name)) {
+                   // such : f(x) = x^2
+                   if (left.args.length == 1 && left.args[0].check({ type: 'variable', name: 'x' }) && !right.contains({ type: 'variable', name: 'y' })) {
+                       return new Xfunction({ sketch: this, expr: right.match, id: left.name });
+                   }
+                   /*
+                   //such : area( h , b , theta) = 0.5 * h * b * sin( theta )
+                   else {
+                       List < string > args = new List<string>();
+                       LNode Process = null;
+                       
+                       foreach(LNode arg in left.Args);
+                       {
+                           if (arg.IsId) {
+                               args.Add(arg.Name.Name);
+                           }
+                           else {
+                               throw new Exception($"The argument {arg.ToString().Substring(0, arg.ToString().length - 1)} of the function \"{name.ToString()}\" is invalid");
+                           }
+                       }
+                       if (MathExpression(right)) {
+                           Process = right;
+                       }
+                       else {
+                           throw new Exception($"The process {right.ToString().Substring(0, right.ToString().length - 1)} of the function \"{name.ToString()}\" is invalid");
+                       }
+
+
+                       MathPackage.Operations.Func func = new MathPackage.Operations.Func(name, args, MathPackage.Transformer.GetNodeFromLoycNode(Process, GraphSettings.CalculationSettings));
+                       return func;
+                   }
+                   */
+               }
+               //#endregion
+               /*
+               //such : a = 2 * c + sin( k )
+               else if (left.IsId && MathExpression(right)) {
+                   LNode b = right, a = left;
+                   return new Variable(a.Name.Name, MathPackage.Transformer.GetNodeFromLoycNode(b, GraphSettings.CalculationSettings));
+               }
+               */
+               //#endregion
+
+           }
+           // /// like 2+3*x = sin(y)^2
+           // else if ((IsBool(parsedString)) && (ContainsSymbol(parsedString, GraphSettings.sy_x) || ContainsSymbol(parsedString, GraphSettings.sy_y))) {
+           //    XYFunction f = new XYFunction(GraphSettings);
+           //    {
+           //       Expression = MathPackage.Transformer.GetNodeFromLoycNode(parsedString, GraphSettings.CalculationSettings);
+           //    };
+           //    if (selectName) {
+           //       if (enrollName) {
+           //          f.SetName(GraphSettings.selectName());
+           //       }
+           //       else {
+           //          f.Name = GraphSettings.selectName();
+           //       }
+           //    }
+           //    return f;
+           // }
+           
+           /// to add function like : x^2
+           else if (parsedString.contains({ type: 'variable', name: 'x' })) {
+               return new Xfunction({ expr: parsedString.match, ...propsTOset });
+           }
+           let newScript = parsedString.check({ type: 'operator', name: '=' }) ? `(${parsedString.args[0].match}) == (${parsedString.args[1].match})` : script;
+           return new EvalExpr({ expr: newScript, ...propsTOset, drawable: false });
        }
 
        getChildById(id) {
@@ -1006,7 +1497,7 @@
                this.childsCanvas.clear();
                for (let child of this.children.values()) {
                    if (child && child.drawable) {
-                       child.value.draw(this.childsCanvas);
+                       child.draw(this.childsCanvas);
                    }
                }
                this.draw();
@@ -1069,7 +1560,7 @@
          setTimeout(() => {
             newControlBtn.classList.remove('animate-shake');
             controls.parentElement.classList.remove('blink-error');
-            addControl(new ChildControl$1(mySketch));
+            addControl(new ChildControl$1());
          }, 400);
       }
    }
@@ -1127,244 +1618,21 @@
    }
 
    function genRandomName() {
-      let num = 0;
       /// randomNameNum is here to avoid getting the same random name if the code is implemented so fast
 
-      return (Date.now() + genRandomName.randomNameNum++).toString(36)
-            .replace(new RegExp(num++, 'g'), 'a') /// I am using Regex for global replacement.
-            .replace(new RegExp(num++, 'g'), 'b')
-            .replace(new RegExp(num++, 'g'), 'c')
-            .replace(new RegExp(num++, 'g'), 'd')
-            .replace(new RegExp(num++, 'g'), 'e')
-            .replace(new RegExp(num++, 'g'), 'f')
-            .replace(new RegExp(num++, 'g'), 'g')
-            .replace(new RegExp(num++, 'g'), 'h')
-            .replace(new RegExp(num++, 'g'), 'i')
-            .replace(new RegExp(num++, 'g'), 'j');
+      return (Date.now() + genRandomName.randomNameNum++).toString(36);
    }
    genRandomName.randomNameNum = 0;
 
+   var keyboardSettings = {
+      backspaceInterval: undefined,
+      mouseDownForInterval: false,
+      showHideKeyBtn: document.querySelector(".sh-keypad"),
+      mathField: document.querySelector('.script')
+   };
+
+
    //#endregion
-
-   class pen{
-       constructor(color, weight = 1, style = 'solid'){
-           this.color = color;
-           this.weight = weight;
-           this.style = style;
-       }
-       setup(canvasORctx) {
-           canvasORctx = canvasORctx instanceof Canvas ? canvasORctx.ctx : canvasORctx;
-           canvasORctx.strokeStyle = this.color.toString();
-           canvasORctx.lineWidth = this.weight;
-       }
-   }
-
-   class color{
-       constructor(r, g, b, a) {
-           this.r = r;
-           this.g = g;
-           this.b = b;
-           this.a = a;
-       }
-
-       brightness() {
-           let num = this.r / 255;
-           let num2 = this.g / 255;
-           let num3 = this.b / 255;
-           let num4 = num;
-           let num5 = num;
-           if (num2 > num4)
-               num4 = num2;
-           if (num3 > num4)
-               num4 = num3;
-           if (num2 < num5)
-               num5 = num2;
-           if (num3 < num5)
-               num5 = num3;
-           return ((num4 + num5) / 2);
-       }
-
-       hue() {
-           if ((this.r == this.g) && (this.g == this.b))
-               return 0;
-           let num = this.r / 255;
-           let num2 = this.g / 255;
-           let num3 = this.b / 255;
-           let num7 = 0;
-           let num4 = num;
-           let num5 = num;
-           if (num2 > num4)
-               num4 = num2;
-           if (num3 > num4)
-               num4 = num3;
-           if (num2 < num5)
-               num5 = num2;
-           if (num3 < num5)
-               num5 = num3;
-           let num6 = num4 - num5;
-           if (num == num4)
-               num7 = (num2 - num3) / num6;
-           else if (num2 == num4)
-               num7 = 2 + ((num3 - num) / num6);
-           else if (num3 == num4)
-               num7 = 4 + ((num - num2) / num6);
-           num7 *= 60;
-           if (num7 < 0)
-               num7 += 360;
-           return num7;
-       }
-
-       saturation() {
-           let num = this.r / 255;
-           let num2 = this.g / 255;
-           let num3 = this.b / 255;
-           let num7 = 0;
-           let num4 = num;
-           let num5 = num;
-           if (num2 > num4)
-               num4 = num2;
-           if (num3 > num4)
-               num4 = num3;
-           if (num2 < num5)
-               num5 = num2;
-           if (num3 < num5)
-               num5 = num3;
-           if (num4 == num5)
-               return num7;
-           let num6 = (num4 + num5) / 2;
-           if (num6 <= 0.5)
-               return ((num4 - num5) / (num4 + num5));
-           return ((num4 - num5) / ((2 - num4) - num5));
-       }
-
-       isDark() {
-           if (this.brightness() > 0.40) {
-               return false;
-           }
-           else {
-               return true;
-           }
-       }
-
-       toArray() {
-           return [this.r, this.g, this.b, this.a];
-       }
-
-       toString() {
-           return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
-       }
-   }
-
-   /**
-    * our color is an object has r g b as properties. {r: num, g: num, b: num}
-    */
-   class colorPackage{
-       static brightness(color) {
-           let num = color.r / 255;
-           let num2 = color.g / 255;
-           let num3 = color.b / 255;
-           let num4 = num;
-           let num5 = num;
-           if (num2 > num4)
-               num4 = num2;
-           if (num3 > num4)
-               num4 = num3;
-           if (num2 < num5)
-               num5 = num2;
-           if (num3 < num5)
-               num5 = num3;
-           return ((num4 + num5) / 2);
-       }
-
-       static hue(color) {
-           if ((color.r == color.g) && (color.g == color.b))
-               return 0;
-           let num = color.r / 255;
-           let num2 = color.g / 255;
-           let num3 = color.b / 255;
-           let num7 = 0;
-           let num4 = num;
-           let num5 = num;
-           if (num2 > num4)
-               num4 = num2;
-           if (num3 > num4)
-               num4 = num3;
-           if (num2 < num5)
-               num5 = num2;
-           if (num3 < num5)
-               num5 = num3;
-           let num6 = num4 - num5;
-           if (num == num4)
-               num7 = (num2 - num3) / num6;
-           else if (num2 == num4)
-               num7 = 2 + ((num3 - num) / num6);
-           else if (num3 == num4)
-               num7 = 4 + ((num - num2) / num6);
-           num7 *= 60;
-           if (num7 < 0)
-           num7 += 360;
-           return num7;
-       }
-
-       static saturation(color) {
-           let num = color.r / 255;
-           let num2 = color.g / 255;
-           let num3 = color.b / 255;
-           let num7 = 0;
-           let num4 = num;
-           let num5 = num;
-           if (num2 > num4)
-               num4 = num2;
-           if (num3 > num4)
-               num4 = num3;
-           if (num2 < num5)
-               num5 = num2;
-           if (num3 < num5)
-               num5 = num3;
-           if (num4 == num5)
-               return num7;
-           let num6 = (num4 + num5) / 2;
-           if (num6 <= 0.5)
-               return ((num4 - num5) / (num4 + num5));
-           return ((num4 - num5) / ((2 - num4) - num5));
-       }
-       static isDark(color) {
-           if (colorPackage.brightness(color) > 0.35) {
-               return false;
-           }
-           else {
-               return true;
-           }
-       }
-
-       static randomColor() {
-           return new drawing.color(random(255), random(255),  random(255));
-       }
-
-       static randomDarkColor() {
-           let c = colorPackage.randomColor();
-           do { c = colorPackage.randomColor(); } while (!c.isDark());
-           return c;
-       }
-
-       static randomLightColor() {
-           let c = colorPackage.randomColor();
-           do { c = colorPackage.randomColor(); } while (c.isDark());
-           return c;
-       }
-   }
-
-   function measureString(txt) {
-       return canvas.elt.getContext("2d").measureText(txt);
-   }
-
-   var drawing$1 = /*#__PURE__*/Object.freeze({
-      __proto__: null,
-      pen: pen,
-      color: color,
-      colorPackage: colorPackage,
-      measureString: measureString
-   });
 
    function canvasEvents() {
       let mousepressed;
@@ -1896,23 +2164,23 @@
    function keypadEvents(){
       //#region (keypad - showHideBtn) events
       let keypad = $('.keypad-container'),
-         sh = $(keyboardSettings$1.showHideKeyBtn);
+         sh = $(keyboardSettings.showHideKeyBtn);
 
       keypad
          .on('mousedown', function () {
-            keyboardSettings$1.mathField.focus();
+            keyboardSettings.mathField.focus();
          });
 
 
       sh.on("mouseup", function (e) {
-         keyboardSettings$1.hideKeyPad = false;
+         keyboardSettings.hideKeyPad = false;
       });
 
-      $("[cancel-hiding-keypad]").bind("mousedown touchstart", function (e) {
-         keyboardSettings$1.hideKeyPad = false;
+      $(document.body).delegate("[cancel-hiding-keypad]", "mousedown touchstart", function (e) {
+         keyboardSettings.hideKeyPad = false;
       });
 
-      $(".script-container").bind("touchstart", function (e) {
+      $('.control').delegate(".script-container", "touchstart", function (e) {
          if (sh.hasClass("hide")) {
             sh.click();
          }
@@ -1925,13 +2193,13 @@
          $(this).on('click', function () {
             let $this = $(this);
             if ($this.hasClass('double-shiftable')) {
-               keyboardSettings$1.mathField.cmd($(' > div.active > span.active', $this).attr('mq-cmd'));
+               keyboardSettings.mathField.cmd($(' > div.active > span.active', $this).attr('mq-cmd'));
             } else if ($this.hasClass('shiftable')) {
-               keyboardSettings$1.mathField.cmd($(' > span.active', $this).attr('mq-cmd'));
+               keyboardSettings.mathField.cmd($(' > span.active', $this).attr('mq-cmd'));
             } else {
-               keyboardSettings$1.mathField.cmd(this.getAttribute('mq-cmd'));
+               keyboardSettings.mathField.cmd(this.getAttribute('mq-cmd'));
             }
-            keyboardSettings$1.mathField.focus();
+            keyboardSettings.mathField.focus();
          });
       });
 
@@ -1939,13 +2207,13 @@
          $(this).on('click', function () {
             let $this = $(this);
             if ($this.hasClass('double-shiftable')) {
-               keyboardSettings$1.mathField.write($(' > div.active > span.active', $this).attr('mq-write'));
+               keyboardSettings.mathField.write($(' > div.active > span.active', $this).attr('mq-write'));
             } else if ($this.hasClass('shiftable')) {
-               keyboardSettings$1.mathField.write($(' > span.active', $this).attr('mq-write'));
+               keyboardSettings.mathField.write($(' > span.active', $this).attr('mq-write'));
             } else {
-               keyboardSettings$1.mathField.write(this.getAttribute('mq-write'));
+               keyboardSettings.mathField.write(this.getAttribute('mq-write'));
             }
-            keyboardSettings$1.mathField.focus();
+            keyboardSettings.mathField.focus();
          });
       });
 
@@ -1953,29 +2221,29 @@
          $(this).on("click", function () {
             let $this = $(this);
             if ($this.hasClass("double-shiftable")) {
-               keyboardSettings$1.mathField.write($(" > div.active > span.active", $this).attr("mq-func"));
+               keyboardSettings.mathField.write($(" > div.active > span.active", $this).attr("mq-func"));
             } else if ($this.hasClass("shiftable")) {
-               keyboardSettings$1.mathField.write($(" > span.active", $this).attr("mq-func"));
+               keyboardSettings.mathField.write($(" > span.active", $this).attr("mq-func"));
             } else {
-               keyboardSettings$1.mathField.write(this.getAttribute("mq-func"));
+               keyboardSettings.mathField.write(this.getAttribute("mq-func"));
             }
-            keyboardSettings$1.mathField.cmd("(");
-            keyboardSettings$1.mathField.focus();
+            keyboardSettings.mathField.cmd("(");
+            keyboardSettings.mathField.focus();
          });
       });
 
       $(".space").on("click", function () {
-         keyboardSettings$1.mathField.keystroke("Right");
+         keyboardSettings.mathField.keystroke("Right");
       });
 
       //keystrokes
       $(".backspace").on("mousedown", function () {
-         keyboardSettings$1.mathField.keystroke("Backspace");
-         keyboardSettings$1.mouseDownForInterval = true;
+         keyboardSettings.mathField.keystroke("Backspace");
+         keyboardSettings.mouseDownForInterval = true;
          setTimeout(function () {
-            if (keyboardSettings$1.mouseDownForInterval) {
-               keyboardSettings$1.backspaceInterval = setInterval(function () {
-                  keyboardSettings$1.mathField.keystroke("Backspace");
+            if (keyboardSettings.mouseDownForInterval) {
+               keyboardSettings.backspaceInterval = setInterval(function () {
+                  keyboardSettings.mathField.keystroke("Backspace");
                }, 120);
             }
          }, 400);
@@ -1986,19 +2254,19 @@
       //#region direction
 
       $(".go-left").on("click", function () {
-         keyboardSettings$1.mathField.keystroke("Left");
+         keyboardSettings.mathField.keystroke("Left");
       });
 
       $(".go-right").on("click", function () {
-         keyboardSettings$1.mathField.keystroke("Right");
+         keyboardSettings.mathField.keystroke("Right");
       });
 
       $(".go-up").on("click", function () {
-         keyboardSettings$1.mathField.keystroke("Up");
+         keyboardSettings.mathField.keystroke("Up");
       });
 
       $(".go-down").on("click", function () {
-         keyboardSettings$1.mathField.keystroke("Down");
+         keyboardSettings.mathField.keystroke("Down");
       });
 
       //#endregion
@@ -2064,35 +2332,28 @@
 
    function setupKeypad() {
 
-      keyboardSettings$1.showHideKeyBtn.addEventListener("click", function (e) {
+      keyboardSettings.showHideKeyBtn.addEventListener("click", function (e) {
          let parent = document.querySelector(".keypad-container");
          let __keypadShown = $(this).hasClass("show");
          let from = __keypadShown ? "show" : "hide",
             to = __keypadShown ? "hide" : "show";
 
-         keyboardSettings$1.showHideKeyBtn.classList.remove(from);
-         keyboardSettings$1.showHideKeyBtn.classList.add(to);
+         keyboardSettings.showHideKeyBtn.classList.remove(from);
+         keyboardSettings.showHideKeyBtn.classList.add(to);
 
          parent.classList.remove(from);
          parent.classList.add(to);
          if (__keypadShown) {
-            document.body.appendChild(keyboardSettings$1.showHideKeyBtn);
+            document.body.appendChild(keyboardSettings.showHideKeyBtn);
             $(".sh-keypad-content").attr("aria-label", "show keypad");
          } else {
-            parent.insertBefore(keyboardSettings$1.showHideKeyBtn, parent.firstElementChild);
+            parent.insertBefore(keyboardSettings.showHideKeyBtn, parent.firstElementChild);
             $(".sh-keypad-content").attr("aria-label", "hide keypad");
          }
       });
 
       keypadEvents();
    }
-
-   var keyboardSettings$1 = {
-      backspaceInterval: undefined,
-      mouseDownForInterval: false,
-      showHideKeyBtn: document.querySelector(".sh-keypad"),
-      mathField: document.querySelector('.script')
-   };
 
    /**
     * """""""""""""""" reminder
@@ -2123,11 +2384,14 @@
      setupSortable();
      
      resize();
+     mySketch.gs.centrate();
+     mySketch.update();
+
 
      $('#loading-layer').fadeOut(1000, () => { 
-       let oc = new ChildControl$1(mySketch);
+       let oc = new ChildControl$1();
        addControl(oc);
-       keyboardSettings$1.mathField = oc.mathField;
+       keyboardSettings.mathField = oc.mathField;
      });
 
      console.log('all-done');
@@ -2181,7 +2445,7 @@
      let startSorting = true;
      $(".controls.sortable").sortable({
        axis: "y",
-       cancel: '.object-control [cancel-move]',
+       cancel: '.control [cancel-move]',
 
        start: function (e, ui) {
          startSorting = true;
@@ -2222,7 +2486,7 @@
    }
 
 
-   setupAPP(document.querySelector('#canvas'));
+   // setupAPP(document.querySelector('#canvas'));
 
    return setupAPP;
 

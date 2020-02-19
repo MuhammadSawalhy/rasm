@@ -1,7 +1,7 @@
 import canvasEvents from "./canvasEvents.js";
 import toolsEvents from "./toolsEvents.js";
 import ChildControl from "../ChildControl.js";
-import { addControl, resize } from "../global.js";
+import { addControl, resize, keyboardSettings } from "../global.js";
 
 export default function setEvents () {
 

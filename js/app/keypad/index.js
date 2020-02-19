@@ -1,4 +1,5 @@
 import keypadEvents from './events.js';
+import { keyboardSettings } from '../global.js';
 
 export default function setupKeypad() {
 
@@ -24,10 +25,3 @@ export default function setupKeypad() {
 
    keypadEvents();
 }
-
-export var keyboardSettings = {
-   backspaceInterval: undefined,
-   mouseDownForInterval: false,
-   showHideKeyBtn: document.querySelector(".sh-keypad"),
-   mathField: document.querySelector('.script')
-};

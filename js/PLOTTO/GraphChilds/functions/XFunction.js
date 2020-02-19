@@ -1,53 +1,71 @@
 /****************************************************************/
 /****************************************************************/
 /****************************************************************/
-import GraphChild from './GraphChild.js';
+import GraphChild from '../GraphChild.js';
+import drawing from '../../drawing/index.js';
 
 export default class Xfunction extends GraphChild {
    /** 
     * gs stands for graphSetting.
    */
-   constructor(gs, name, expr, _pen) {
-      let c = gs.sketch.coor.coorSettings.background.isDark() ? colorPackage.randomLightColor() : colorPackage.randomDarkColor();
-      c.a = 155;
-      _pen = _pen || new drawing.pen(c, 2);
-      super(gs, name, _pen);
-      this.expression = new Expression(['x'], expr);
+   constructor(options) {
+      //#region 
+      let propName;
+
+      propName = 'expr';
+      if (!options[propName]) {
+         throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
+      }
+
+      if (!options.pen) {
+         let c = options.sketch.coor.coorSettings.background.isDark() ? drawing.colorPackage.randomLightColor() : drawing.colorPackage.randomDarkColor();
+         c.a = 155;
+         options.pen = new drawing.pen(c, 2);
+      }
+      //#endregion
+
+      super(options);
+      this.expression = MathPackage.Parser.maximaTOjsFunction(this.expr, ['x']);
+   }
+
+   static fromString(expr, sketch) {
+      if (str.replace(/==+/, '').indexOf('=') > -1) throw new Error('there is "=" opertor!');
+      return new Xfunction({expr, sketch});
    }
 
    async draw(canvas) {
-      canvas.stroke(...this.pen.color.toArray());
-      canvas.strokeWeight(this.pen.weight);
-      canvas.noFill();
+      let ctx = canvas.ctx;
+      ctx.strokeStyle = this.pen.color.toString();
+      ctx.lineWidth = this.pen.weight;
       let p, previousP, midP, continous;
-      canvas.beginShape();
+      ctx.beginPath();
       for (let x = this.gs.viewport.xmin; x <= this.gs.viewport.xmax; x += this.gs.drawingStep) {
-         p = this.gs.coorTOpx(x, this.eval(x));
-         midP = this.gs.coorTOpx(x - this.gs.drawingStep / 2, this.eval(x - this.gs.drawingStep / 2));
+         p = this.gs.coorTOpx(x, this.expression(x));
+         midP = this.gs.coorTOpx(x - this.gs.drawingStep / 2, this.expression(x - this.gs.drawingStep / 2));
          // if valid add new point, unless add the array of point if has more than point
          let valid = !isNaN(p.x) && !isNaN(p.y) &&
-            Math.abs(p.x) < width + 100000 && Math.abs(p.y) < height + 100000 &&
+            Math.abs(p.x) < 100000 && Math.abs(p.y) < 100000 &&
             ((continous && (Math.sign(p.y - midP.y) === Math.sign(midP.y - previousP.y) || Math.abs(p.y - previousP.y) / this.gs.drawingStep < 20)) || !continous);
          if (!valid) {
             if (continous) {
-               canvas.endShape();
-               canvas.beginShape();
+               ctx.stroke();
+               ctx.beginPath();
                continous = false;
             }
          }
          else {
-            canvas.curveVertex(p.x, p.y);
+            if (continous)
+               ctx.lineTo(p.x, p.y);
+            else
+               ctx.moveTo(p.x, p.y);
+
             previousP = { x: p.x, y: p.y };
             continous = true;
          }
       }
 
-      canvas.endShape();
+      ctx.stroke();
 
-   }
-
-   eval(x) {
-      return this.expression.eval(x);
    }
 
    toString() {

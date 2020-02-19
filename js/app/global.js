@@ -49,7 +49,7 @@ export function removeControl(control) {
       setTimeout(() => {
          newControlBtn.classList.remove('animate-shake');
          controls.parentElement.classList.remove('blink-error');
-         addControl(new ChildControl(mySketch));
+         addControl(new ChildControl());
       }, 400);
    }
 }
@@ -118,18 +118,16 @@ export function genRandomName() {
    let num = 0;
    /// randomNameNum is here to avoid getting the same random name if the code is implemented so fast
 
-   return (Date.now() + genRandomName.randomNameNum++).toString(36)
-         .replace(new RegExp(num++, 'g'), 'a') /// I am using Regex for global replacement.
-         .replace(new RegExp(num++, 'g'), 'b')
-         .replace(new RegExp(num++, 'g'), 'c')
-         .replace(new RegExp(num++, 'g'), 'd')
-         .replace(new RegExp(num++, 'g'), 'e')
-         .replace(new RegExp(num++, 'g'), 'f')
-         .replace(new RegExp(num++, 'g'), 'g')
-         .replace(new RegExp(num++, 'g'), 'h')
-         .replace(new RegExp(num++, 'g'), 'i')
-         .replace(new RegExp(num++, 'g'), 'j');
+   return (Date.now() + genRandomName.randomNameNum++).toString(36);
 }
 genRandomName.randomNameNum = 0;
+
+export var keyboardSettings = {
+   backspaceInterval: undefined,
+   mouseDownForInterval: false,
+   showHideKeyBtn: document.querySelector(".sh-keypad"),
+   mathField: document.querySelector('.script')
+};
+
 
 //#endregion

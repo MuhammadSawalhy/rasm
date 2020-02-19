@@ -1,7 +1,15 @@
-import XFunction from './function/XFunction.js';
+import Xfunction from './functions/Xfunction.js';
 import Point from './Point.js';
+import EvalExpr from './EvalExpr.js';
 
 export default {
-   XFunction,
-   Point
-}
+   Xfunction,
+   Point,
+   EvalExpr
+};
+
+export {
+   Xfunction,
+   Point,
+   EvalExpr
+};

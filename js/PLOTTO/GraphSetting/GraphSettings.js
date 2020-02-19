@@ -80,6 +80,19 @@ export default class {
 
   //#endregion
 
+  checkId(id) {
+    if (!id) throw new Error('can\'t set a falsy value to the name of this sketch child.');
+    let __id = id.replace(/^\s*([_a-zA-z\d]+)\s*$/, '$1');
+    if (!__id)
+      throw new Error(`"${id}" is not valid to use.`);
+    else {
+      if (this.sketch.children.has(id)) {
+        throw new Error(`"${id}" is used before.`);
+      }
+    }
+    return __id;
+  }
+
 }
 
 

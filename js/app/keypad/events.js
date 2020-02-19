@@ -1,4 +1,4 @@
-import { keyboardSettings } from './index.js';
+import { keyboardSettings } from './../global.js';
 
 export default function(){
    //#region (keypad - showHideBtn) events
@@ -15,11 +15,11 @@ export default function(){
       keyboardSettings.hideKeyPad = false;
    });
 
-   $("[cancel-hiding-keypad]").bind("mousedown touchstart", function (e) {
+   $(document.body).delegate("[cancel-hiding-keypad]", "mousedown touchstart", function (e) {
       keyboardSettings.hideKeyPad = false;
    });
 
-   $(".script-container").bind("touchstart", function (e) {
+   $('.control').delegate(".script-container", "touchstart", function (e) {
       if (sh.hasClass("hide")) {
          sh.click();
       }

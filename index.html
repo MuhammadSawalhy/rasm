@@ -14,10 +14,11 @@
     <link href="./libraries/SUI/dist/styles/all.css" rel="stylesheet" />
     <script src="./libraries/SUI/dist/js/all.js"></script>
     <!-- this should be here before MathPackage -->
+    <script src="./libraries/tex2max.js"></script>
     <script src="./libraries/MagicalParser.js"></script>
     <script src="./libraries/MathPackage.js"></script>
-    <!-- <script src="E:\Program_Disgner\_Projects\_Mine\mathPackage\lib\MathPackage.js"></script> -->
-    <script src="./libraries/tex2max.js"></script>
+    <!-- <script src="E:/Program_Disgner/_Projects/_Mine/MagicalParser/lib/MagicalParser.js"></script> -->
+    <!-- <script src="E:/Program_Disgner/_Projects/_Mine/MathPackage/lib/MathPackage.js"></script> -->
 
     <!--plugins -->
     <link
@@ -32,7 +33,6 @@
 
     <!-- my own code -->
     <link href="./dist/styles/style.min.css" rel="stylesheet" />
-
   </head>
 
   <body>
@@ -64,9 +64,12 @@
       </div>
     </div>
 
-
     <button class="hide sh-keypad ">
-      <div class=" sh-keypad-content" data-balloon-pos="up" aria-label="show keypad">
+      <div
+        class=" sh-keypad-content"
+        data-balloon-pos="up"
+        aria-label="show keypad"
+      >
         <i class="far fa-keyboard"></i>
         <div class="arrow">
           <svg width="10" height="5" class="svg1">
@@ -75,7 +78,6 @@
         </div>
       </div>
     </button>
-
 
     <div class="keypad-container hide" cancel-hiding-keypad>
       <section class="tabs-1">
@@ -91,41 +93,43 @@
               <div class="rows">
                 <div class="row">
                   <!--  1  -->
-                  <button mq-write='^2'><span class="math-field">a^2</span></button>
+                  <button mq-write="^2">
+                    <span class="math-field">a^2</span>
+                  </button>
                   <div class="take-space"></div>
-                  <button class="shiftable" mq-cmd='^'>
-                    <span class="math-field active" mq-cmd='^'>a^{...}</span>
-                    <span class="math-field" mq-cmd='_'>a_{...}</span>
+                  <button class="shiftable" mq-cmd="^">
+                    <span class="math-field active" mq-cmd="^">a^{...}</span>
+                    <span class="math-field" mq-cmd="_">a_{...}</span>
                   </button>
-                  <button class="shiftable" mq-cmd='('>
+                  <button class="shiftable" mq-cmd="(">
                     <span class="active" mq-cmd="(">(</span>
-                    <span mq-cmd='['>[</span>
+                    <span mq-cmd="[">[</span>
                   </button>
-                  <button class="shiftable" mq-cmd=')'>
-                    <span class="active" mq-cmd=')'>)</span>
-                    <span mq-cmd=']'>]</span>
+                  <button class="shiftable" mq-cmd=")">
+                    <span class="active" mq-cmd=")">)</span>
+                    <span mq-cmd="]">]</span>
                   </button>
-                  <button mq-cmd='/'><span>÷</span></button>
+                  <button mq-cmd="/"><span>÷</span></button>
                   <button mq-cmd="\sqrt">
                     <span class="math-field">\sqrt{a}</span>
                   </button>
                   <div class="take-space"></div>
-                  <button class="shiftable" mq-write='\lt'>
-                    <span class="active" mq-write='\lt'>&lt;</span>
-                    <span class="math-field" mq-write='\let'>\leq</span>
+                  <button class="shiftable" mq-write="\lt">
+                    <span class="active" mq-write="\lt">&lt;</span>
+                    <span class="math-field" mq-write="\let">\leq</span>
                   </button>
                 </div>
 
                 <div class="row">
                   <!--  2  -->
-                  <button class="name-btn" mq-write='x'>
+                  <button class="name-btn" mq-write="x">
                     <span class="math-field">x</span>
                   </button>
                   <div class="take-space"></div>
-                  <button class="num-btn" mq-write='7'><span>7</span></button>
-                  <button class="num-btn" mq-write='8'><span>8</span></button>
-                  <button class="num-btn" mq-write='9'><span>9</span></button>
-                  <button mq-write='\cdot'><span>×</span></button mq-write='\lt'>
+                  <button class="num-btn" mq-write="7"><span>7</span></button>
+                  <button class="num-btn" mq-write="8"><span>8</span></button>
+                  <button class="num-btn" mq-write="9"><span>9</span></button>
+                  <button mq-write="\cdot"><span>×</span></button>
                   <button mq-write="\sqrt[]{}">
                     <span class="math-field">\sqrt[b]{a}</span>
                   </button>
@@ -324,7 +328,7 @@
                     </div>
                     <div class="greek">
                       <span class="active" mq-write="π">π</span>
-                      <span mq-write="Π">Π</spanπ>
+                      <span mq-write="Π">Π</span>
                     </div>
                   </button>
                 </div>
@@ -558,32 +562,44 @@
                 <div class="row">
                   <button class="double-shiftable" mq-func="sin">
                     <div class="active">
-                      <span class="active" mq-func="sin">sin</span><span class="math-field"
-                        mq-func="\sin ^{-1}">sin^{-1}</span>
+                      <span class="active" mq-func="sin">sin</span
+                      ><span class="math-field" mq-func="\sin ^{-1}"
+                        >sin^{-1}</span
+                      >
                     </div>
                     <div>
-                      <span class="active" mq-func="csc">csc</span><span class="math-field"
-                        mq-func="csc^{-1}">csc^{-1}</span>
+                      <span class="active" mq-func="csc">csc</span
+                      ><span class="math-field" mq-func="csc^{-1}"
+                        >csc^{-1}</span
+                      >
                     </div>
                   </button>
                   <button class="double-shiftable" mq-func="cos">
                     <div class="active">
-                      <span class="active" mq-func="cos">cos</span><span class="math-field"
-                        mq-func="cos^{-1}">cos^{-1}</span>
+                      <span class="active" mq-func="cos">cos</span
+                      ><span class="math-field" mq-func="cos^{-1}"
+                        >cos^{-1}</span
+                      >
                     </div>
                     <div>
-                      <span class="active" mq-func="sec">sec</span><span class="math-field"
-                        mq-func="sec^{-1}">sec^{-1}</span>
+                      <span class="active" mq-func="sec">sec</span
+                      ><span class="math-field" mq-func="sec^{-1}"
+                        >sec^{-1}</span
+                      >
                     </div>
                   </button>
                   <button class="double-shiftable" mq-func="tan">
                     <div class="active">
-                      <span class="active" mq-func="tan">tan</span><span class="math-field"
-                        mq-func="tan^{-1}">tan^{-1}</span>
+                      <span class="active" mq-func="tan">tan</span
+                      ><span class="math-field" mq-func="tan^{-1}"
+                        >tan^{-1}</span
+                      >
                     </div>
                     <div>
-                      <span class="active" mq-func="cot">cot</span><span class="math-field"
-                        mq-func="cot^{-1}">cot^{-1}</span>
+                      <span class="active" mq-func="cot">cot</span
+                      ><span class="math-field" mq-func="cot^{-1}"
+                        >cot^{-1}</span
+                      >
                     </div>
                   </button>
                   <div class="take-space"></div>
@@ -594,32 +610,44 @@
                 <div class="row">
                   <button class="double-shiftable" mq-func="sinh">
                     <div class="active">
-                      <span class="active" mq-func="sinh">sinh</span><span class="math-field"
-                        mq-func="sinh^{-1}">sinh^{-1}</span>
+                      <span class="active" mq-func="sinh">sinh</span
+                      ><span class="math-field" mq-func="sinh^{-1}"
+                        >sinh^{-1}</span
+                      >
                     </div>
                     <div>
-                      <span class="active" mq-func="csch">csch</span><span class="math-field"
-                        mq-func="csch^{-1}">csch^{-1}</span>
+                      <span class="active" mq-func="csch">csch</span
+                      ><span class="math-field" mq-func="csch^{-1}"
+                        >csch^{-1}</span
+                      >
                     </div>
                   </button>
                   <button class="double-shiftable" mq-func="coch">
                     <div class="active">
-                      <span class="active" mq-func="coch">cosh</span><span class="math-field"
-                        mq-func="cosh^{-1}">cosh^{-1}</span>
+                      <span class="active" mq-func="coch">cosh</span
+                      ><span class="math-field" mq-func="cosh^{-1}"
+                        >cosh^{-1}</span
+                      >
                     </div>
                     <div>
-                      <span class="active" mq-func="sech">sech</span><span class="math-field"
-                        mq-func="sech^{-1}">sech^{-1}</span>
+                      <span class="active" mq-func="sech">sech</span
+                      ><span class="math-field" mq-func="sech^{-1}"
+                        >sech^{-1}</span
+                      >
                     </div>
                   </button>
                   <button class="double-shiftable" mq-func="tanh">
                     <div class="active">
-                      <span class="active" mq-func="tanh">tanh</span><span class="math-field"
-                        mq-func="tanh^{-1}">tanh^{-1}</span>
+                      <span class="active" mq-func="tanh">tanh</span
+                      ><span class="math-field" mq-func="tanh^{-1}"
+                        >tanh^{-1}</span
+                      >
                     </div>
                     <div>
-                      <span class="active" mq-func="coth">coth</span><span class="math-field"
-                        mq-func="coth^{-1}">coth^{-1}</span>
+                      <span class="active" mq-func="coth">coth</span
+                      ><span class="math-field" mq-func="coth^{-1}"
+                        >coth^{-1}</span
+                      >
                     </div>
                   </button>
                   <div class="take-space"></div>
@@ -629,13 +657,16 @@
                 </div>
                 <div class="row">
                   <button class="shiftable" mq-func="floor">
-                    <span class="active" mq-func="floor">floor</span><span mq-func="ceil">ceil</span>
+                    <span class="active" mq-func="floor">floor</span
+                    ><span mq-func="ceil">ceil</span>
                   </button>
                   <button class="shiftable" mq-func="gcd">
-                    <span class="active" mq-func="gcd">gcd</span><span mq-func="lcm">lcm</span>
+                    <span class="active" mq-func="gcd">gcd</span
+                    ><span mq-func="lcm">lcm</span>
                   </button>
                   <button class="shiftable" mq-func="round">
-                    <span class="active" mq-func="round">round</span><span mq-func="mod">mod</span>
+                    <span class="active" mq-func="round">round</span
+                    ><span mq-func="mod">mod</span>
                   </button>
                   <div class="take-space"></div>
                   <button mq-write="!">
@@ -659,7 +690,6 @@
                   <button mq-write="\int_{ }^{ }">
                     <span class="math-field" mq-write="\int_{ }^{ }">\int</span>
                   </button>
-
                 </div>
                 <div class="row">
                   <button class="double-shift">
@@ -817,11 +847,12 @@
       </footer>
     </div>
 
-    <script src="./js/app/app.js" type="module"></script>
+    <!-- <script src="./js/app/app.js" type="module"></script> -->
 
-    <!-- <script src="./dist/js/app.js"></script> -->
-    <!-- <script>
+    <script src="./dist/js/app.js"></script> 
+    <script>
       PLOTTO(document.querySelector('#canvas'));
-    </script> -->
+    </script>
+    
   </body>
 </html>

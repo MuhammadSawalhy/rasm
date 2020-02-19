@@ -1,31 +1,44 @@
-import GraphChild from './GraphChild.js';
 
+import GraphChild from './GraphChild.js';
 export default class Point extends GraphChild {
     // color is rgb
     // gs stands for graphSetting
-    constructor(gs, name, x, y, _pen = new drawing.pen(new drawing.color(0, 0, 255), 10, 'solid')) {
-        super(gs, name, _pen);
-        this.x = new expression(x);
-        this.y = new expression(y);
+    constructor(options) {
+        options.pen = options.pen || new drawing.pen(new drawing.color(0, 0, 255), 10);
+        
+        //#region 
+        let propName;
+
+        propName = 'x';
+        if (!options[propName]) {
+            throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
+        }
+
+        propName = 'y';
+        if (!options[propName]) {
+            throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
+        }
+        //#endregion
+
+        super(options);
+        this.x = this.x instanceof Function ? this.x : MathPackage.Parser.maximaTOjsFunction(this.x);
+        this.y = this.y instanceof Function ? this.y : MathPackage.Parser.maximaTOjsFunction(this.y);
     }
 
-    static from(str, gs) {
+    static fromString(str, sketch) {
         if (str) {
             let p;
-            let regex = /\s*\(\s*(.+)\s*,\s*(.+)\s*\)\s*/;
-            str.replace(regex, (match, group1, group2) => {
-                if (match === str) {
-                    p = new Point(null, '', group1, group2);
-                    p.gs = gs;
-                }
+            let regex = /^\s*\(\s*(.+?)\s*,\s*(.+?)\s*\)\s*$/;
+            str.replace(regex, (match, x, y) => {
+                p = new Point({ sketch, x, y });
             });
             if (!p)
-                console.error('error while trying to add a point: ' + str);
+                throw new Error('error while trying to add a point: ' + str);
             else
                 return p;
         }
         else
-            console.error('your str is empty :(');
+            throw new Error('your str is empty :\'(');
     }
 
     async draw(canvas) {

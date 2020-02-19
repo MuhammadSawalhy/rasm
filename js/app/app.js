@@ -1,8 +1,8 @@
-import { getContainment, updateObjsOrder, resize, canvasParent, addControl } from './global.js';
+import { getContainment, updateObjsOrder, resize, canvasParent, addControl, keyboardSettings } from './global.js';
 import Sketch from '../PLOTTO/Sketch.js';
 import drawing from '../PLOTTO/drawing/index.js';
 import setEvents from './events/index.js';
-import { default as setupKeypad, keyboardSettings} from './keypad/index.js';
+import { default as setupKeypad} from './keypad/index.js';
 import ChildControl from './ChildControl.js';
 /**
  * """""""""""""""" reminder
@@ -33,9 +33,12 @@ export default function setupAPP(canvas) {
   setupSortable();
   
   resize();
+  mySketch.gs.centrate();
+  mySketch.update();
+
 
   $('#loading-layer').fadeOut(1000, () => { 
-    let oc = new ChildControl(mySketch);
+    let oc = new ChildControl();
     addControl(oc);
     keyboardSettings.mathField = oc.mathField;
   });
@@ -91,7 +94,7 @@ function setupSortable(){
   let startSorting = true;
   $(".controls.sortable").sortable({
     axis: "y",
-    cancel: '.object-control [cancel-move]',
+    cancel: '.control [cancel-move]',
 
     start: function (e, ui) {
       startSorting = true;
@@ -132,4 +135,4 @@ function setupSortable(){
 }
 
 
-setupAPP(document.querySelector('#canvas'));
+// setupAPP(document.querySelector('#canvas'));
