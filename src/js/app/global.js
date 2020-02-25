@@ -13,6 +13,7 @@ export var subTools = {
       parent: document.querySelector('.canvas-container')
    })
 };
+export var mouse = { x: undefined, y: undefined };
 //#endregion
 
 //#region methods

@@ -1,4 +1,5 @@
 import GraphChild from "./GraphChild.js";
+import { getJSfunction } from '../global.js';
 
 export default class EvalExpr extends GraphChild{
    constructor(options) {
@@ -11,7 +12,17 @@ export default class EvalExpr extends GraphChild{
       options.drawable = false;
       //#endregion
       super(options);
-      this.eval = this.expr instanceof Function ? this.expr : MathPackage.Parser.maximaTOjsFunction(this.expr);
+
+      if (this.expr.check({ type: 'operator', name: '=' })) {
+         this.eval = new Function(
+            'return ' +
+            MathPackage.Parser.__generateJS(this.expr.args[0]) +
+            ' === ' +
+            MathPackage.Parser.__generateJS(this.expr.args[1])
+         );         
+      } else {
+         this.eval = getJSfunction(this.expr);
+      }
    }
 
    static fromString(str, sketch) {

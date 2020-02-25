@@ -15,7 +15,7 @@ export default function setEvents () {
       }
       //#endregion
    });
-   window.addEventListener('mouseup', function (e) {
+   window.addEventListener('mousedown', function (e) {
       //#region hide keybad
       let keypadShown = /\sshow\s|^show\s|\sshow$/.test(keyboardSettings.showHideKeyBtn.className); // hasClass
       if (keyboardSettings.hideKeyPad && keypadShown) {

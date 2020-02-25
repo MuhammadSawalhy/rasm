@@ -23,5 +23,7 @@ export default function setupKeypad() {
       }
    });
 
+   SUI.tabs(document.body.querySelector('.keypad-container .tabs-1'));
+
    keypadEvents();
 }

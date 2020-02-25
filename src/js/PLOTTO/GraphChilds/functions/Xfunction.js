@@ -3,6 +3,7 @@
 /****************************************************************/
 import GraphChild from '../GraphChild.js';
 import drawing from '../../drawing/index.js';
+import { getJSfunction } from '../../global.js';
 
 export default class Xfunction extends GraphChild {
    /** 
@@ -25,7 +26,7 @@ export default class Xfunction extends GraphChild {
       //#endregion
 
       super(options);
-      this.expression = MathPackage.Parser.maximaTOjsFunction(this.expr, ['x']);
+      this.expression = getJSfunction(this.expr, ['x'], true);
    }
 
    static fromString(expr, sketch) {

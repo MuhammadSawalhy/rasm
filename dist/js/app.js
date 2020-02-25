@@ -9,22 +9,56 @@
    }
    generateName.randomNameNum = 0;
 
+   // let mathFunc = {
+   //    sin: x => Math.sin(x),
+   //    cos: x => Math.cos(x),
+   //    tan: x => Math.tan(x),
+   //    asin: x => Math.asin(x),
+   //    acos: x => Math.acos(x),
+   //    atan: x => Math.atan(x),
+   //    exp: x => Math.exp(x),
+   //    ln: x => Math.log(x),
+   //    log: function (x) {
+   //       let base = arguments[1] || 10;
+   //       return Math.log10(x) / Math.log(base);
+   //    },
+   //    sqrt: x => Math.sqrt(x),
+   //    max: (...values) => Math.max(...values),
+   //    min: (...values) => Math.min(...values),
+   //    round: x => Math.round(x),
+   //    abs: x => Math.abs(x),
+   //    floor: x => Math.floor(x),
+   //    ceil: x => Math.ceil(x),
+   // };
    let mathFunc = {
-      sin: x => Math.sin(x),
-      cos: x => Math.cos(x),
-      tan: x => Math.tan(x),
-      asin: x => Math.asin(x),
-      acos: x => Math.acos(x),
-      atan: x => Math.atan(x),
-      exp: x => Math.exp(x),
-      ln: x => Math.log(x),
-      log: function(x) {
-         let base = arguments[1] || 10;
-         return Math.log10(x) / Math.log(base);
+      log: function (x, base = 10) {
+         return Math.log10(x) / Math.log10(base);
       },
-   };
+      ln: x => Math.log(x, Math.E),
 
-   Object.assign(window, mathFunc);
+      sec: x => 1 / Math.cos(x),
+      csc: x => 1 / Math.sin(x),
+      cot: x => 1 / Math.tan(x),
+
+      sinh: x => (Math.exp(x) - Math.exp(-x)) / 2,
+      cosh: x => (Math.exp(x) + Math.exp(-x)) / 2,
+      tanh: x => Math.sinh(x) / Math.cosh(-x),
+      asinh: x => Math.log,
+      acosh: x => (Math.exp(x) + Math.exp(-x)) / 2,
+      atanh: x => Math.sinh(x) / Math.cosh(-x),
+
+   };
+   Object.assign(Math, mathFunc);
+
+   function getJSfunction(input, params, parse) {
+      if (input instanceof Function)
+         return input;
+      else if (input instanceof MagicalParser.Node) {
+         return MathPackage.Parser.parsedTOjsFunction(input);
+      } else {
+         return MathPackage.Parser.maximaTOjsFunction(input, params, parse);
+      }
+   }
 
    class GraphChild$1 {
 
@@ -365,7 +399,7 @@
          //#endregion
 
          super(options);
-         this.expression = MathPackage.Parser.maximaTOjsFunction(this.expr, ['x']);
+         this.expression = getJSfunction(this.expr, ['x'], true);
       }
 
       static fromString(expr, sketch) {
@@ -414,6 +448,71 @@
 
    }
 
+   class Point extends GraphChild$1 {
+       // color is rgb
+       // gs stands for graphSetting
+       constructor(options) {
+           options.pen = options.pen || new drawing.pen(new drawing.color(0, 0, 255), 10);
+           
+           //#region 
+           let propName;
+
+           propName = 'x';
+           if (!options[propName]) {
+               throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
+           }
+
+           propName = 'y';
+           if (!options[propName]) {
+               throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
+           }
+           //#endregion
+
+           super(options);
+           this.x = getJSfunction(this.x);
+           this.y = getJSfunction(this.y);
+       }
+
+       static fromString(str, sketch) {
+           if (str) {
+               let p;
+               let regex = /^\s*\(\s*(.+?)\s*,\s*(.+?)\s*\)\s*$/;
+               str.replace(regex, (match, x, y) => {
+                   p = new Point({ sketch, x, y });
+               });
+               if (!p)
+                   throw new Error('error while trying to add a point: ' + str);
+               else
+                   return p;
+           }
+           else
+               throw new Error('your str is empty :\'(');
+       }
+
+       async draw(canvas) {
+           canvas.rectMode(CENTER);
+           switch (this.pen.style) {
+               case 'solid':
+                   canvas.strokeWeight(2);
+                   canvas.stroke(200);
+                   canvas.fill(...(this.pen.color.toArray().splice(0, 3)), 150);
+                   break;
+               case 'shallow':
+                   canvas.strokeWeight(3);
+                   canvas.stroke(...this.pen.color.toArray());
+                   canvas.fill(...(this.pen.color.toArray().splice(0, 3)), 50);
+                   break;
+           }
+           let p = this.gs.coorTOpx(this.x.eval(), this.y.eval());
+           canvas.rect(p.x, p.y, this.pen.weight, this.pen.weight, 3);
+       }
+
+       toString() {
+           return `(${this.x}, ${this.y})`;
+       }
+
+   }
+
    class EvalExpr extends GraphChild$1{
       constructor(options) {
          //#region 
@@ -425,7 +524,7 @@
          options.drawable = false;
          //#endregion
          super(options);
-         this.eval = this.expr instanceof Function ? this.expr : MathPackage.Parser.maximaTOjsFunction(this.expr);
+         this.eval = getJSfunction(this.expr);
       }
 
       static fromString(str, sketch) {
@@ -459,7 +558,7 @@
             <span class='order'>12</span>
           </div>
         </div>
-        <div class="script-container" cancel-move cancel-hiding-keypad>
+        <div class="control--main" cancel-move cancel-hiding-keypad>
           <span type="text" class="script"></span>
         </div>
         <div class="side-ctrl">
@@ -477,17 +576,16 @@
          this.elt = (this.elt.childNodes[1]);
 
          this.__setEvents();
-         this.__updateElts(); /// updating elements
       }
       get graphChild() {
          return this._graphChild;
       }
 
       set graphChild(value) {
-         if (!value) {
+         if (!value && this._graphChild) {
             /// delete the current graphChild from the sketch
             this._graphChild.remove([false]);
-         } else {
+         } else if (value) {
             value.handlers.onremove = (removeElt) => {
                if (removeElt) this.remove(false);
             };
@@ -512,7 +610,7 @@
             supSubsRequireOperand: true,
             // charsThatBreakOutOfSupSub: '+-=<>',
             autoSubscriptNumerals: true,
-            // autoCommands: 'pi theta sqrt sum int prod',
+            autoCommands: 'pi theta sqrt sum int prod',
             // // autoOperatorNames: '',
             maxDepth: 10,
             handlers: {
@@ -576,10 +674,10 @@
       }
 
       __updateElts() {
-         if (this.graphChild) {
-            if (this.graphChild instanceof Xfunction) {
+         if (this._graphChild) {
+            if (this._graphChild instanceof Xfunction) {
                this.elt.style.background = this.graphChild.color;
-            }
+            } else if (this._graphChild instanceof EvalExpr) ;
          }
       }
    }
@@ -1403,7 +1501,7 @@
 
        childFromString(script, propsTOset = {}) {
            propsTOset.sketch = this;
-           let parsedString = this.getChildParser.parse(script);
+           let parsedString = this.getChildParser.parse(script.replace(/\^/g, '**'));
            if (parsedString.check({ name: '=' })) {
                let left = parsedString.args[0], right = parsedString.args[1];
                
@@ -1446,7 +1544,7 @@
                    }
                    */
                }
-               //#endregion
+
                /*
                //such : a = 2 * c + sin( k )
                else if (left.IsId && MathExpression(right)) {
@@ -1454,7 +1552,6 @@
                    return new Variable(a.Name.Name, MathPackage.Transformer.GetNodeFromLoycNode(b, GraphSettings.CalculationSettings));
                }
                */
-               //#endregion
 
            }
            // /// like 2+3*x = sin(y)^2
@@ -1478,6 +1575,17 @@
            else if (parsedString.contains({ type: 'variable', name: 'x' })) {
                return new Xfunction({ expr: parsedString.match, ...propsTOset });
            }
+       
+           /// to add a point like (1, 2)
+           else if (parsedString.check({ type: 'block', name: '()' }) && parsedString.args.length == 1 && parsedString.args[0].check({ type: 'separator', name: ',', length: 2 })) {
+               /// it is a parametricFunction
+               if (vars.contains('t')) ;
+               /// it is a point
+               else {
+                   return new Point({ x: parsedString.args[0].args[0].match, y: parsedString.args[0].args[1].match , ...propsTOset });
+               }
+           }
+
            let newScript = parsedString.check({ type: 'operator', name: '=' }) ? `(${parsedString.args[0].match}) == (${parsedString.args[1].match})` : script;
            return new EvalExpr({ expr: newScript, ...propsTOset, drawable: false });
        }
@@ -2141,7 +2249,7 @@
          }
          //#endregion
       });
-      window.addEventListener('mouseup', function (e) {
+      window.addEventListener('mousedown', function (e) {
          //#region hide keybad
          let keypadShown = /\sshow\s|^show\s|\sshow$/.test(keyboardSettings.showHideKeyBtn.className); // hasClass
          if (keyboardSettings.hideKeyPad && keypadShown) {
@@ -2180,7 +2288,7 @@
          keyboardSettings.hideKeyPad = false;
       });
 
-      $('.control').delegate(".script-container", "touchstart", function (e) {
+      $('.control').delegate(".control--main", "touchstart", function (e) {
          if (sh.hasClass("hide")) {
             sh.click();
          }
@@ -2486,7 +2594,7 @@
    }
 
 
-   // setupAPP(document.querySelector('#canvas'));
+   setupAPP(document.querySelector('#canvas'));
 
    return setupAPP;
 

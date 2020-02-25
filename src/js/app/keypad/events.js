@@ -19,7 +19,7 @@ export default function(){
       keyboardSettings.hideKeyPad = false;
    });
 
-   $('.control').delegate(".script-container", "touchstart", function (e) {
+   $('.control').delegate(".main", "touchstart", function (e) {
       if (sh.hasClass("hide")) {
          sh.click();
       }

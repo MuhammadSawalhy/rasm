@@ -1,29 +1,17 @@
 import { addControl, removeControl, genRandomName } from './global.js';
-import { Xfunction } from '../PLOTTO/GraphChilds/index.js';
+import { Xfunction, Point, EvalExpr } from '../PLOTTO/GraphChilds/index.js';
 export default class {
    constructor(graphChild) {
-      if (graphChild) {
-         this.graphChild = graphChild;
-      } else {
-         this.id = genRandomName();
-         mySketch.children.set(this.id, null);
-      }
-
       this.elt = document.createElement('div');
       this.elt.innerHTML = `
       <li class="control" id="${this.id}">
-        <div class="sideStatus" cancel-move>
-          <div class="visible">
-            <div class="inner">
-              
-            </div>
-          </div>
+        <div class="side-status" cancel-move>
           <div class="order-container">
             <span class='order'>12</span>
           </div>
         </div>
-        <div class="script-container" cancel-move cancel-hiding-keypad>
-          <span type="text" class="script"></span>
+        <div class="main" cancel-move cancel-hiding-keypad>
+         <div class=script-container><span type="text" class="script"></span></div>
         </div>
         <div class="side-ctrl">
           <button class="closebtn-2 remove" cancel-move><div class="inner"></div></button>
@@ -39,28 +27,44 @@ export default class {
       `;
       this.elt = (this.elt.childNodes[1]);
 
+      if (graphChild) {
+         this.graphChild = graphChild;
+      } else {
+         this.id = genRandomName();
+         mySketch.children.set(this.id, null);
+      }
+
       this.__setEvents();
-      this.__updateElts(); /// updating elements
    }
+
+   get id() {
+      return this._id;
+   }
+   set id(newid) {
+      this._id = newid;
+      this.elt.id = newid;
+   }
+
    get graphChild() {
       return this._graphChild;
    }
-
    set graphChild(value) {
-      if (!value) {
+      if (!value && this._graphChild) {
          /// delete the current graphChild from the sketch
-         this._graphChild.remove([false]);
-      } else {
+         this._graphChild.drawable = false;
+      } else if (value) {
          value.handlers.onremove = (removeElt) => {
             if (removeElt) this.remove(false);
          };
          mySketch.children.delete(this.id);
-         mySketch.children.set(value.id, value);
+         mySketch.children.set(value.id, value); /// changing the id
+         let prev = this._graphChild;
          this._graphChild = value;
          this.id = value.id;
+         this.__updateElts(prev, value);
          mySketch.update();
+         
       }
-     
    }
 
    __setEvents() {
@@ -69,13 +73,13 @@ export default class {
       this.orderELT = this.elt.querySelector('.order');
 
       //#region math, script field
-      let handleScript = (latex) => (this.handleScript(latex) );
+      let handleScript = (latex) => (this.handleScript(latex));
       let mathField = MQ.MathField(scriptELT, {
          sumStartsWithNEquals: true,
          supSubsRequireOperand: true,
          // charsThatBreakOutOfSupSub: '+-=<>',
          autoSubscriptNumerals: true,
-         // autoCommands: 'pi theta sqrt sum int prod',
+         autoCommands: 'pi theta sqrt abs floor ceil round random sum int prod',
          // // autoOperatorNames: '',
          maxDepth: 10,
          handlers: {
@@ -102,9 +106,10 @@ export default class {
    handleScript(latex) {
       let newGC;
       try {
+         let props = {};
+         if (this.graphChild && this.graphChild.pen) props.pen = this.graphChild.pen;
          newGC = mySketch.childFromString(
-            MathPackage.Parser.latexTOmaxima(latex)
-         );
+            MathPackage.Parser.latexTOmaxima(latex), props);
       } catch (e) {
          this.error(e);
       }
@@ -138,13 +143,62 @@ export default class {
       mySketch.update();
    }
 
-   __updateElts() {
-      if (this.graphChild) {
-         if (this.graphChild instanceof Xfunction) {
-            this.elt.style.background = this.graphChild.color;
+   //#region updatingElt
+
+   __updateElts(from, to) {
+      if (to) {
+         if (to instanceof Xfunction) {
+            if (from instanceof Xfunction) {
+               this.__updateXfunction();
+            } else {
+               this.__toXfunction();
+            }
+         } else if (to instanceof EvalExpr) {
+            if (from instanceof EvalExpr) {
+               this.__updateEvalExpr();
+            } else {
+               this.__toEvalExpr();
+            }
          }
       }
    }
+
+   __toXfunction() {
+      this.elt.type = 'Xfunction';
+      let sideStatus = this.elt.querySelector('.side-status');
+      let eltsTOremove = this.elt.querySelectorAll('.special-elt');
+      eltsTOremove.forEach(elt => { elt.remove(); });
+      sideStatus.append($(`<div class="visible special-elt"><div class="inner"></div></div>`)[0]);
+      this.__updateXfunction();
+   }
+   __updateXfunction() {
+      let visibleELt = this.elt.querySelector('.side-status').querySelector('.visible');
+      visibleELt.setAttribute('style', `--color: ${this.graphChild.pen.color.toString()}`);
+   }
+
+   __toEvalExpr() {
+      this.elt.type = 'EvalExpr';
+
+      let main = this.elt.querySelector('.main');
+      let sideStatus = this.elt.querySelector('.side-status');
+      let eltsTOremove = this.elt.querySelectorAll('.special-elt');
+
+      eltsTOremove.forEach(elt => { elt.remove(); });
+
+      main.append($(`<div class="value special-elt"><span></span></div>`)[0]);
+      sideStatus.append($(`<div class="isFract special-elt"><input type='checkbox'/><label></label></div>`)[0]);
+
+      this.__updateEvalExpr();
+   }
+   __updateEvalExpr() {
+      let main = this.elt.querySelector('.main');
+      let value = main.querySelector('.value span');
+      value.textContent = this.graphChild.eval();
+   }
+
+   //#endregion
+
+
 }
 
 

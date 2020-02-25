@@ -3,7 +3,7 @@
 import GraphSettings from './GraphSetting/GraphSettings.js';
 import Coordinates from './Coordinates.js';
 import Canvas from './Canvas.js';
-import { Xfunction, EvalExpr } from './GraphChilds/index.js';
+import { Xfunction, EvalExpr, Point } from './GraphChilds/index.js';
 export default class Sketch {
 
     constructor(canvas) {
@@ -28,12 +28,12 @@ export default class Sketch {
 
     childFromString(script, propsTOset = {}) {
         propsTOset.sketch = this;
-        let parsedString = this.getChildParser.parse(script);
+        let parsedString = this.getChildParser.parse(script.replace(/\^/g, '**'));
         if (parsedString.check({ name: '=' })) {
             let left = parsedString.args[0], right = parsedString.args[1];
             
             if (left.check({ type: 'variable', name: 'y' }) && !right.contains({ type: 'variable', name: 'y' })) {
-                return new Xfunction({ expr: right.match, ...propsTOset });
+                return new Xfunction({ expr: right, ...propsTOset });
             }
            
             //such : area( h , b , theta ) = 0.5 * h * b * sin( theta )
@@ -41,7 +41,7 @@ export default class Sketch {
             else if (left.check({ type: 'functionCalling' }) && !this.gs.reservedFunction.find(name => name === left.name)) {
                 // such : f(x) = x^2
                 if (left.args.length == 1 && left.args[0].check({ type: 'variable', name: 'x' }) && !right.contains({ type: 'variable', name: 'y' })) {
-                    return new Xfunction({ sketch: this, expr: right.match, id: left.name });
+                    return new Xfunction({ sketch: this, expr: right, id: left.name });
                 }
                 /*
                 //such : area( h , b , theta) = 0.5 * h * b * sin( theta )
@@ -71,7 +71,7 @@ export default class Sketch {
                 }
                 */
             }
-            //#endregion
+
             /*
             //such : a = 2 * c + sin( k )
             else if (left.IsId && MathExpression(right)) {
@@ -79,7 +79,6 @@ export default class Sketch {
                 return new Variable(a.Name.Name, MathPackage.Transformer.GetNodeFromLoycNode(b, GraphSettings.CalculationSettings));
             }
             */
-            //#endregion
 
         }
         // /// like 2+3*x = sin(y)^2
@@ -101,13 +100,11 @@ export default class Sketch {
         
         /// to add function like : x^2
         else if (parsedString.contains({ type: 'variable', name: 'x' })) {
-            return new Xfunction({ expr: parsedString.match, ...propsTOset });
+            return new Xfunction({ expr: parsedString, ...propsTOset });
         }
     
-        {
-            /*
         /// to add a point like (1, 2)
-        else if (parsedString.check({ type: 'block', name: '()' }) && parsedString.args.length = 1 && parsedString.args[0].check({ type: 'separator', name: ',', length: 2 })) {
+        else if (parsedString.check({ type: 'block', name: '()' }) && parsedString.args.length == 1 && parsedString.args[0].check({ type: 'separator', name: ',', length: 2 })) {
             /// it is a parametricFunction
             if (vars.contains('t')) {
                 //    let func = new ParametricFunc({
@@ -129,12 +126,13 @@ export default class Sketch {
             }
             /// it is a point
             else {
-                let point = ;
-
-                return point;
+                return new Point({ x: parsedString.args[0].args[0], y: parsedString.args[0].args[1] , ...propsTOset });
             }
         }
-        
+    
+        {
+            /*
+
         else {
             //#region "Add PointsDependant";
             if (PDsTypes().Contains(parsedString.Target.Name.ToString())) {
@@ -194,8 +192,8 @@ export default class Sketch {
 
     */
         }
-        let newScript = parsedString.check({ type: 'operator', name: '=' }) ? `(${parsedString.args[0].match}) == (${parsedString.args[1].match})` : script;
-        return new EvalExpr({ expr: newScript, ...propsTOset, drawable: false });
+
+        return new EvalExpr({ expr: parsedString, ...propsTOset, drawable: false });
     }
 
     getChildById(id) {

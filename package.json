@@ -4,8 +4,8 @@
   "description": "This is the (html - css - js) PLOTTO.",
   "main": "/js/script.js",
   "scripts": {
-    "lint": "eslint ./js/**/*.js",
-    "build": "rollup ./js/app/app.js --file ./dist/js/app.js --format umd --name PLOTTO"
+    "lint": "eslint ./src/js/**/*.js",
+    "build": "rollup ./src/js/app/app.js --file ./dist/js/app.js --format umd --name PLOTTO"
   },
   "author": "SciCave Team",
   "license": "copyrights reserved - you can not grap any snippet of this project without a compliance.",

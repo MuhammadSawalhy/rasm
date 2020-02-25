@@ -42,13 +42,12 @@ export default function toolsEvents() {
 
    //#endregion tool - subtools events
 
-   let inputCall = () => {
-      subTools.type = el.checked ? el.dataset.type : subTools.type;
-   };
    let radios = document.querySelectorAll('.subtools-container input[type*="radio"]');
    radios.forEach(el => {
       subTools.type = el.checked ? el.dataset.type : subTools.type;
-      el.addEventListener('change', inputCall);
+      el.addEventListener('change', () => {
+         subTools.type = el.checked ? el.dataset.type : subTools.type;
+      });
    });
 
    document.querySelector('#home').addEventListener('click', () => {

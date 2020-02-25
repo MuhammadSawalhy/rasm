@@ -1,5 +1,6 @@
 
 import GraphChild from './GraphChild.js';
+import { getJSfunction } from '../global.js';
 export default class Point extends GraphChild {
     // color is rgb
     // gs stands for graphSetting
@@ -21,8 +22,8 @@ export default class Point extends GraphChild {
         //#endregion
 
         super(options);
-        this.x = this.x instanceof Function ? this.x : MathPackage.Parser.maximaTOjsFunction(this.x);
-        this.y = this.y instanceof Function ? this.y : MathPackage.Parser.maximaTOjsFunction(this.y);
+        this.x = getJSfunction(this.x);
+        this.y = getJSfunction(this.y);
     }
 
     static fromString(str, sketch) {

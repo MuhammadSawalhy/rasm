@@ -135,4 +135,4 @@ function setupSortable(){
 }
 
 
-// setupAPP(document.querySelector('#canvas'));
+setupAPP(document.querySelector('#canvas'));
