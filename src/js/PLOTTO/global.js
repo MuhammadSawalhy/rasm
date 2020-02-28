@@ -25,7 +25,9 @@ generateName.randomNameNum = 0;
 //    floor: x => Math.floor(x),
 //    ceil: x => Math.ceil(x),
 // };
+
 let mathFunc = {
+
    log: function (x, base = 10) {
       return Math.log10(x) / Math.log10(base);
    },
@@ -42,8 +44,73 @@ let mathFunc = {
    acosh: x => (Math.exp(x) + Math.exp(-x)) / 2,
    atanh: x => Math.sinh(x) / Math.cosh(-x),
 
+   gcd: (...values)=>{
+      let gcd_ = Math.abs(values[0]);
+      let a = Math.abs(values[1]);
+      if (gcd_ % 1 != 0 || a % 1 != 0)
+         return NaN;
+      gcd_ = a > gcd_ ? Math.gcd2(a, gcd_) : Math.gcd2(gcd_, a);
+
+      for (let i = 2; i < values.length; i++) {
+         a = Math.abs(values[i]);
+         if (a % 1 != 0)
+            return NaN;
+         gcd_ = a > gcd_ ? Math.gcd2(a, gcd_) : Math.gcd2(gcd_, a);
+      }
+
+      return gcd_;
+   },
+   
+   gcd2: (a, b) => {
+      a = Math.abs(a);
+      b = Math.abs(b);
+
+      if (b === 0 || a === 0) {
+         return a;
+      }
+      else if (a === b) {
+         return a;
+      }
+      else if (a % b === 0) {
+         return b;
+      }
+      else {
+         if (a - b > b) {
+            return Math.gcd(a - b, b);
+         }
+         else {
+            return Math.gcd(b, a - b);
+         }
+      }
+      return NaN;
+   },
+
+   lcm: (...values) => {
+      let product = 1;
+      let a;
+      for (let i = 0; i < values.length; i++) {
+         a = values[i];
+         if (a % 1 !== 0)
+            return NaN;
+         product *= a;
+      }
+      return Math.abs(product) / Math.pow(Math.gcd(...values), values.length - 1);
+   },
+   
+   mod: (a, b) =>{
+      return a % b;
+   }
 };
+
 Object.assign(Math, mathFunc);
+
+let vars = {
+   pi: Math.PI,
+   e: mathFunc.sec,
+   
+};
+
+Object.assign(Math, vars);
 
 export function getJSfunction(input, params, parse = true) {
    if (input instanceof Function)

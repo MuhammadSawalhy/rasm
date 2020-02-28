@@ -4,7 +4,7 @@ import { subTools, mouse } from '../global.js';
 
 export default function canvasEvents() {
    let mousepressed;
-
+   let lines = MathPackage.Lines;
    canvas.elt.addEventListener('mousedown', (e) => {
       Object.assign(subTools, {
          type: subTools.type,
@@ -17,8 +17,12 @@ export default function canvasEvents() {
       if (subTools.type.search('axises') > -1) {
          let xEq = lines.lineEquation(-mySketch.gs.transform.xAngle, mySketch.gs.center),
             yEq = lines.lineEquation(-mySketch.gs.transform.yAngle, mySketch.gs.center);
-         let d = 10;
-         if (lines.distToLine(subTools.mouse, xEq) < d * 3 && lines.distToLine(subTools.mouse, yEq) < d * 3) {
+         let d = 30;
+         let distTo = {
+            x: lines.distToLine(subTools.mouse, xEq),
+            y: lines.distToLine(subTools.mouse, yEq)
+         };
+         if (distTo.x < d && distTo.y < d) {
             subTools.axis = 'xy';
             subTools.xSpace = mySketch.gs.transform.xSapce;
             subTools.ySpace = mySketch.gs.transform.ySapce;
@@ -30,7 +34,7 @@ export default function canvasEvents() {
             mySketch.coor.coorSettings.penXaxis.color = new drawing.color(255, 0, 0, 155);
             mySketch.coor.coorSettings.penYaxis.color = new drawing.color(255, 0, 0, 155);
          }
-         else if (lines.distToLine(subTools.mouse, xEq) < d) {
+         else if (distTo.x < d) {
             subTools.axis = 'x';
             subTools.space = mySketch.gs.transform.xSapce;
             subTools.angle = mySketch.gs.transform.xAngle;
@@ -42,7 +46,7 @@ export default function canvasEvents() {
             subTools.penColor = [mySketch.coor.coorSettings.penXaxis.color].slice()[0];
             mySketch.coor.coorSettings.penXaxis.color = new drawing.color(255, 0, 0, 155);
          }
-         else if (lines.distToLine(subTools.mouse, yEq) < d) {
+         else if (distTo.y < d) {
             subTools.axis = 'y';
             subTools.space = mySketch.gs.transform.ySapce;
             subTools.angle = mySketch.gs.transform.yAngle;
@@ -64,11 +68,12 @@ export default function canvasEvents() {
       }
       e.preventDefault();
    });
-   canvas.elt.addEventListener('mousemove', e => {
-      mouse.x = e.offsetX;
-      mouse.y = e.offsetY;
-   }, true);
+
    window.addEventListener('mousemove', (e) => {
+      let canvasPos = getPosittion(canvas.elt);
+      mouse.x = e.x - canvasPos.left;
+      mouse.y = e.y - canvasPos.top;
+
       if (mousepressed) {
          switch (subTools.type) {
             case 'move':
@@ -94,7 +99,15 @@ export default function canvasEvents() {
          }
          e.preventDefault();
       }
-   });
+   }, true);
+
+   function getPosittion(elt) {
+      let parentPos = {left: 0, top: 0};
+      if (elt.offsetParent) {
+         parentPos = getPosittion(elt.offsetParent);
+      }
+      return { left: elt.offsetLeft + parentPos.left, top: elt.offsetTop + parentPos.top};
+   }
 
    window.addEventListener('mouseup', (e) => {
       if (mousepressed) {
@@ -141,12 +154,16 @@ export default function canvasEvents() {
    canvas.elt.addEventListener('mousewheel', (e) => {
       {
          e.preventDefault();
-         e.stopPropagation();
+         let center = mySketch.gs.center;
+         let mousePos = mouse;       
+         if (MathPackage.Core.dist(mouse.x, center.x, mouse.y, center.y) < 30){
+            mousePos = center;
+         }
          if (e.wheelDelta > 0) {
-            mySketch.gs.transform.zoomIn(new vector(mouse.x, mouse.y));
+            mySketch.gs.transform.zoomIn(new vector(mousePos.x, mousePos.y));
             mySketch.update();
          } else {
-            mySketch.gs.transform.zoomOut(new vector(mouse.x, mouse.y));
+            mySketch.gs.transform.zoomOut(new vector(mousePos.x, mousePos.y));
             mySketch.update();
          }
       }
@@ -359,7 +376,7 @@ export default function canvasEvents() {
       //#endregion
 
       //#region drawing box
-      mySketch.subcanvas.resizeCanvas(mySketch.gs.width, mySketch.gs.height);
+      mySketch.subcanvas.resize(mySketch.gs.width, mySketch.gs.height);
       mySketch.subcanvas.clear();
       let c1 = mySketch.canvas.get(0, 0, mySketch.canvas.width, mySketch.canvas.height);
       let c2 = mySketch.canvas.get(s.xmin, s.ymin, s.width, s.height);

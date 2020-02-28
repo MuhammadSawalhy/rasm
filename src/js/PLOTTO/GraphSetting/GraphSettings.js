@@ -12,6 +12,9 @@ export default class {
     this.transform.onchange();
 
     this.physicsRun = false;
+
+    this.childrenIDs = [];
+  
   }
 
   get coor() { return this.sketch.coor; }
@@ -86,7 +89,7 @@ export default class {
     if (!__id)
       throw new Error(`"${id}" is not valid to use.`);
     else {
-      if (this.sketch.children.has(id)) {
+      if (this.childrenIDs.find(a=> a === id)) {
         throw new Error(`"${id}" is used before.`);
       }
     }

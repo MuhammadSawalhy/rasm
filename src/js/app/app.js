@@ -4,6 +4,7 @@ import drawing from '../PLOTTO/drawing/index.js';
 import setEvents from './events/index.js';
 import { default as setupKeypad} from './keypad/index.js';
 import ChildControl from './ChildControl.js';
+import { Variable } from '../PLOTTO/GraphChildren/index.js';
 /**
  * """""""""""""""" reminder
  * app folder is associated with PLOTTO folder, both of them depends upon the other.
@@ -17,6 +18,15 @@ export default function setupAPP(canvas) {
   window.drawing = drawing;
   window.vector = MP.entities.Vector;
   window.MQ = MathQuill.getInterface(2);
+  MQ.config({
+    sumStartsWithNEquals: true,
+    supSubsRequireOperand: true,
+    // charsThatBreakOutOfSupSub: '+-=<>',
+    autoSubscriptNumerals: true,
+    autoCommands: 'pi theta sqrt abs floor ceil round random sum int prod',
+    // // autoOperatorNames: '',
+    maxDepth: 10,
+  });
   window.mySketch = new Sketch(canvas);
   window.canvas = mySketch.canvas;
   // canvasParent.appendChild(window.canvas.elt);
@@ -31,19 +41,22 @@ export default function setupAPP(canvas) {
 
   setupResizer();
   setupSortable();
-  
+
   resize();
   mySketch.gs.centrate();
   mySketch.update();
 
 
-  $('#loading-layer').fadeOut(1000, () => { 
+  $('#loading-layer').fadeOut(1000, () => {
     let oc = new ChildControl();
     addControl(oc);
     keyboardSettings.mathField = oc.mathField;
+    // keyboardSettings.mathField.latex('a=1');
   });
 
-  console.log('all-done');
+  console.log('%cPLOTTO', 'background: black; color: white; font: 50px consolas;');
+
+  console.log('%cWe are sciCave', 'color: blue; font: 25px consolas;');
 
 }
 
@@ -81,11 +94,11 @@ function setupResizer(){
   });
 
   //#endregion
-  
+
 }
 
 function setupSortable(){
-  
+
   //#region sortable-sidebar
 
   var outer_ccc = document.querySelector('.outer-controls');
@@ -133,6 +146,5 @@ function setupSortable(){
   //#endregion
 
 }
-
 
 setupAPP(document.querySelector('#canvas'));

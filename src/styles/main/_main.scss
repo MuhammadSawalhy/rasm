@@ -37,6 +37,7 @@ body{
   // bottom: 0;
   height: 100vh;
   overflow: hidden;
+  user-select: none;
 }
 
 /* main layout */
@@ -48,27 +49,6 @@ body{
   justify-content: center;
   align-items: center; 
   height: 100vh;
-  
-  header{
-    display: flex;
-    justify-content: center;
-    width: 100%;
-
-    .title{
-      text-align: center;
-      user-select: none;
-      font-weight: bolder;
-      font-family: monospace;
-      font-size: 1.2em;
-      color: rgb(255, 255, 255);
-      background: var(--main-color);
-      margin: 0;
-      padding: 5px 0;
-      filter: saturate(0.5);
-      opacity: 0.9;
-      width: 100%;
-    }
-  }
   
   .container{
     display: flex;
@@ -85,9 +65,10 @@ body{
   top: 0; left: 0; bottom:0; right: 0;
   z-index: 2000;
 
-  display: grid;
-  place-items: center;
-
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
   background: linear-gradient(rgb(167, 89, 89), rgb(65, 133, 197));
 
   .inner{

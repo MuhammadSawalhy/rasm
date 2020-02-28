@@ -2,8 +2,9 @@
 
 .main-keypad, .alpha-keypad, .functions-keypad {
   box-sizing: border-box;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   .rows {
     width: 100%;

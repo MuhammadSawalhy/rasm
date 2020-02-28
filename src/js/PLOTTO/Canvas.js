@@ -26,7 +26,7 @@ export default class Canvas{
          this.ctx.fillStyle = fillStyle;
          this.ctx.fillRect(0, 0, this.elt.clientWidth, this.elt.clientHeight);
       } else {
-         this.ctx.clearRect(0, 0, this.elt.clientWidth, this.elt.clientHeight);
+         this.ctx.clearRect(0, 0, this.elt.width, this.elt.height);
       }
    }
    setFont(font) {
@@ -48,6 +48,7 @@ export default class Canvas{
    }
 
    ellipse(x, y, radius1, radius2, rotation = 0, startAngle = 0, endAngle = Math.PI*2, counterClockWise = false) {
+      radius2 = radius2 || radius1;
       this.ctx.beginPath();
       this.ctx.ellipse(x, y, radius1, radius2 || radius1, rotation, startAngle, endAngle, counterClockWise);
       this.ctx.fill();

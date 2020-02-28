@@ -14,6 +14,13 @@ export var subTools = {
    })
 };
 export var mouse = { x: undefined, y: undefined };
+
+export var keyboardSettings = {
+   backspaceInterval: undefined,
+   mouseDownForInterval: false,
+   showHideKeyBtn: document.querySelector(".sh-keypad"),
+   mathField: document.querySelector('.script')
+};
 //#endregion
 
 //#region methods
@@ -66,17 +73,18 @@ export function addTOsketch(child, controlIndex = 'last' /* the index */) {
 export var canvasParent = document.querySelector('.canvas-container');
 export function resize(setContainment = true) {
 
-   canvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
+   mySketch.canvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
+   mySketch.subcanvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
+   mySketch.ChildrenCanvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
+
    mySketch.gs.width = canvasParent.clientWidth;
    mySketch.gs.height = canvasParent.clientHeight;
 
-   
    let vp = mySketch.gs.viewport;
    mySketch.gs.transform.onchange(true);
    // if (angles.minAngle(new vector(1, 0), vector.fromAngle(mySketch.gs.transform.xAngle)).toFixed(3) === (0).toFixed(3) && angles.minAngle(new vector(1, 0), vector.fromAngle(mySketch.gs.transform.yAngle)).toFixed(3) === (Math.PI / 2).toFixed(3)) {
    mySketch.gs.transform.invokeOnchange = false;
    mySketch.gs.transform.transformOrigin = undefined;
-   let xs = mySketch.gs.transform.xScale;
    mySketch.gs.transform.setViewport(vp, null, true);
    mySketch.gs.transform.invokeOnchange = true;
    mySketch.gs.transform.onchange();
@@ -122,13 +130,6 @@ export function genRandomName() {
    return (Date.now() + genRandomName.randomNameNum++).toString(36);
 }
 genRandomName.randomNameNum = 0;
-
-export var keyboardSettings = {
-   backspaceInterval: undefined,
-   mouseDownForInterval: false,
-   showHideKeyBtn: document.querySelector(".sh-keypad"),
-   mathField: document.querySelector('.script')
-};
 
 
 //#endregion

@@ -9,7 +9,6 @@ export default class EvalExpr extends GraphChild{
       if (!options[propName]) {
          throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
       }
-      options.drawable = false;
       //#endregion
       super(options);
 
@@ -21,15 +20,25 @@ export default class EvalExpr extends GraphChild{
             MathPackage.Parser.__generateJS(this.expr.args[1])
          );         
       } else {
-         this.eval = getJSfunction(this.expr);
+         this.evalFunc = getJSfunction(this.expr);
       }
    }
 
    static fromString(str, sketch) {
       if (str) {
+         // TODO: getting it from "a = 1+2/4"
          return new EvalExpr({ expr: expr });
       }
       else
          throw new Error('your expression is empty :\'(');
    }
+
+   eval() {
+      try {
+         return this.evalFunc();
+      } catch (e) {
+         this.error(e);
+      }
+   }
+
 }

@@ -5,7 +5,8 @@ export default function setupKeypad() {
 
    keyboardSettings.showHideKeyBtn.addEventListener("click", function (e) {
       let parent = document.querySelector(".keypad-container");
-      let __keypadShown = $(this).hasClass("show");
+      let $this = $(this);
+      let __keypadShown = $this.hasClass("show");
       let from = __keypadShown ? "show" : "hide",
          to = __keypadShown ? "hide" : "show";
 
@@ -16,10 +17,8 @@ export default function setupKeypad() {
       parent.classList.add(to);
       if (__keypadShown) {
          document.body.appendChild(keyboardSettings.showHideKeyBtn);
-         $(".sh-keypad-content").attr("aria-label", "show keypad");
       } else {
          parent.insertBefore(keyboardSettings.showHideKeyBtn, parent.firstElementChild);
-         $(".sh-keypad-content").attr("aria-label", "hide keypad");
       }
    });
 

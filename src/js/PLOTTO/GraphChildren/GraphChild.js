@@ -4,12 +4,17 @@ export default class GraphChild {
     constructor(options) {
         this.checkOptions(options);
 
-        options.id = options.id || generateName();
-        options.handlers = options.handlers || {};
-        options.drawable = options.hasOwnProperty('drawable') ? options.drawable : true;
+        if (!options.id) {
+            options.id = generateName();
+        }
 
+        options.handlers = options.handlers || {};
+        options.renderable = options.hasOwnProperty('renderable') ? options.renderable : true;
+        
+        this.sketch = options.sketch; /// avoid error when defining the sketch after the id
         Object.assign(this, options);
         this.gs = this.sketch.gs;
+        this.gs.childrenIDs.push(options.id);
 
     }
     checkOptions(options) {
@@ -29,8 +34,20 @@ export default class GraphChild {
     /**
      * methods are here
      */
+
+    render(canvas, handlerOptions = []) {
+        if (this.handlers.onrender) {
+            this.handlers.onrender(...handlerOptions);
+        }
+    }
+
     remove(handlerArgs) {
         this.sketch.children.delete(this.id);
+        this.gs.childrenIDs = this.gs.childrenIDs.filter(a => a !== this.id);
         if (this.handlers.remove) this.handlers.remove(...handlerArgs);
-     }
+    }
+    
+    error(e) {
+        this.handlers.onerror(e);
+    }
 }

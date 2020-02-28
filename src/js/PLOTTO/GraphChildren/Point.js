@@ -42,22 +42,29 @@ export default class Point extends GraphChild {
             throw new Error('your str is empty :\'(');
     }
 
-    async draw(canvas) {
-        canvas.rectMode(CENTER);
-        switch (this.pen.style) {
-            case 'solid':
-                canvas.strokeWeight(2);
-                canvas.stroke(200);
-                canvas.fill(...(this.pen.color.toArray().splice(0, 3)), 150);
-                break;
-            case 'shallow':
-                canvas.strokeWeight(3);
-                canvas.stroke(...this.pen.color.toArray());
-                canvas.fill(...(this.pen.color.toArray().splice(0, 3)), 50);
-                break;
+    async render(canvas, handlerArgs = []) {
+
+        if (this.renderable) {
+            switch (this.pen.style) {
+                case 'solid':
+                    canvas.strokeWeight(2);
+                    canvas.stroke(200);
+                    canvas.fill(...(this.pen.color.toArray().splice(0, 3)), 150);
+                    break;
+                case 'shallow':
+                    canvas.ctx.lineWidth = 3;
+                    canvas.ctx.strokeStyle(this.pen.color.toString());
+                    canvas.ctx.fillStyle(this.sketch.coor.coorSettings.background.toString());
+                    break;
+            }
+            let p = this.gs.coorTOpx(this.x.eval(), this.y.eval());
+            canvas.ellipse(p.x, p.y, this.pen.weight, this.pen.weight);
         }
-        let p = this.gs.coorTOpx(this.x.eval(), this.y.eval());
-        canvas.rect(p.x, p.y, this.pen.weight, this.pen.weight, 3);
+
+        if (this.handlers.onrender) {
+            this.handlers.onrender(...handlerArgs);
+        }
+
     }
 
     toString() {

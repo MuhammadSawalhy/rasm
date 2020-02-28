@@ -33,29 +33,29 @@ export default class {
          autoRefiningOnZoomimg: true
       };
 
-      defaultCoorSettings = {
-         ...defaultCoorSettings,
-         ...{
-            color: defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 255) : new drawing.color(50, 50, 50, 1),
-            drawDecimalLines: !defaultCoorSettings.background.isDark(),
-            penDecimalLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 30/255) : new drawing.color(50, 50, 50, 30/255),  1),
-            penMainLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100/255) : new drawing.color(50, 50, 50, 100/255),   1),
-            penXaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150/255) : new drawing.color(0, 0, 0, 150/255),          2),
-            penYaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150/255) : new drawing.color(0, 0, 0, 150/255),          2),
-            penPolarCircles: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100/255) : new drawing.color(50, 50, 50, 50/255), 1),
-            penPolarLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100/255) : new drawing.color(50, 50, 50, 50/255),   1)
-         }
-      };
+      Object.assign(defaultCoorSettings, {
+         color: defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 255) : new drawing.color(50, 50, 50, 1),
+         antiBackground: defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 255) : new drawing.color(50, 50, 50, 1),
+         drawDecimalLines: !defaultCoorSettings.background.isDark(),
+         penDecimalLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 30 / 255) : new drawing.color(50, 50, 50, 30 / 255), 1),
+         penMainLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100 / 255) : new drawing.color(50, 50, 50, 100 / 255), 1),
+         penXaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150 / 255) : new drawing.color(0, 0, 0, 150 / 255), 2),
+         penYaxis: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(255, 255, 255, 150 / 255) : new drawing.color(0, 0, 0, 150 / 255), 2),
+         penPolarCircles: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100 / 255) : new drawing.color(50, 50, 50, 50 / 255), 1),
+         penPolarLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100 / 255) : new drawing.color(50, 50, 50, 50 / 255), 1)
+      });
 
       if (coorSettings) {
-         this.coorSettings = { ...defaultCoorSettings, ...coorSettings };
+         this.coorSettings = {};
+         Object.assign(this.coorSettings, defaultCoorSettings);
+         Object.assign(this.coorSettings, coorSettings);
       } else {
          this.coorSettings = defaultCoorSettings;
       }
 
    }
 
-   draw(ctx) {
+   render(ctx) {
       switch (this.coorSettings.type) {
          case 'default':
             this.custom(ctx);
@@ -107,6 +107,8 @@ export default class {
          this.coorSettings.penXaxis.setup(canvas);
          canvas.line(this.gs.xToPixel(start_x, 0), this.gs.yToPixel(start_x, 0),
             this.gs.xToPixel(end_x, 0), this.gs.yToPixel(end_x, 0));
+         canvas.ctx.stroke();
+         canvas.ctx.beginPath();
          this.coorSettings.penYaxis.setup(canvas);
          canvas.line(this.gs.xToPixel(0, start_y), this.gs.yToPixel(0, start_y),
             this.gs.xToPixel(0, end_y), this.gs.yToPixel(0, end_y));

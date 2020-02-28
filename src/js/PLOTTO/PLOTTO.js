@@ -4,6 +4,6 @@ import Sketch from './Sketch.js';
 
 export default class {
    constructor() {
-      this.GraphChilds = {};
+      this.GraphChildren = {};
    }
 }

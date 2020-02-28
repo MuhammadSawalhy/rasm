@@ -3,42 +3,46 @@
 import GraphSettings from './GraphSetting/GraphSettings.js';
 import Coordinates from './Coordinates.js';
 import Canvas from './Canvas.js';
-import { Xfunction, EvalExpr, Point } from './GraphChilds/index.js';
+import { Xfunction, EvalExpr, Point, Variable, Empty } from './GraphChildren/index.js';
 export default class Sketch {
 
     constructor(canvas) {
         this.gs = new GraphSettings(this, canvas.clientWidth, canvas.clientHeight);
         this.coor = new Coordinates(this.gs);
-        this.canvas = new Canvas({ canvas: canvas});
+        this.canvas = new Canvas({ canvas: canvas });
         this.subcanvas = new Canvas();
-        this.childsCanvas = new Canvas();
-        // this.canvas.ctx.textAlign = 'left';
-        // this.subcanvas.ctx.textAlign = 'left';
-        // this.childsCanvas.ctx.textAlign = 'left';
+        this.ChildrenCanvas = new Canvas();
 
         this.children = new Map();
-        this.getChildParser = new MagicalParser.CustomParsers.Math();
+        this.scriptParser = new MagicalParser.CustomParsers.Math();
     }
 
     appendChild(child) {
         if (!child.id) throw new Error('Your sketch child should have had an id :\'(');
-        let append = (child instanceof GraphChild ? child : this.childFromString(child));
+        let append = (child instanceof GraphChild ? child : this.childFromScript(child));
         this.children.set(child.id, child);
     }
 
-    childFromString(script, propsTOset = {}) {
-        propsTOset.sketch = this;
+    childFromScript(script, propsTOset = {}) {
         let parsedString = this.getChildParser.parse(script.replace(/\^/g, '**'));
-        if (parsedString.check({ name: '=' })) {
+        return childFromParsed(parsedString, propsTOset);
+    }
+
+    childFromParsed(parsedString, propsTOset = {}) {
+        propsTOset.sketch = this;
+        if (parsedString.type === '') {
+            return new Empty(propsTOset);
+        }
+        if (parsedString.name === '=') {
             let left = parsedString.args[0], right = parsedString.args[1];
-            
+
             if (left.check({ type: 'variable', name: 'y' }) && !right.contains({ type: 'variable', name: 'y' })) {
-                return new Xfunction({ expr: right, ...propsTOset });
+                return new Xfunction(Object.assign(propsTOset, { expr: right, }));
             }
-           
+
             //such : area( h , b , theta ) = 0.5 * h * b * sin( theta )
             //such : f(x) = x^2
-            else if (left.check({ type: 'functionCalling' }) && !this.gs.reservedFunction.find(name => name === left.name)) {
+            else if (left.check({ type: 'functionCalling' }) && !this.gs.reservedFunction.find(name => Math.hasOwnProperty(left.name))) {
                 // such : f(x) = x^2
                 if (left.args.length == 1 && left.args[0].check({ type: 'variable', name: 'x' }) && !right.contains({ type: 'variable', name: 'y' })) {
                     return new Xfunction({ sketch: this, expr: right, id: left.name });
@@ -72,13 +76,18 @@ export default class Sketch {
                 */
             }
 
-            /*
-            //such : a = 2 * c + sin( k )
-            else if (left.IsId && MathExpression(right)) {
-                LNode b = right, a = left;
-                return new Variable(a.Name.Name, MathPackage.Transformer.GetNodeFromLoycNode(b, GraphSettings.CalculationSettings));
+            //such : a = 2
+            else if (left.type === 'variable' && right.type === 'number') {
+                return new Variable(Object.assign(propsTOset, { id: left.name, value: right.value }));
             }
-            */
+            //such : a = -2
+            else if (left.type === 'variable' && right.check({ type: 'prefixOperator', name: '-' }) && right.args[0].type === 'number') {
+                return new Variable(Object.assign(propsTOset, { id: left.name, value: -right.args[0].value }));
+            }
+            //such : a = 2b+c
+            else if (left.type === 'variable') {
+                return new EvalExpr(Object.assign(propsTOset, { id: left.name, expr: right }));
+            }
 
         }
         // /// like 2+3*x = sin(y)^2
@@ -97,12 +106,12 @@ export default class Sketch {
         //    }
         //    return f;
         // }
-        
+
         /// to add function like : x^2
         else if (parsedString.contains({ type: 'variable', name: 'x' })) {
-            return new Xfunction({ expr: parsedString, ...propsTOset });
+            return new Xfunction(Object.assign(propsTOset, { expr: parsedString, }));
         }
-    
+
         /// to add a point like (1, 2)
         else if (parsedString.check({ type: 'block', name: '()' }) && parsedString.args.length == 1 && parsedString.args[0].check({ type: 'separator', name: ',', length: 2 })) {
             /// it is a parametricFunction
@@ -126,10 +135,10 @@ export default class Sketch {
             }
             /// it is a point
             else {
-                return new Point({ x: parsedString.args[0].args[0], y: parsedString.args[0].args[1] , ...propsTOset });
+                return new Point({ x: parsedString.args[0].args[0], y: parsedString.args[0].args[1], ...propsTOset });
             }
         }
-    
+
         {
             /*
 
@@ -193,7 +202,7 @@ export default class Sketch {
     */
         }
 
-        return new EvalExpr({ expr: parsedString, ...propsTOset, drawable: false });
+        return new EvalExpr(Object.assign(propsTOset, { expr: parsedString, drawable: false }));
     }
 
     getChildById(id) {
@@ -204,24 +213,27 @@ export default class Sketch {
         return this.children.get(id);
     }
 
-    update() {
+    update(draw = true, coors = true) {
         if (this.canvas) {
-            this.canvas.resize(this.gs.width, this.gs.height);
-            this.childsCanvas.resize(this.gs.width, this.gs.height);
-            this.childsCanvas.clear();
+            if (coors) {
+                this.subcanvas.clear();
+                this.coor.render(this.subcanvas);
+            }
+            this.ChildrenCanvas.clear();
             for (let child of this.children.values()) {
-                if (child && child.drawable) {
-                    child.draw(this.childsCanvas);
+                if (child) {
+                    child.render(this.ChildrenCanvas);
                 }
             }
-            this.draw();
+
+            if (draw) this.draw();
         }
     }
 
     draw() {
         this.canvas.clear(this.coor.coorSettings.background.toString());
-        this.coor.draw(this.canvas);
-        this.canvas.ctx.drawImage(this.childsCanvas.elt, 0, 0);
+        this.canvas.ctx.drawImage(this.subcanvas.elt, 0, 0);
+        this.canvas.ctx.drawImage(this.ChildrenCanvas.elt, 0, 0);
     }
 
 }

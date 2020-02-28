@@ -14,6 +14,7 @@ export default function setEvents () {
          clearInterval(keyboardSettings.backspaceInterval);
       }
       //#endregion
+      keyboardSettings.hideKeyPad = true;
    });
    window.addEventListener('mousedown', function (e) {
       //#region hide keybad
@@ -21,7 +22,6 @@ export default function setEvents () {
       if (keyboardSettings.hideKeyPad && keypadShown) {
          keyboardSettings.showHideKeyBtn.click();
       }
-      keyboardSettings.hideKeyPad = true;
       //#endregion
    });
    //#endregion

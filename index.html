@@ -9,6 +9,7 @@
     <script src="./libraries/jquery/jquery-3.4.1.min.js"></script>
     <link href="./libraries/jquery/jquery-ui.min.css" rel="stylesheet" defer />
     <script src="./libraries/jquery/jquery-ui.min.js"></script>
+    <script src="./libraries/jquery.balloon.min.js"></script>
 
     <!--plugins create by me -->
     <link href="./libraries/SUI/dist/styles/all.css" rel="stylesheet" />
@@ -26,7 +27,13 @@
       rel="stylesheet"
       defer
     />
-    <script>var disableNativeKeypad = false;</script>
+    <script>
+      var device;
+      window.navigator.userAgent.replace(/(android|ipad|iphone|linux|windows)/i, (match)=>{
+        device = match.toLowerCase();
+      });
+      var disableNativeKeypad = !(device === 'linux' || device === 'windows');
+    </script>
     <script src="./libraries/mathquill-0.10.1/mathquill.js"></script>
 
     <!--plugins -->
@@ -717,10 +724,6 @@
     </div>
 
     <div class="app-container">
-      <header>
-        <h1 class="title">PLOTTO - Graphing Claculator</h1>
-      </header>
-
       <section class="container">
         <div class="sidebar-container">
           <div class="header">
