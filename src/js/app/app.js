@@ -1,4 +1,4 @@
-import { getContainment, updateObjsOrder, resize, canvasParent, addControl, keyboardSettings } from './global.js';
+import { getContainment, updateObjsOrder, resize, checkSM, canvasParent, addControl, keypadSettings } from './global.js';
 import Sketch from '../PLOTTO/Sketch.js';
 import drawing from '../PLOTTO/drawing/index.js';
 import setEvents from './events/index.js';
@@ -10,6 +10,7 @@ import { Variable } from '../PLOTTO/GraphChildren/index.js';
  * app folder is associated with PLOTTO folder, both of them depends upon the other.
  */
 export default function setupAPP(canvas) {
+  document.body.style.height = window.innerHeight + 'px';
 
   window.MP = MathPackage;
   window.angles = MP.Angles;
@@ -31,10 +32,38 @@ export default function setupAPP(canvas) {
   window.canvas = mySketch.canvas;
   // canvasParent.appendChild(window.canvas.elt);
 
+  resize.prevSize = { width: 1000, height: 1000 }; /// the app is desined upon the large screen so this should be the default
+  checkSM();
+  resize.prevSize = { width: window.innerWidth, height: window.innerHeight };
+
   let mathFields = $(".math-field");
   for (let i = 0; i < mathFields.length; i++) {
     MQ.StaticMath(mathFields[i]);
   }
+
+  let addNewGCelt = $(`
+      <li class="control">
+        <div class="side-status" cancel-move>
+          <div class="order-container">
+            <span class='order'>123</span>
+          </div>
+        </div>
+        <div class="main" cancel-move cancel-hiding-keypad>
+         <div class=script-container><span type="text" class="script">NEW</span></div>
+        </div>
+        <div class="side-ctrl">
+          <button class="closebtn-2 remove" cancel-move><div class="inner"></div></button>
+          <span class="move">
+            <div>
+              <span>..</span>
+              <span>..</span>
+              <span>..</span>
+            </div>
+          </span>
+        </div>
+      </li>
+      `)[0];
+  document.body.querySelector('#add-new-control').append(addNewGCelt);
 
   setEvents();
   setupKeypad();
@@ -46,18 +75,13 @@ export default function setupAPP(canvas) {
   mySketch.gs.centrate();
   mySketch.update();
 
-
   $('#loading-layer').fadeOut(1000, () => {
     let oc = new ChildControl();
     addControl(oc);
-    keyboardSettings.mathField = oc.mathField;
-    // keyboardSettings.mathField.latex('a=1');
   });
 
   console.log('%cPLOTTO', 'background: black; color: white; font: 50px consolas;');
-
   console.log('%cWe are sciCave', 'color: blue; font: 25px consolas;');
-
 }
 
 function setupResizer(){
@@ -70,7 +94,7 @@ function setupResizer(){
 
   $(sidebarResizer).draggable({
     axis: 'x',
-    containment: getContainment(),
+    containment: getContainment(sidebar),
 
     start: (e) => {
       sidebarResizer.classList.add('dragging');

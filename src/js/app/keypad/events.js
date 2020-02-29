@@ -1,22 +1,17 @@
-import { keyboardSettings } from './../global.js';
+import { keypadSettings, addControl } from './../global.js';
+import ChildControl from './../ChildControl.js';
 
 export default function(){
    //#region (keypad - showHideBtn) events
    let keypad = $('.keypad-container'),
-      sh = $(keyboardSettings.showHideKeyBtn);
+      sh = $(keypadSettings.showHideKeyBtn);
 
-   keypad
-      .on('mousedown', function () {
-         keyboardSettings.mathField.focus();
-      });
-
-
-   sh.on("mouseup", function (e) {
-      keyboardSettings.hideKeyPad = false;
+   keypad.bind('focusin', function () {
+         keypadSettings.mathField.focus();
    });
 
    $(document.body).delegate("[cancel-hiding-keypad]", "mousedown touchstart", function (e) {
-      keyboardSettings.hideKeyPad = false;
+      keypadSettings.hideKeyPad = false;
    });
 
    $('.control').delegate(".main", "touchstart", function (e) {
@@ -32,13 +27,13 @@ export default function(){
       $(this).on('click', function () {
          let $this = $(this);
          if ($this.hasClass('double-shiftable')) {
-            keyboardSettings.mathField.cmd($(' > div.active > span.active', $this).attr('mq-cmd'));
+            keypadSettings.mathField.cmd($(' > div.active > span.active', $this).attr('mq-cmd'));
          } else if ($this.hasClass('shiftable')) {
-            keyboardSettings.mathField.cmd($(' > span.active', $this).attr('mq-cmd'));
+            keypadSettings.mathField.cmd($(' > span.active', $this).attr('mq-cmd'));
          } else {
-            keyboardSettings.mathField.cmd(this.getAttribute('mq-cmd'));
+            keypadSettings.mathField.cmd(this.getAttribute('mq-cmd'));
          }
-         keyboardSettings.mathField.focus();
+         keypadSettings.focusedControl.focus();
       });
    });
 
@@ -46,13 +41,13 @@ export default function(){
       $(this).on('click', function () {
          let $this = $(this);
          if ($this.hasClass('double-shiftable')) {
-            keyboardSettings.mathField.write($(' > div.active > span.active', $this).attr('mq-write'));
+            keypadSettings.mathField.write($(' > div.active > span.active', $this).attr('mq-write'));
          } else if ($this.hasClass('shiftable')) {
-            keyboardSettings.mathField.write($(' > span.active', $this).attr('mq-write'));
+            keypadSettings.mathField.write($(' > span.active', $this).attr('mq-write'));
          } else {
-            keyboardSettings.mathField.write(this.getAttribute('mq-write'));
+            keypadSettings.mathField.write(this.getAttribute('mq-write'));
          }
-         keyboardSettings.mathField.focus();
+         keypadSettings.focusedControl.focus();
       });
    });
 
@@ -60,32 +55,42 @@ export default function(){
       $(this).on("click", function () {
          let $this = $(this);
          if ($this.hasClass("double-shiftable")) {
-            keyboardSettings.mathField.write($(" > div.active > span.active", $this).attr("mq-func"));
+            keypadSettings.mathField.write($(" > div.active > span.active", $this).attr("mq-func"));
          } else if ($this.hasClass("shiftable")) {
-            keyboardSettings.mathField.write($(" > span.active", $this).attr("mq-func"));
+            keypadSettings.mathField.write($(" > span.active", $this).attr("mq-func"));
          } else {
-            keyboardSettings.mathField.write(this.getAttribute("mq-func"));
+            keypadSettings.mathField.write(this.getAttribute("mq-func"));
          }
-         keyboardSettings.mathField.cmd("(");
-         keyboardSettings.mathField.focus();
+         keypadSettings.mathField.cmd("(");
+         keypadSettings.focusedControl.focus();
       });
    });
 
    $(".space").on("click", function () {
-      keyboardSettings.mathField.keystroke("Right");
+      keypadSettings.mathField.keystroke("Right");
    });
 
    //keystrokes
    $(".backspace").on("mousedown", function () {
-      keyboardSettings.mathField.keystroke("Backspace");
-      keyboardSettings.mouseDownForInterval = true;
+      if (keypadSettings.mathField.latex() == '') {
+         keypadSettings.focusedControl.remove();
+      } else {
+         keypadSettings.mathField.keystroke("Backspace");
+      }
+
+      //#region for keep backSpace on holing the button
+
+      keypadSettings.mouseDownForInterval = true;
       setTimeout(function () {
-         if (keyboardSettings.mouseDownForInterval) {
-            keyboardSettings.backspaceInterval = setInterval(function () {
-               keyboardSettings.mathField.keystroke("Backspace");
+         if (keypadSettings.mouseDownForInterval) {
+            keypadSettings.backspaceInterval = setInterval(function () {
+               keypadSettings.mathField.keystroke("Backspace");
             }, 120);
          }
       }, 400);
+
+      //#endregion
+
    });
 
    //#endregion
@@ -93,19 +98,23 @@ export default function(){
    //#region direction
 
    $(".go-left").on("click", function () {
-      keyboardSettings.mathField.keystroke("Left");
+      keypadSettings.mathField.keystroke("Left");
    });
 
    $(".go-right").on("click", function () {
-      keyboardSettings.mathField.keystroke("Right");
+      keypadSettings.mathField.keystroke("Right");
    });
 
    $(".go-up").on("click", function () {
-      keyboardSettings.mathField.keystroke("Up");
+      keypadSettings.mathField.keystroke("Up");
    });
 
    $(".go-down").on("click", function () {
-      keyboardSettings.mathField.keystroke("Down");
+      keypadSettings.mathField.keystroke("Down");
+   });
+
+   $(".enter").on("click", function () {
+      addControl(new ChildControl(), parseInt(keypadSettings.focusedControl.orderELT.textContent));
    });
 
    //#endregion

@@ -1,41 +1,38 @@
-
-*, *::before, *::after{
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
-*:focus{
+*:focus {
   outline: none;
 }
 
-:root{
-
+:root {
   --buttons-radius: 10px;
   --buttons-margin: 5px;
   --oc-min-height: 60px;
   --sidebar-min-width: 300px;
   --sidebar-max-width: 60vw;
-  --main-color: rgb(0, 86, 214);
+  --border-color: rgba(31, 106, 192, 0.733);
+  --background-color: rgb(255, 255, 255);
 
-    // these are here as the sh button will be outside the keypad container on hiding the keypad
+  // these are here as the sh button will be outside the keypad container on hiding the keypad
   --shkbBTNposition: 5px;
   --kb-background: white;
-  --kb-border: 1px solid #313131aa;
+  --kb-border: 1px solid var(--border-color);
   --kb-radius: 5px;
-
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-}
-
-body{
+body {
   // position: absolute;
   // top: 0;
   // right: 0;
   // left: 0;
   // bottom: 0;
-  height: 100vh;
+
+  margin: 0;
+  padding: 0;
   overflow: hidden;
   user-select: none;
 }
@@ -43,49 +40,28 @@ body{
 /* main layout */
 /* main layout */
 /* main layout */
-.app-container{
+.app-container {
   display: flex;
   flex-flow: column nowrap;
-  justify-content: center;
-  align-items: center; 
-  height: 100vh;
-  
-  .container{
+  height: 100%;
+
+  .container {
     display: flex;
-    flex-flow: row nowrap; 
+    flex-flow: row nowrap;
     flex-grow: 1;
-    width:100%;
+    width: 100%;
     overflow: hidden;
   }
 
-}
 
-#loading-layer{
-  position: absolute;
-  top: 0; left: 0; bottom:0; right: 0;
-  z-index: 2000;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  
-  background: linear-gradient(rgb(167, 89, 89), rgb(65, 133, 197));
-
-  .inner{
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: stretch;
-    .load-wrapp{
-      .letter{
-        font: 20px monospace;
-        color: black;
-      }
-
-      .line{
-        background-color: black;
-      }
-
-      background: transparent;
+  footer{
+    padding: 10px;
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+    > p{
+      margin: 0;
+      text-align: center;
+      color: grey;
     }
   }
 }

@@ -1,25 +1,35 @@
 import keypadEvents from './events.js';
-import { keyboardSettings } from '../global.js';
+import { keypadSettings, resize, checkSM } from '../global.js';
 
 export default function setupKeypad() {
 
-   keyboardSettings.showHideKeyBtn.addEventListener("click", function (e) {
+   keypadSettings.showHideKeyBtn.addEventListener("click", function (e) {
+      let sidebar = document.querySelector(".sidebar-container");
+      let sidebarShown = /\svisible\s|^visible\s|\svisible$/.test(sidebar.className); // hasClass
+      if (!sidebarShown) {
+         document.querySelector("#show-hide-sidebar").click();
+      }
       let parent = document.querySelector(".keypad-container");
       let $this = $(this);
-      let __keypadShown = $this.hasClass("show");
-      let from = __keypadShown ? "show" : "hide",
-         to = __keypadShown ? "hide" : "show";
+      let __keypadShown = $this.hasClass("visible");
+      let from = __keypadShown ? "visible" : "unvisible",
+         to = __keypadShown ? "unvisible" : "visible";
 
-      keyboardSettings.showHideKeyBtn.classList.remove(from);
-      keyboardSettings.showHideKeyBtn.classList.add(to);
+      keypadSettings.showHideKeyBtn.classList.remove(from);
+      keypadSettings.showHideKeyBtn.classList.add(to);
 
       parent.classList.remove(from);
       parent.classList.add(to);
       if (__keypadShown) {
-         document.body.appendChild(keyboardSettings.showHideKeyBtn);
+         document.body.querySelector('.app-container').appendChild(keypadSettings.showHideKeyBtn);
       } else {
-         parent.insertBefore(keyboardSettings.showHideKeyBtn, parent.firstElementChild);
+         parent.insertBefore(keypadSettings.showHideKeyBtn, parent.firstElementChild);
       }
+      if (checkSM.smallScreen) {
+         resize();
+      }
+
+      keypadSettings.focusedControl.focus();
    });
 
    SUI.tabs(document.body.querySelector('.keypad-container .tabs-1'));

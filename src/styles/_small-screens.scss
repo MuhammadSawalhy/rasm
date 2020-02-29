@@ -1,46 +1,97 @@
-
 /* for small screens - media queries*/
 /* for small screens - media queries*/
 /* for small screens - media queries*/
 $small-width: 600px;
-@media (max-width: $small-width){
-  .app-container .container{
+@media (max-width: $small-width) {
+  .app-container .container {
     flex-flow: column nowrap;
   }
 
-  .canvas-outer-container{
+  .canvas-outer-container {
     order: 1;
     flex-grow: 1;
     height: 35%;
     width: 100%;
   }
 
-  .sidebar-container{
+  .sidebar-container {
     order: 2;
     flex-grow: 1;
     height: 65%;
     width: 100%;
     max-width: 100vw;
+    border-right: none;
 
-      .resizer{
-        display: none;
-      }
+    &.visible {
+      position: relative;
+      transition: transform 0.3s;
+      transform: translate(0%, 0);
+    }
 
-  }
-}
+    &.unvisible {
+      bottom: 0;
+      position: absolute;
+      transform: translate(0, 100%);
+    }
 
-@media (max-width: 850px){
-
-  .subtools-container{
-    display: none;
-  }
-
-  .main-tools-container{
-    .subtools-btn{
-      display: inline-block;
+    .resizer {
+      display: none;
     }
   }
 
+  .keypad-container {
+    order: 3;
+    &.visible {
+      position: relative;
+      transition: transform 0.3s;
+      transform: translateY(0%);
+    }
+
+    &.unvisible {
+      transform: translateY(100%);
+    }
+  }
+
+  #show-hide-sidebar {
+    &.unvisible {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      top: initial;
+      left: initial;
+      .path {
+        d: var(--up);
+      }
+    }
+
+    &.visible {
+      .path {
+        d: var(--down);
+      }
+    }
+  }
 }
 
+@media (max-width: 850px) {
+  .subtools-container {
+    display: none;
+  }
 
+  .canvas-outer-container {
+    .tools {
+      button {
+        height: 40px;
+        width: 40px;
+      }
+    }
+    .main-tools-container {
+      .subtools-btn {
+        display: inline-block;
+      }
+    }
+  }
+
+  footer {
+    display: none;
+  }
+}

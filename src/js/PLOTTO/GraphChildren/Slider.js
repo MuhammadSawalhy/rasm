@@ -1,36 +1,24 @@
 import GraphChild from "./GraphChild.js";
 import { getJSfunction } from '../global.js';
 
-export default class Variable /** or slider */ extends GraphChild {
-
+export default class Slider /** or slider */ extends GraphChild {
+   
    constructor(options) {
       //#region 
       let propName;
       propName = 'id';
       if (!options[propName]) {
-         throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + 'name' + ' property, or it is falsy value');
+         throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
       }
       propName = 'value';
       if (!options[propName]) {
-         throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + 'name' + ' property, or it is falsy value');
+         throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
       }
       //#endregion
       super(options);
 
       if (!this.id.match(/[a-zA-Z_]+\d*/)) throw new Error(`${this.id} is invalid.`);
-
-      let val;
-      let funcBody;
-
-      if (this.value.check({ type: 'operator', name: '=' })) {
-         funcBody =
-            MathPackage.Parser.__generateJS(this.expr.args[0]) +
-            ' === ' +
-            MathPackage.Parser.__generateJS(this.expr.args[1]);
-      } else {
-         funcBody = MathPackage.Parser.__generateJS(this.value);
-      }
-      eval(`this.value = {func: ()=>${funcBody}, valueOf: function(){return this.func();}};`);
+      
       Math[this.id] = this.value;
 
    }

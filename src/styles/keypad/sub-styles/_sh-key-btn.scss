@@ -15,7 +15,11 @@
     outline: none;
   }
 
-  &.show {
+  &:active{
+    transform: scale(0.9);
+  }
+
+  &.visible {
     position: absolute;
     top: 0;
     left: 0;
@@ -30,14 +34,14 @@
     }
   }
 
-  &.hide {
+  &.unvisible {
     position: absolute;
     bottom: var(--shkbBTNposition);
     left: var(--shkbBTNposition);
     animation: animateSH 0.7s;
     border: var(--kb-border);
     border-radius: var(--kb-radius);
-
+    box-shadow: 1px 3px 5px 0 silver;
     @keyframes animateSH {
       0%, 30% {
         transform: translateX(-120%);

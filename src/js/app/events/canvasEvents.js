@@ -5,7 +5,22 @@ import { subTools, mouse } from '../global.js';
 export default function canvasEvents() {
    let mousepressed;
    let lines = MathPackage.Lines;
-   canvas.elt.addEventListener('mousedown', (e) => {
+
+   let startTransFunc = (e) => {
+
+      mousepressed = true;
+
+      let canvasPos = getPosittion(canvas.elt);
+      if (e.type === 'mousedown') {
+         mouse.x = e.clientX - canvasPos.left;
+         mouse.y = e.clientY - canvasPos.top;
+      } else {
+         //touchstart
+         let touch = e.touches[0];
+         mouse.x = touch.clientX - canvasPos.left;
+         mouse.y = touch.clientY - canvasPos.top;
+      }
+
       Object.assign(subTools, {
          type: subTools.type,
          mouse: new vector(mouse.x, mouse.y),
@@ -13,7 +28,6 @@ export default function canvasEvents() {
          jVector: new vector(...mySketch.gs.iVector.toArray())
       });
 
-      mousepressed = true;
       if (subTools.type.search('axises') > -1) {
          let xEq = lines.lineEquation(-mySketch.gs.transform.xAngle, mySketch.gs.center),
             yEq = lines.lineEquation(-mySketch.gs.transform.yAngle, mySketch.gs.center);
@@ -67,12 +81,23 @@ export default function canvasEvents() {
          subTools.pxViewport = {};
       }
       e.preventDefault();
-   });
+   };
 
-   window.addEventListener('mousemove', (e) => {
+   canvas.elt.addEventListener('mousedown', startTransFunc);
+   canvas.elt.addEventListener('touchstart', startTransFunc);
+
+   let updateTransFunc = (e) => {
       let canvasPos = getPosittion(canvas.elt);
-      mouse.x = e.x - canvasPos.left;
-      mouse.y = e.y - canvasPos.top;
+      if (e.type === 'mousemove') {
+         mouse.x = e.clientX - canvasPos.left;
+         mouse.y = e.clientY - canvasPos.top;
+      } else {
+         //touchstart
+         let touch = e.touches[0];
+         mouse.x = touch.clientX - canvasPos.left;
+         mouse.y = touch.clientY - canvasPos.top;
+      }
+      e.preventDefault();
 
       if (mousepressed) {
          switch (subTools.type) {
@@ -99,17 +124,20 @@ export default function canvasEvents() {
          }
          e.preventDefault();
       }
-   }, true);
+   };
+
+   window.addEventListener('mousemove', updateTransFunc, true);
+   window.addEventListener('touchmove', updateTransFunc, { passive: false, capture: true });
 
    function getPosittion(elt) {
-      let parentPos = {left: 0, top: 0};
+      let parentPos = { left: 0, top: 0 };
       if (elt.offsetParent) {
          parentPos = getPosittion(elt.offsetParent);
       }
-      return { left: elt.offsetLeft + parentPos.left, top: elt.offsetTop + parentPos.top};
+      return { left: elt.offsetLeft + parentPos.left, top: elt.offsetTop + parentPos.top };
    }
 
-   window.addEventListener('mouseup', (e) => {
+   let transEndFunc = (e) => {
       if (mousepressed) {
          mousepressed = false;
          if (subTools.type === 'move') {
@@ -146,17 +174,18 @@ export default function canvasEvents() {
             mySketch.update();
          }
 
-         e.preventDefault();
-         e.stopPropagation();
       }
-   });
+   };
+
+   window.addEventListener('mouseup', transEndFunc);
+   window.addEventListener('touchend', transEndFunc);
 
    canvas.elt.addEventListener('mousewheel', (e) => {
       {
          e.preventDefault();
          let center = mySketch.gs.center;
-         let mousePos = mouse;       
-         if (MathPackage.Core.dist(mouse.x, center.x, mouse.y, center.y) < 30){
+         let mousePos = mouse;
+         if (MathPackage.Core.dist(mouse.x, center.x, mouse.y, center.y) < 30) {
             mousePos = center;
          }
          if (e.wheelDelta > 0) {

@@ -50,9 +50,9 @@ button {
 
   @include generalStyle();
 
-  max-width: 200px;
   position: relative;
-  flex-grow: 1;
+  width: 100%;
+  height: 40px;
 
   > span {
     position: absolute;

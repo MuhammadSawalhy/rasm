@@ -3,7 +3,7 @@
 import GraphSettings from './GraphSetting/GraphSettings.js';
 import Coordinates from './Coordinates.js';
 import Canvas from './Canvas.js';
-import { Xfunction, EvalExpr, Point, Variable, Empty } from './GraphChildren/index.js';
+import { Xfunction, EvalExpr, Point, Variable, Empty, Slider } from './GraphChildren/index.js';
 export default class Sketch {
 
     constructor(canvas) {
@@ -78,15 +78,15 @@ export default class Sketch {
 
             //such : a = 2
             else if (left.type === 'variable' && right.type === 'number') {
-                return new Variable(Object.assign(propsTOset, { id: left.name, value: right.value }));
+                return new Slider(Object.assign(propsTOset, { id: left.name, value: right.value }));
             }
             //such : a = -2
             else if (left.type === 'variable' && right.check({ type: 'prefixOperator', name: '-' }) && right.args[0].type === 'number') {
-                return new Variable(Object.assign(propsTOset, { id: left.name, value: -right.args[0].value }));
+                return new Slider(Object.assign(propsTOset, { id: left.name, value: -right.args[0].value }));
             }
             //such : a = 2b+c
             else if (left.type === 'variable') {
-                return new EvalExpr(Object.assign(propsTOset, { id: left.name, expr: right }));
+                return new Variable(Object.assign(propsTOset, { id: left.name, value: right }));
             }
 
         }
