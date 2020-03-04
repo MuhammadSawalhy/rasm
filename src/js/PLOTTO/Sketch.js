@@ -6,15 +6,23 @@ import Canvas from './Canvas.js';
 import { Xfunction, EvalExpr, Point, Variable, Empty, Slider } from './GraphChildren/index.js';
 export default class Sketch {
 
-    constructor(canvas) {
-        this.gs = new GraphSettings(this, canvas.clientWidth, canvas.clientHeight);
+    constructor(canvasParent) {
+        this.canvas = new Canvas({ parent: canvasParent, attributes: { id: 'canvas' } });
+        this.childrenCanvas = new Canvas({ parent: canvasParent, attributes: { id: 'children-canvas' } });
+        this.gs = new GraphSettings(this, this.canvas.width, this.canvas.height);
+        // this.gs.transform.handlers.onchange = () => {
+        //     let i = this.gs.iVector,
+        //         j = this.gs.jVector,
+        //         c = this.gs.center;
+        //     this.childrenCanvas.setTransform(i.x, i.y, j.x, j.y, c.x, c.y);
+        // };
         this.coor = new Coordinates(this.gs);
-        this.canvas = new Canvas({ canvas: canvas });
-        this.subcanvas = new Canvas();
-        this.ChildrenCanvas = new Canvas();
-
         this.children = new Map();
         this.scriptParser = new MagicalParser.CustomParsers.Math();
+
+        this.childrenCanvas.ctx.miterLimit = 1;
+
+        this.updator = { worker: new Worker('./updateChildren.js'), data: { status: 'ready'}};
     }
 
     appendChild(child) {
@@ -214,26 +222,46 @@ export default class Sketch {
     }
 
     update(draw = true, coors = true) {
-        if (this.canvas) {
-            if (coors) {
-                this.subcanvas.clear();
-                this.coor.render(this.subcanvas);
+        if (draw && coors) {
+            this.canvas.clear();
+            this.coor.draw(this.canvas);
+        }
+        let pro = new Promise((res) => {
+            res();
+        });
+        // let vp = this.gs.viewport;
+        // this.childrenCanvas.clear(null, [vp.xmin, vp.ymin, vp.width, vp.height]);
+        if (this.updator.status !== 'updating') {
+            
+            this.updator.data.status = 'updating';
+            this.updator.data.children = this.children.values();
+            this.updator.worker.onmessage = (msg) => {
+                console.log(msg.data);
             }
-            this.ChildrenCanvas.clear();
-            for (let child of this.children.values()) {
-                if (child) {
-                    child.render(this.ChildrenCanvas);
-                }
-            }
+            this.updator.worker.postMessage(1);
 
-            if (draw) this.draw();
+            // let interval = setInterval(() => { 
+            //     if (this.updator.status === 'ready') {
+            //         clearInterval(interval);
+            //         if (draw) {
+            //             this.draw(false);
+            //         }
+            //     }
+            // }, 10);
         }
     }
 
-    draw() {
-        this.canvas.clear(this.coor.coorSettings.background.toString());
-        this.canvas.ctx.drawImage(this.subcanvas.elt, 0, 0);
-        this.canvas.ctx.drawImage(this.ChildrenCanvas.elt, 0, 0);
+    draw(coors = true) {
+        if (coors) {
+            this.canvas.clear();
+            this.coor.draw(this.canvas);
+        }
+        this.childrenCanvas.clear();
+        for (let child of this.children.values()) {
+            if (child) {
+                child.draw(this.childrenCanvas);
+            }
+        }
     }
 
 }

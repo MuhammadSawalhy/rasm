@@ -35,10 +35,13 @@ export default class GraphChild {
      * methods are here
      */
 
-    render(canvas, handlerOptions = []) {
-        if (this.handlers.onrender) {
-            this.handlers.onrender(...handlerOptions);
+    update(canvas, handlerOptions = []) {
+        if (this.handlers.onupdate) {
+            this.handlers.onupdate(...handlerOptions);
         }
+    }
+
+    draw(canvas) {
     }
 
     remove(handlerArgs) {

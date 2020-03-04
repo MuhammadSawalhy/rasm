@@ -444,14 +444,14 @@ export default class ChildControl {
          valueType: valueType[0],
          valueElt: value[0]
       };
-      this.graphChild.handlers.onrender = () => {
+      this.graphChild.handlers.onupdate = () => {
          this.__updateEvalExpr();
       };
       // this.__updateEvalExpr(); /// will be done on updating the sktech
    }
 
    __updateEvalExpr() {
-      this.graphChild.handlers.onrender = () => {
+      this.graphChild.handlers.onupdate = () => {
          this.__updateEvalExpr();
       };
 

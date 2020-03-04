@@ -3,13 +3,16 @@
 import { subTools, mouse } from '../global.js';
 
 export default function canvasEvents() {
+   
    let mousepressed;
    let lines = MathPackage.Lines;
+   let dragInterval;
 
    let startTransFunc = (e) => {
 
       mousepressed = true;
 
+      /// the mouse position
       let canvasPos = getPosittion(canvas.elt);
       if (e.type === 'mousedown') {
          mouse.x = e.clientX - canvasPos.left;
@@ -24,11 +27,22 @@ export default function canvasEvents() {
       Object.assign(subTools, {
          type: subTools.type,
          mouse: new vector(mouse.x, mouse.y),
-         iVector: new vector(...mySketch.gs.iVector.toArray()),
-         jVector: new vector(...mySketch.gs.iVector.toArray())
+         iVector: mySketch.gs.iVector,
+         jVector: mySketch.gs.jVector
       });
 
-      if (subTools.type.search('axises') > -1) {
+      if (subTools.type === 'move') {
+         mouse.prev = { x: mouse.x, y: mouse.y };
+         mouse.vel = { x: 0, y: 0 };
+         clearInterval(dragInterval);
+         dragInterval = setInterval(() => {
+            // mouse.prevVel = mouse.vel;
+            mouse.vel = { x: mouse.x - mouse.prev.x, y: mouse.y - mouse.prev.y };
+            // mouse.acc = { x: mouse.vel.x - mouse.prevVel.x, y: mouse.vel.y - mouse.prevVel.y };
+            mouse.prev = { x: mouse.x, y: mouse.y };
+         }, 10);
+      }
+      else if (subTools.type.search('axises') > -1) {
          let xEq = lines.lineEquation(-mySketch.gs.transform.xAngle, mySketch.gs.center),
             yEq = lines.lineEquation(-mySketch.gs.transform.yAngle, mySketch.gs.center);
          let d = 30;
@@ -78,13 +92,19 @@ export default function canvasEvents() {
          subTools.increment = 0;
          mySketch.draw();
       } else if (subTools.type === 'zoom') {
+         /// setting the layer of zoomBox
+         let boxElt = document.createElement('div');
+         boxElt.classList.add('zoom-box');
+         // boxElt.setAttribute('style', `--top: 0;--left: 0;--width: 0;--height: 0;`);
+         canvasParent.append(boxElt);
+         subTools.boxElt = boxElt;
          subTools.pxViewport = {};
       }
       e.preventDefault();
    };
 
-   canvas.elt.addEventListener('mousedown', startTransFunc);
-   canvas.elt.addEventListener('touchstart', startTransFunc);
+   canvasParent.addEventListener('mousedown', startTransFunc);
+   canvasParent.addEventListener('touchstart', startTransFunc);
 
    let updateTransFunc = (e) => {
       let canvasPos = getPosittion(canvas.elt);
@@ -97,8 +117,6 @@ export default function canvasEvents() {
          mouse.x = touch.clientX - canvasPos.left;
          mouse.y = touch.clientY - canvasPos.top;
       }
-      e.preventDefault();
-
       if (mousepressed) {
          switch (subTools.type) {
             case 'move':
@@ -140,26 +158,37 @@ export default function canvasEvents() {
    let transEndFunc = (e) => {
       if (mousepressed) {
          mousepressed = false;
+        
          if (subTools.type === 'move') {
-            mySketch.draw();
+            clearInterval(dragInterval);
+            mouse.vel = new vector(mouse.vel.x, mouse.vel.y);
+            while (mouse.vel.mag > 50) {
+               mouse.vel = mouse.vel.mult(0.9);
+            }
+            dragInterval = setInterval(() => {
+               if (mouse.vel.mag > 1) {
+                  mouse.vel = mouse.vel.mult(0.9);
+               }
+               mySketch.gs.transform.translate(mouse.vel);
+               mySketch.update();
+               if (mouse.vel.mag <= 1) clearInterval(dragInterval);
+            }, 10);
          }
          else if (subTools.type.search('axises') > -1) {
             if (subTools.axis == 'x') {
                mySketch.coor.coorSettings.penXaxis.color = subTools.penColor;
-               mySketch.draw();
             } else if (subTools.axis == 'y') {
                mySketch.coor.coorSettings.penYaxis.color = subTools.penColor;
-               mySketch.draw();
             } else if (subTools.axis == 'xy') {
                mySketch.coor.coorSettings.penXaxis.color = subTools.xPenColor;
                mySketch.coor.coorSettings.penYaxis.color = subTools.yPenColor;
-               mySketch.draw();
             }
          }
          else if (subTools.type === 'zoom') {
+            subTools.boxElt.remove();
             if (subTools.pxViewport.width && subTools.pxViewport.height) {
                mySketch.gs.transform.transformOrigin = undefined;
-               mySketch.gs.transform.setViewport(mySketch.gs.transform.getViewport(subTools.pxViewport), new vector(subTools.pxViewport.xmin, subTools.pxViewport.ymin));
+               mySketch.gs.transform.setViewport(mySketch.gs.transform.getViewport(subTools.pxViewport));
             }
             showTransDetails([
                'x: {',
@@ -173,19 +202,18 @@ export default function canvasEvents() {
             ], 'zoom');
             mySketch.update();
          }
-
       }
    };
 
    window.addEventListener('mouseup', transEndFunc);
    window.addEventListener('touchend', transEndFunc);
 
-   canvas.elt.addEventListener('mousewheel', (e) => {
+   canvasParent.addEventListener('mousewheel', (e) => {
       {
          e.preventDefault();
          let center = mySketch.gs.center;
          let mousePos = mouse;
-         if (MathPackage.Core.dist(mouse.x, center.x, mouse.y, center.y) < 30) {
+         if (MathPackage.Core.dist(mouse.x, mouse.y, center.x, center.y) < 30) {
             mousePos = center;
          }
          if (e.wheelDelta > 0) {
@@ -389,14 +417,18 @@ export default function canvasEvents() {
          s = subTools.pxViewport;
       }
       else {
+         subTools.boxElt.classList.remove('v');
+         subTools.boxElt.classList.remove('h');
          if (s.height < 10 && s.width > 10) {
-            slice = { type: 'vertical' };
+            slice = { type: 'v' };
+            subTools.boxElt.classList.add('v');
             s.ymin = 0;
             s.ymax = mySketch.gs.height;
             s.height = mySketch.gs.height;
          }
          else if (s.height > 10 && s.width < 10) {
-            slice = { type: 'horizental' };
+            slice = { type: 'h' };
+            subTools.boxElt.classList.add('h');
             s.xmin = 0;
             s.xmax = mySketch.gs.width;
             s.width = mySketch.gs.width;
@@ -404,62 +436,8 @@ export default function canvasEvents() {
       }
       //#endregion
 
-      //#region drawing box
-      mySketch.subcanvas.resize(mySketch.gs.width, mySketch.gs.height);
-      mySketch.subcanvas.clear();
-      let c1 = mySketch.canvas.get(0, 0, mySketch.canvas.width, mySketch.canvas.height);
-      let c2 = mySketch.canvas.get(s.xmin, s.ymin, s.width, s.height);
-      mySketch.subcanvas.image(c1, 0, 0);
-      let fadeColor = mySketch.coor.coorSettings.background.isDark() ? [255, 155] : [0, 155];
-      mySketch.subcanvas.background(...fadeColor);
-      if (s.width && s.height) {
-         let size = 10,
-            sw = 4 + (4), r = 3;
-         if (!slice) {
-
-            mySketch.subcanvas.stroke(0);
-            mySketch.subcanvas.strokeWeight(sw);
-            mySketch.subcanvas.rect(s.xmin, s.ymin, size, size, r);
-            mySketch.subcanvas.rect(s.xmax - size, s.ymin, size, size, r);
-            mySketch.subcanvas.rect(s.xmin, s.ymax - size, size, size, r);
-            mySketch.subcanvas.rect(s.xmax - size, s.ymax - size, size, size, r);
-
-            mySketch.subcanvas.stroke(255, 200);
-            mySketch.subcanvas.strokeWeight(sw - 4);
-            mySketch.subcanvas.rect(s.xmin, s.ymin, size, size, r);
-            mySketch.subcanvas.rect(s.xmax - size, s.ymin, size, size, r);
-            mySketch.subcanvas.rect(s.xmin, s.ymax - size, size, size, r);
-            mySketch.subcanvas.rect(s.xmax - size, s.ymax - size, size, size, r);
-
-         } else {
-            let size = 20,
-               sw = 4 + (4), r = 3;
-            if (slice.type === 'vertical') {
-               mySketch.subcanvas.stroke(0);
-               mySketch.subcanvas.strokeWeight(sw);
-               mySketch.subcanvas.rect(s.xmin, subTools.mouse.y - size / 2, size, size, r);
-               mySketch.subcanvas.rect(s.xmax - size, subTools.mouse.y - size / 2, size, size, r);
-               mySketch.subcanvas.stroke(255, 200);
-               mySketch.subcanvas.strokeWeight(sw - 4);
-               mySketch.subcanvas.rect(s.xmin, subTools.mouse.y - size / 2, size, size, r);
-               mySketch.subcanvas.rect(s.xmax - size, subTools.mouse.y - size / 2, size, size, r);
-            } else {
-               mySketch.subcanvas.stroke(0);
-               mySketch.subcanvas.strokeWeight(8);
-               mySketch.subcanvas.rect(subTools.mouse.x - size / 2, s.ymin, size, size, r);
-               mySketch.subcanvas.rect(subTools.mouse.x - size / 2, s.ymax - size, size, size, r);
-               mySketch.subcanvas.stroke(255, 200);
-               mySketch.subcanvas.strokeWeight(4);
-               mySketch.subcanvas.rect(subTools.mouse.x - size / 2, s.ymin, size, size, r);
-               mySketch.subcanvas.rect(subTools.mouse.x - size / 2, s.ymax - size, size, size, r);
-            }
-         }
-
-         mySketch.subcanvas.image(c2, s.xmin, s.ymin);
-      }
-      image(mySketch.subcanvas, 0, 0);
-
-      //#endregion
+      let fadeColor = mySketch.coor.coorSettings.background.isDark() ? '#fff5' : '#0005';
+      subTools.boxElt.setAttribute('style', `--left: ${s.xmin}px; --top: ${s.ymin}px; --width: ${s.width}px; --height: ${s.height}px; --background: ${fadeColor}`);
 
    }
 

@@ -61,8 +61,8 @@ export default class Point extends GraphChild {
             canvas.ellipse(p.x, p.y, this.pen.weight, this.pen.weight);
         }
 
-        if (this.handlers.onrender) {
-            this.handlers.onrender(...handlerArgs);
+        if (this.handlers.onupdate) {
+            this.handlers.onupdate(...handlerArgs);
         }
 
     }

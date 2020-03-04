@@ -40,15 +40,11 @@ $small-width: 600px;
   }
 
   .keypad-container {
-    order: 3;
+    order: 3;  
     &.visible {
       position: relative;
       transition: transform 0.3s;
       transform: translateY(0%);
-    }
-
-    &.unvisible {
-      transform: translateY(100%);
     }
   }
 

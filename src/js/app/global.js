@@ -10,10 +10,10 @@ export var subTools = {
       position: { bottom: 20, left: 20 },
       duration: 2500, // to make it fixed
       content: '<p style="background: green; color:white;">There is no god but Allah',
-      parent: document.querySelector('.canvas-container')
+      parent: document.querySelector('#canvas-parent')
    })
 };
-export var mouse = { x: undefined, y: undefined };
+export var mouse = { x: undefined, y: undefined, friction: 1 /** used on draging the coordinates */ };
 
 export var keypadSettings = {
    backspaceInterval: undefined,
@@ -79,30 +79,32 @@ export function addTOsketch(child, controlIndex = 'last' /* the index */) {
    mySketch.appendChild(child);
 }
 
-export var canvasParent = document.querySelector('.canvas-container');
 export function resize(setContainment = true) {
    checkSM();
 
    document.body.style.height = window.innerHeight + 'px';
 
    mySketch.canvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
-   mySketch.subcanvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
-   mySketch.ChildrenCanvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
+   mySketch.childrenCanvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
+  
+   mySketch.gs.transform.invokeOnchange = false;
 
    mySketch.gs.width = canvasParent.clientWidth;
    mySketch.gs.height = canvasParent.clientHeight;
 
    let vp = mySketch.gs.viewport;
-   mySketch.gs.transform.onchange();
+   mySketch.gs.transform.onchange(true);
    // if (angles.minAngle(new vector(1, 0), vector.fromAngle(mySketch.gs.transform.xAngle)).toFixed(3) === (0).toFixed(3) && angles.minAngle(new vector(1, 0), vector.fromAngle(mySketch.gs.transform.yAngle)).toFixed(3) === (Math.PI / 2).toFixed(3)) {
    mySketch.gs.transform.transformOrigin = undefined;
-   mySketch.gs.transform.setViewport(vp, null, true);
+   mySketch.gs.transform.setViewport(vp, true);
+   mySketch.gs.transform.invokeOnchange = true;
+   mySketch.gs.transform.onchange();
    // }
 
    if (setContainment) {
       let sideBar = document.querySelector('.sidebar-container');
 
-      $(".sidebar-container .resizer")
+      $(".resizer", sideBar)
          .draggable('option', 'containment', getContainment(sideBar));
       // .css({ left: document.querySelector('.sidebar-container').clientWidth + 'px' });
    }
@@ -113,11 +115,9 @@ export function resize(setContainment = true) {
 export function checkSM(){
    if (window.innerWidth <= 600 && resize.prevSize.width > 600) {
       /// changing the element layout
-      document.body.querySelector('.app-container .container').append(document.body.querySelector('.keypad-container'));
       checkSM.smallScreen = true;
    } else if (window.innerWidth > 600 && resize.prevSize.width <= 600) {
       /// changing the element layout
-      document.body.append(document.body.querySelector('.app-container .container .keypad-container'));
       checkSM.smallScreen = false;
    }
 }

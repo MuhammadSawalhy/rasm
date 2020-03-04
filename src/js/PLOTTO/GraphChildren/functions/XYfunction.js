@@ -72,8 +72,8 @@ export default class XYfunction extends GraphChild {
             this.error(e);
          }
       }
-      if (this.handlers.onrender) {
-         this.handlers.onrender(...handlerArgs);
+      if (this.handlers.onupdate) {
+         this.handlers.onupdate(...handlerArgs);
       }
    }
 

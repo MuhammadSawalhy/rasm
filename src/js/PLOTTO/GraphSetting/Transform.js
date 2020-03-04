@@ -2,7 +2,7 @@ export default class {
 
    constructor(gs) {
       this.gs = gs;
-
+      this.handlers = {};
       /** don't spacify the value of xAngle or yAngle before _xAngle and _yAngle
        *  as the value of either depends upon the other */
       /**
@@ -239,27 +239,31 @@ export default class {
 
    //#region viewport managment
 
-   setViewport(viewport, corner, resize) {
+   /**
+    * setting new viewport form the cartesian coordinates.
+    * @param {Object} viewport 
+    * an object has: 1. xmin, xmax, ymin, ymax representing the edges of the cartesian coordinates not the pixels in the canvas
+    * @param {Object} keepRatio 
+    */
+   setViewport(viewport, keepRatio) {
       //#region precalculations
-      viewport = viewport || {};
+      // the top left corner
       viewport.xmin = viewport.xmin === 0 ? 0 : (viewport.xmin || this.gs.viewport.xmin);
       viewport.xmax = viewport.xmax === 0 ? 0 : (viewport.xmax || this.gs.viewport.xmax);
       viewport.ymin = viewport.ymin === 0 ? 0 : (viewport.ymin || this.gs.viewport.ymin);
       viewport.ymax = viewport.ymax === 0 ? 0 : (viewport.ymax || this.gs.viewport.ymax);
       let a = this.invokeOnchange; this.invokeOnchange = false;
       let p = this.gs.pxTOcoor(this.gs.width / 2, this.gs.height / 2);
-      corner = corner || new vector(0, 0);
-      corner = this.gs.pxTOcoor(corner.x, corner.y);
+
       //#endregion
 
       //#region maincalculations
       let xs = this.xSpace, ys = this.ySpace;
 
       this.xSpace = this.xSpace / ((viewport.xmax - viewport.xmin) / (this.gs.viewport.xmax - this.gs.viewport.xmin));
-      if (resize) {
+      if (keepRatio) {
          this.ySpace *= this.xSpace / xs;
-      }
-      else {
+      } else {
          this.ySpace = this.ySpace / ((viewport.ymax - viewport.ymin) / (this.gs.viewport.ymax - this.gs.viewport.ymin));
       }
 
@@ -275,11 +279,12 @@ export default class {
 
       //#region aftercalulations
       this.invokeOnchange = true; this.onchange();
-      corner = this.gs.coorTOpx(corner.x, corner.y);
-      corner = new vector(corner.x, corner.y);
-      this.translate(corner.mult(-1));
+      let tfCorner = this.gs.coorTOpx(viewport.xmin, viewport.ymax);
+      tfCorner = new vector(tfCorner.x, tfCorner.y);
+      /// translation::: put the top left corner as pixels after transformations on top of the one before transformation 
+      this.translate(tfCorner.mult(-1));
       this.onchange();
-      if (resize) {
+      if (keepRatio) {
          let p_ = this.gs.coorTOpx(p.x, (viewport.ymax + viewport.ymin) / 2);
          this.translate(new vector(0, this.gs.height / 2 - p_.y));
       }
@@ -288,10 +293,15 @@ export default class {
    }
 
    getViewport(pxViewport) {
-      let xStart = this.gs.xToCoor(pxViewport.xmin, Math.tan(this.yAngle) > 0 ? pxViewport.ymin : pxViewport.ymax);
-      let xEnd = this.gs.xToCoor(pxViewport.xmax, Math.tan(this.yAngle) <= 0 ? pxViewport.ymin : pxViewport.ymax);
-      let yStart = this.gs.yToCoor(Math.tan(this.xAngle) > 0 ? pxViewport.xmax : pxViewport.xmin, pxViewport.ymax);
-      let yEnd = this.gs.yToCoor(Math.tan(this.xAngle) <= 0 ? pxViewport.xmax : pxViewport.xmin, pxViewport.ymin);
+      pxViewport.xmin = pxViewport.xmin || 0;
+      pxViewport.xmax = pxViewport.xmax || this.gs.width;
+      pxViewport.ymin = pxViewport.ymin || 0;
+      pxViewport.ymax = pxViewport.ymax || this.gs.height;
+
+      let xStart = this.gs.xTOcoor(pxViewport.xmin, Math.tan(this.yAngle) > 0 ? pxViewport.ymin : pxViewport.ymax);
+      let xEnd = this.gs.xTOcoor(pxViewport.xmax, Math.tan(this.yAngle) <= 0 ? pxViewport.ymin : pxViewport.ymax);
+      let yStart = this.gs.yTOcoor(Math.tan(this.xAngle) > 0 ? pxViewport.xmax : pxViewport.xmin, pxViewport.ymax);
+      let yEnd = this.gs.yTOcoor(Math.tan(this.xAngle) <= 0 ? pxViewport.xmax : pxViewport.xmin, pxViewport.ymin);
 
       return {
          xmin: xEnd < xStart ? xEnd : xStart,
@@ -435,10 +445,13 @@ export default class {
          this.xScale = (this.xSpace * ysm / this.xSpaceValue);
          this.yScale = (this.ySpace * xsm / this.ySpaceValue);
 
-         this.gs.viewport = this.getViewport({
+         let vp = this.getViewport({
             xmin: 0, xmax: this.gs.width,
             ymin: 0, ymax: this.gs.height
          });
+         vp.width = vp.xmax - vp.xmin;
+         vp.height = vp.ymax - vp.ymin;
+         this.gs.viewport = vp;
 
          this.gs.drawingStep = (this.gs.viewport.xmax - this.gs.viewport.xmin) / 10000;
 
@@ -476,6 +489,10 @@ export default class {
             return;
          }
 
+         if (this.handlers.onchange) {
+            this.handlers.onchange();
+         }
+            
          this.lastEdition = {
             transform: Object.assign(new this.constructor(), this),
             viewport: Object.assign({}, this.gs.viewport),

@@ -27,21 +27,19 @@ export default class Xfunction extends GraphChild {
 
       super(options);
       this.expression = getJSfunction(this.expr, ['x'], true);
+      this.path = new Path2D();
    }
 
    static fromString(expr, sketch) {
       if (str.replace(/==+/, '').indexOf('=') > -1) throw new Error('there is "=" opertor!');
-      return new Xfunction({expr, sketch});
+      return new Xfunction({ expr, sketch });
    }
 
-   async render(canvas) {
+   async update(canvas) {
       if (this.renderable) {
          try {
-            let ctx = canvas.ctx;
-            ctx.strokeStyle = this.pen.color.toString();
-            ctx.lineWidth = this.pen.weight;
             let p, previousP, midP, continous;
-            ctx.beginPath();
+            let path = new Path2D();
             for (let x = this.gs.viewport.xmin; x <= this.gs.viewport.xmax; x += this.gs.drawingStep) {
                p = this.gs.coorTOpx(x, this.expression(x));
                midP = this.gs.coorTOpx(x - this.gs.drawingStep / 2, this.expression(x - this.gs.drawingStep / 2));
@@ -51,30 +49,35 @@ export default class Xfunction extends GraphChild {
                   ((continous && (Math.sign(p.y - midP.y) === Math.sign(midP.y - previousP.y) || Math.abs(p.y - previousP.y) / this.gs.drawingStep < 20)) || !continous);
                if (!valid) {
                   if (continous) {
-                     ctx.stroke();
-                     ctx.beginPath();
                      continous = false;
                   }
                }
                else {
                   if (continous)
-                     ctx.lineTo(p.x, p.y);
+                     path.lineTo(p.x, p.y);
                   else
-                     ctx.moveTo(p.x, p.y);
-   
+                     path.moveTo(p.x, p.y);
+
                   previousP = { x: p.x, y: p.y };
                   continous = true;
                }
             }
-   
-            ctx.stroke();
+
+            this.path = path;
          } catch (e) {
             this.error(e);
          }
       }
-      if (this.handlers.onrender) {
-         this.handlers.onrender(...handlerArgs);
+      if (this.handlers.onupdate) {
+         this.handlers.onupdate(...handlerArgs);
       }
+   }
+
+   draw(canvas) {
+      let ctx = canvas.ctx;
+      ctx.strokeStyle = this.pen.color.toString();
+      ctx.lineWidth = this.pen.weight;
+      ctx.stroke(this.path);
    }
 
    toString() {

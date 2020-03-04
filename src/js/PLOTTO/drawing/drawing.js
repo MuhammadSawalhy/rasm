@@ -20,7 +20,7 @@ export class color{
         this.a = a;
     }
 
-    brightness() {
+    get brightness() {
         let num = this.r / 255;
         let num2 = this.g / 255;
         let num3 = this.b / 255;
@@ -37,7 +37,7 @@ export class color{
         return ((num4 + num5) / 2);
     }
 
-    hue() {
+    get hue() {
         if ((this.r == this.g) && (this.g == this.b))
             return 0;
         let num = this.r / 255;
@@ -67,7 +67,7 @@ export class color{
         return num7;
     }
 
-    saturation() {
+    get saturation() {
         let num = this.r / 255;
         let num2 = this.g / 255;
         let num3 = this.b / 255;
@@ -91,7 +91,7 @@ export class color{
     }
 
     isDark() {
-        if (this.brightness() > 0.40) {
+        if (this.brightness > 0.40) {
             return false;
         }
         else {
@@ -99,12 +99,17 @@ export class color{
         }
     }
 
-    toArray() {
-        return [this.r, this.g, this.b, this.a];
+    toArray(override = {}) {
+        return [
+            override.r || override.r === 0 ? override.r : this.r,
+            override.g || override.g === 0 ? override.g : this.g,
+            override.b || override.b === 0 ? override.b : this.b,
+            override.a || override.a === 0 ? override.a : this.a
+        ];
     }
 
-    toString() {
-        return `rgba(${this.r}, ${this.g}, ${this.b}, ${this.a})`;
+    toString(override = {}) { 
+        return `rgba(${this.toArray(override).join(', ')})`;
     }
 }
 

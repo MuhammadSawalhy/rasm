@@ -62,7 +62,7 @@ export default class {
     return { x: this.xToPixel(x, y), y: this.yToPixel(x, y) };
   }
   pxTOcoor(x, y) {
-    return { x: this.xToCoor(x, y), y: this.yToCoor(x, y) };
+    return { x: this.xTOcoor(x, y), y: this.yTOcoor(x, y) };
   }
   xToPixel(xCoorValue, yCoorValue) {
     return (this.center.x + (xCoorValue * this.transform.xScale) * Math.cos(this.transform.xAngle) + (yCoorValue * this.transform.yScale) * Math.cos(this.transform.yAngle));
@@ -70,12 +70,12 @@ export default class {
   yToPixel(xCoorValue, yCoorValue) {
     return (this.center.y - ((yCoorValue * this.transform.yScale) * Math.sin(this.transform.yAngle) + (xCoorValue * this.transform.xScale) * Math.sin(this.transform.xAngle)));
   }
-  xToCoor(xPixelValue, yPixelValue) {
+  xTOcoor(xPixelValue, yPixelValue) {
     xPixelValue = xPixelValue - this.center.x;
     yPixelValue = this.center.y - yPixelValue;
     return ((Math.cos(this.transform.yAngle) * yPixelValue - Math.sin(this.transform.yAngle) * xPixelValue) / Math.sin(this.transform.xAngle - this.transform.yAngle)) / this.transform.xScale;
   }
-  yToCoor(xPixelValue, yPixelValue) {
+  yTOcoor(xPixelValue, yPixelValue) {
     xPixelValue = xPixelValue - this.center.x;
     yPixelValue = this.center.y - yPixelValue;
     return ((Math.cos(this.transform.xAngle) * yPixelValue - Math.sin(this.transform.xAngle) * xPixelValue) / Math.sin(this.transform.yAngle - this.transform.xAngle)) / this.transform.yScale;

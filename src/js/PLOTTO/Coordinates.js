@@ -44,7 +44,10 @@ export default class {
          penPolarCircles: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100 / 255) : new drawing.color(50, 50, 50, 50 / 255), 1),
          penPolarLines: new drawing.pen(defaultCoorSettings.background.isDark() ? new drawing.color(200, 200, 200, 100 / 255) : new drawing.color(50, 50, 50, 50 / 255), 1)
       });
-
+      Object.assign(defaultCoorSettings, {
+         fillColor: defaultCoorSettings.color.toString(),
+         fillColorDim: defaultCoorSettings.color.toString({ a: 0.5 }),
+      });
       if (coorSettings) {
          this.coorSettings = {};
          Object.assign(this.coorSettings, defaultCoorSettings);
@@ -55,7 +58,7 @@ export default class {
 
    }
 
-   render(ctx) {
+   draw(ctx) {
       switch (this.coorSettings.type) {
          case 'default':
             this.custom(ctx);
@@ -115,18 +118,18 @@ export default class {
          canvas.ctx.stroke();
       }
 
-      start_x = Math.floor(start_x / this.gs.transform.xSpaceValue / a);
-      end_x = Math.ceil(end_x / this.gs.transform.xSpaceValue / a);
-      start_y = Math.floor(start_y / this.gs.transform.ySpaceValue);
-      end_y = Math.ceil(end_y / this.gs.transform.ySpaceValue);
-
-      let y, x;
-      let num;
       if (this.coorSettings.drawNumbers) {
+         start_x = Math.floor(start_x / this.gs.transform.xSpaceValue / a);
+         end_x = Math.ceil(end_x / this.gs.transform.xSpaceValue / a);
+         start_y = Math.floor(start_y / this.gs.transform.ySpaceValue);
+         end_y = Math.ceil(end_y / this.gs.transform.ySpaceValue);
+
+         let y, x;
+         let num;
          // label position x
-         canvas.ctx.fillStyle = this.coorSettings.color.toString();
-         canvas.ctx.strokeStyle = `rgba(${this.coorSettings.background.toArray().splice(0, 3).join(', ')}, 200)`;
-         canvas.ctx.lineWidth = 2;
+         canvas.ctx.fillStyle = this.coorSettings.fillColor;
+         canvas.ctx.strokeStyle = this.coorSettings.background.toString();
+         canvas.ctx.lineWidth = 3;
          canvas.setFont({ size: 15 }); /// setting the label style.
 
          let xD, yD;
@@ -145,9 +148,9 @@ export default class {
                x.toFixed(3).replace(/0+$/, "").replace(/\.$/, ''); /// .toFixed(3) returns 32146.000 if you input an integer, so I want to remove all the zeros from the end, and if "." remians, then remove it too, other wise keep all thing such as 2343165.123 
             if (x != 0) {
                num += (a === Math.PI / 2 ? 'pi' : '') + this.coorSettings.xUnit;
-               let p = this.__getLabelPos(canvas, this.gs.coorTOpx(x, 0), num, xD, this.gs.jVector); /// position of the label of x which the line, which is parallel to yAxis, intersect xAxis;
+               let p = this.__getLabelPos(canvas, this.gs.coorTOpx(x, 0) , num, xD, this.gs.jVector); /// position of the label of x which the line, which is parallel to yAxis, intersect xAxis;
+               canvas.ctx.strokeText(num, p.x, p.y);
                canvas.ctx.fillText(num, p.x, p.y);
-               // canvas.ctx.strokeText(num, p.x + 4, p.y + 4);
             }
          }
          // label position y
@@ -159,8 +162,8 @@ export default class {
             if (y != 0) {
                num += this.coorSettings.yUnit;
                let p = this.__getLabelPos(canvas, this.gs.coorTOpx(0, y), num, yD, this.gs.iVector);
+               canvas.ctx.strokeText(num, p.x, p.y);
                canvas.ctx.fillText(num, p.x, p.y);
-               // canvas.ctx.strokeText(num, p.x + 4, p.y + 4);
             }
          }
       }
@@ -178,29 +181,35 @@ export default class {
    __getLabelPos(canvas, pos, number, dimension, unitVec) {
       let size = canvas.measureString(number);
       size.height = 10; // as there is no properity called height in size, gotten from measureString("string");
-      pos = new vector(pos.x, pos.y);
+      pos = new vector(pos.x +4, pos.y +4);
 
       if (dimension === 'h') {
-         let bounds = [4, this.gs.width - size.width - 4];
+         let bounds = [10, this.gs.width - size.width - 10];
          if (pos.x < bounds[0]) {
+            // canvas.ctx.fillStyle = this.coorSettings.fillColorDim;
             let n = (bounds[0] - pos.x) / unitVec.x;
             return pos.add(unitVec.mult(n));
          } else if (pos.x > bounds[1]) {
+            // canvas.ctx.fillStyle = this.coorSettings.fillColorDim;
             let n = (bounds[1] - pos.x) / unitVec.x;
             return pos.add(unitVec.mult(n));
          } else {
+            // canvas.ctx.fillStyle = this.coorSettings.fillColor;
             return pos;
          }
       } else {
          /// if dimension is 'v' or even anything else.
-         let bounds = [4, this.gs.height - size.height - 4];
+         let bounds = [10, this.gs.height - size.height - 10];
          if (pos.y < bounds[0]) {
+            // canvas.ctx.fillStyle = this.coorSettings.fillColorDim;
             let n = (bounds[0] - pos.y) / unitVec.y;
             return pos.add(unitVec.mult(n));
          } else if (pos.y > bounds[1]) {
+            // canvas.ctx.fillStyle = this.coorSettings.fillColorDim;
             let n = (bounds[1] - pos.y) / unitVec.y;
             return pos.add(unitVec.mult(n));
          } else {
+            // canvas.ctx.fillStyle = this.coorSettings.fillColor;
             return pos;
          }
       }

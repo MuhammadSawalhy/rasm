@@ -106,7 +106,7 @@ Object.assign(Math, mathFunc);
 
 let vars = {
    pi: Math.PI,
-   e: mathFunc.sec,
+   e: Math.E,
    
 };
 

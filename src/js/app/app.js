@@ -1,4 +1,4 @@
-import { getContainment, updateObjsOrder, resize, checkSM, canvasParent, addControl, keypadSettings } from './global.js';
+import { getContainment, updateObjsOrder, resize, checkSM, addControl, keypadSettings } from './global.js';
 import Sketch from '../PLOTTO/Sketch.js';
 import drawing from '../PLOTTO/drawing/index.js';
 import setEvents from './events/index.js';
@@ -9,7 +9,7 @@ import { Variable } from '../PLOTTO/GraphChildren/index.js';
  * """""""""""""""" reminder
  * app folder is associated with PLOTTO folder, both of them depends upon the other.
  */
-export default function setupAPP(canvas) {
+export default function setupAPP(canvasParent) {
   document.body.style.height = window.innerHeight + 'px';
 
   window.MP = MathPackage;
@@ -28,9 +28,9 @@ export default function setupAPP(canvas) {
     // // autoOperatorNames: '',
     maxDepth: 10,
   });
-  window.mySketch = new Sketch(canvas);
+  window.mySketch = new Sketch(canvasParent);
   window.canvas = mySketch.canvas;
-  // canvasParent.appendChild(window.canvas.elt);
+  window.canvasParent = canvasParent;
 
   resize.prevSize = { width: 1000, height: 1000 }; /// the app is desined upon the large screen so this should be the default
   checkSM();
@@ -171,4 +171,4 @@ function setupSortable(){
 
 }
 
-setupAPP(document.querySelector('#canvas'));
+setupAPP(document.querySelector('#canvas-parent'));

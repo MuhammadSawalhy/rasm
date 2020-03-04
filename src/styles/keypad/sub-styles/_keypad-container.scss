@@ -16,14 +16,11 @@
   border-top: var(--kb-border);
   background: var(--kb-background);
   box-shadow: -1px 0 10px 2px silver;
+  transform: translateY(100%);
 
   &.visible {
     transition: transform 0.3s;
     transform: translateY(0%);
-  }
-
-  &.unvisible {
-    transform: translateY(100%);
   }
 
   .tabs-content {
