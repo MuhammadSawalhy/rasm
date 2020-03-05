@@ -40,7 +40,7 @@ $small-width: 600px;
   }
 
   .keypad-container {
-    order: 3;  
+    order: 3;
     &.visible {
       position: relative;
       transition: transform 0.3s;
@@ -83,6 +83,20 @@ $small-width: 600px;
     .main-tools-container {
       .subtools-btn {
         display: inline-block;
+      }
+    }
+  }
+
+  .keypad-container {
+    .main-keypad {
+      .take-space {
+        width: calc(var(--window-width) / 60);
+      }
+    }
+
+    .functions-keypad {
+      .take-space {
+        width: calc(var(--keypad-take-space) / 60);
       }
     }
   }

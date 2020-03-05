@@ -10,10 +10,14 @@ export default class Sketch {
         this.canvas = new Canvas({ parent: canvasParent, attributes: { id: 'canvas' } });
         this.childrenCanvas = new Canvas({ parent: canvasParent, attributes: { id: 'children-canvas' } });
         this.gs = new GraphSettings(this, this.canvas.width, this.canvas.height);
-        this.gs.transform.handlers.onchange = () => {
-            let { a, b, c, d, e, f } = this.gs.transform.getTransform();
-            this.childrenCanvas.setTransform(a, b, c, d, e, f);
-        };
+        // childrenTrans = this.gs.transform.getTransform();
+        // this.gs.transform.handlers.onchange = () => {
+        //     let { a, b, c, d, e, f } = this.gs.transform.getTransform();
+        //     a = a - childrenTrans.a; b = b - childrenTrans.b;
+        //     c = c - childrenTrans.c; d = d - childrenTrans.d;
+        //     e = e - childrenTrans.e; f = f - childrenTrans.f;
+        //     this.childrenCanvas.setTransform(a, b, c, d, e, f);
+        // };
         this.coor = new Coordinates(this.gs);
         this.children = new Map();
         this.scriptParser = new MagicalParser.CustomParsers.Math();
@@ -221,24 +225,19 @@ export default class Sketch {
 
     update(draw = true, coors = true) {
 
-        this.updator.worker.onmessage = (msg) => {
-            console.log(msg.data);
-            for (let child of this.children.values()) {
-                if (child) {
-                    child.update();
-                }
-            }
-            if (draw) {
-                this.childrenCanvas.ctx.resetTransform();
-                this.draw(false);
-            }
-        };
+        // this.updator.worker.onmessage = (msg) => {
+        // };
+        // this.updator.worker.postMessage('update');
 
-        this.updator.worker.postMessage('update');
-
+        for (let child of this.children.values()) {
+            if (child) {
+                child.update();
+            }
+        }
         if (draw) {
             this.draw(coors);
         }
+
     }
 
     draw(coors = true) {
@@ -258,3 +257,4 @@ export default class Sketch {
     }
 
 }
+// var childrenTrans;

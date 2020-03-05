@@ -258,7 +258,7 @@
                 >
                   <div
                     class="rows"
-                    style="--grid-template-columns: 1fr minmax(0, 0.2fr) repeat(5, 1fr) minmax(0, 0.2fr) 1fr;"
+                    style="--grid-template-columns: 1fr auto repeat(5, 1fr) auto 1fr;"
                   >
                     <div class="row">
                       <!--  1  -->
@@ -280,6 +280,7 @@
                         <span class="active" mq-cmd=")">)</span>
                         <span mq-cmd="]">]</span>
                       </button>
+                      
                       <button mq-cmd="/"><span>÷</span></button>
                       <button mq-cmd="\sqrt">
                         <span class="math-field">\sqrt{a}</span>
@@ -785,7 +786,7 @@
                 <div class="functions-keypad">
                   <div
                     class="rows"
-                    style="--grid-template-columns: repeat(3, 1fr) minmax(0, 0.2fr) 1fr;"
+                    style="--grid-template-columns: repeat(3, 1fr) auto 1fr;"
                   >
                     <div class="row">
                       <button class="double-shiftable" mq-func="sin">
@@ -831,8 +832,8 @@
                         </div>
                       </button>
                       <div class="take-space"></div>
-                      <button mq-write="\sum_{n=}^{ }">
-                        <span mq-write="\sum_{n=}^{ }">∑</span>
+                      <button mq-cmd="sum">
+                        <span mq-cmd="sum">∑</span>
                       </button>
                     </div>
                     <div class="row">
@@ -915,8 +916,8 @@
                       </button>
                       <div class="take-space"></div>
 
-                      <button mq-write="\int_{ }^{ }">
-                        <span class="math-field" mq-write="\int_{ }^{ }"
+                      <button mq-cmd="int">
+                        <span class="math-field" mq-cmd="int"
                           >\int</span
                         >
                       </button>

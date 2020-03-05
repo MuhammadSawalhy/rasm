@@ -82,8 +82,8 @@ export function addTOsketch(child, controlIndex = 'last' /* the index */) {
 export function resize(setContainment = true) {
    checkSM();
 
-   document.body.style.height = window.innerHeight + 'px';
-
+   document.body.style = `--window-width: ${window.innerWidth}px; --window-height: ${window.innerHeight}px`;
+   
    mySketch.canvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
    mySketch.childrenCanvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
   

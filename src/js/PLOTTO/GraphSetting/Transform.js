@@ -282,12 +282,13 @@ export default class {
       //#endregion
 
       //#region aftercalulations
-      this.invokeOnchange = true; this.onchange();
+
+      this.onchange(true);
       let tfCorner = this.coorManager.coorTOpx(viewport.xmin, viewport.ymax);
       tfCorner = new vector(tfCorner.x, tfCorner.y);
       /// translation::: put the top left corner as pixels after transformations on top of the one before transformation 
       this.translate(tfCorner.mult(-1));
-      this.onchange();
+      this.onchange(true);
       if (keepRatio) {
          let p_ = this.coorManager.coorTOpx(p.x, (viewport.ymax + viewport.ymin) / 2);
          this.translate(new vector(0, this.gs.height / 2 - p_.y));
@@ -413,12 +414,12 @@ export default class {
    reset() {
       this.transformOrigin = undefined;
 
-      this.xSpace = 80;
+      this.xSpace = 120;
       this.xSpaceValue = 2;
       this.xSpaceModifier = 1;
       this.xZoomingState = 2;
 
-      this.ySpace = 80;
+      this.ySpace = 120;
       this.ySpaceValue = 2;
       this.ySpaceModifier = 1;
       this.yZoomingState = 2;
@@ -431,8 +432,23 @@ export default class {
       this.onchange();
    }
 
-   assign(src) {
-      Object.assign(this, src);
+   assign(target, src) {
+      // target._transformOrigin = src._transformOrigin;
+
+      target.xSpace = src.xSpace;
+      target.xSpaceValue = src.xSpaceValue;
+      target.xSpaceModifier = src.xSpaceModifier;
+      target.xZoomingState = src.xZoomingState;
+
+      target.ySpace = src.ySpace;
+      target.ySpaceValue = src.ySpaceValue;
+      target.ySpaceModifier = src.ySpaceModifier;
+      target.yZoomingState = src.yZoomingState;
+
+      target._xAngle = src._xAngle;
+      target._yAngle = src._yAngle;
+
+      target._center = src._center;
    }
 
    onchange(change = this.invokeOnchange, transToOrigin = true) {
@@ -444,20 +460,27 @@ export default class {
          this.xScale = (this.xSpace * ysm / this.xSpaceValue);
          this.yScale = (this.ySpace * xsm / this.ySpaceValue);
 
-         let notValid =
+         let invalid =
             !math.isNumeric(this.xScale) || !math.isNumeric(this.yScale) ||
             !math.isNumeric(this.center.x) || !math.isNumeric(this.center.y) ||
             (this.transformOrigin && transToOrigin &&
                (!math.isNumeric(this.transformOrigin.coorVector.x) || !math.isNumeric(this.transformOrigin.coorVector.y) ||
                   !math.isNumeric(this.transformOrigin.pxVector.x) || !math.isNumeric(this.transformOrigin.pxVector.y)));
 
-         if (notValid) {
-            this.assign(this.lastEdition.transform);
-            this.gs.viewport = Object.assign({}, this.lastEdition.viewport);
-            this.gs.drawingStep = this.lastEdition.drawingStep;
-            this.gs._center = Object.assign(new vector(), this.lastEdition.center);
+         if (invalid) {
+            let a = this.invokeOnchange;
+            this.invokeOnchange = false;
+            try {
+               this.assign(this, this.lastVersion.transform);
+            } catch (e) {
+               this.reset();
+            }
+            this.invokeOnchange = a;
+            this.onchange(true);
             return;
          }
+
+         this.coorManager.transform = this.getTransform();
 
          let vp = this.getViewport({
             xmin: 0, xmax: this.gs.width,
@@ -470,25 +493,28 @@ export default class {
 
          this.gs.drawingStep = (this.gs.viewport.xmax - this.gs.viewport.xmin) / 10000;
 
-         notValid = !math.isNumeric(this.gs.viewport.xmin) || !math.isNumeric(this.gs.viewport.xmax) ||
+         invalid = !math.isNumeric(this.gs.viewport.xmin) || !math.isNumeric(this.gs.viewport.xmax) ||
             !math.isNumeric(this.gs.viewport.ymin) || !math.isNumeric(this.gs.viewport.ymax) ||
             !math.isNumeric(this.gs.drawingStep) ||
             (this.gs.viewport.xmax - this.gs.viewport.xmin) > 10 ** 12 ||
             (this.gs.viewport.ymax - this.gs.viewport.ymin) > 10 ** 12 ||
             (this.gs.viewport.xmax - this.gs.viewport.xmin) < 10 ** -12 ||
-            (this.gs.viewport.ymax - this.gs.viewport.ymin) < 10 ** -12 |
+            (this.gs.viewport.ymax - this.gs.viewport.ymin) < 10 ** -12 ||
             (this.gs.viewport.xmin + this.gs.drawingStep / 2 <= this.gs.viewport.xmin) ||
             this.gs.viewport.xmax - this.gs.drawingStep / 2 >= this.gs.viewport.xmax;
 
-         if (notValid && this.lastEdition) {
-            this.assign(this.lastEdition.transform);
-            this.gs.viewport = Object.assign({}, this.lastEdition.viewport);
-            this.gs.drawingStep = this.lastEdition.drawingStep;
-            this.gs._center = Object.assign(new vector(), this.lastEdition.center);
+         if (invalid && this.lastVersion) {
+            let a = this.invokeOnchange;
+            this.invokeOnchange = false;
+            try {
+               this.assign(this, this.lastVersion.transform);
+            } catch (e) {
+               this.reset();
+            }
+            this.invokeOnchange = a;
+            this.onchange(true);
             return;
          } else {
-
-            this.coorManager.transform = this.getTransform();
 
             if (this.transformOrigin && transToOrigin) {
                let a = this.invokeOnchange;
@@ -497,17 +523,16 @@ export default class {
                this.translate(this.transformOrigin.pxVector.subtract(p));
                this.onchange(true, false);
                this.invokeOnchange = a;
+               return;
             }
 
             if (this.handlers.onchange) {
                this.handlers.onchange();
             }
-
-            this.lastEdition = {
-               transform: Object.assign({}, this),
-               viewport: Object.assign({}, this.gs.viewport),
-               drawingStep: this.gs.drawingStep,
-               center: Object.assign({}, this.center)
+            let trans = {};
+            this.assign(trans, this);
+            this.lastVersion = {
+               transform: trans,
             };
          }
 
