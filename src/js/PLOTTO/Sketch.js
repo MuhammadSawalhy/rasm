@@ -10,19 +10,17 @@ export default class Sketch {
         this.canvas = new Canvas({ parent: canvasParent, attributes: { id: 'canvas' } });
         this.childrenCanvas = new Canvas({ parent: canvasParent, attributes: { id: 'children-canvas' } });
         this.gs = new GraphSettings(this, this.canvas.width, this.canvas.height);
-        // this.gs.transform.handlers.onchange = () => {
-        //     let i = this.gs.iVector,
-        //         j = this.gs.jVector,
-        //         c = this.gs.center;
-        //     this.childrenCanvas.setTransform(i.x, i.y, j.x, j.y, c.x, c.y);
-        // };
+        this.gs.transform.handlers.onchange = () => {
+            let { a, b, c, d, e, f } = this.gs.transform.getTransform();
+            this.childrenCanvas.setTransform(a, b, c, d, e, f);
+        };
         this.coor = new Coordinates(this.gs);
         this.children = new Map();
         this.scriptParser = new MagicalParser.CustomParsers.Math();
 
         this.childrenCanvas.ctx.miterLimit = 1;
 
-        this.updator = { worker: new Worker('./updateChildren.js'), data: { status: 'ready'}};
+        this.updator = { worker: new Worker('./updateChildren.js'), data: { status: 'ready' } };
     }
 
     appendChild(child) {
@@ -222,32 +220,24 @@ export default class Sketch {
     }
 
     update(draw = true, coors = true) {
-        if (draw && coors) {
-            this.canvas.clear();
-            this.coor.draw(this.canvas);
-        }
-        let pro = new Promise((res) => {
-            res();
-        });
-        // let vp = this.gs.viewport;
-        // this.childrenCanvas.clear(null, [vp.xmin, vp.ymin, vp.width, vp.height]);
-        if (this.updator.status !== 'updating') {
-            
-            this.updator.data.status = 'updating';
-            this.updator.data.children = this.children.values();
-            this.updator.worker.onmessage = (msg) => {
-                console.log(msg.data);
-            }
-            this.updator.worker.postMessage(1);
 
-            // let interval = setInterval(() => { 
-            //     if (this.updator.status === 'ready') {
-            //         clearInterval(interval);
-            //         if (draw) {
-            //             this.draw(false);
-            //         }
-            //     }
-            // }, 10);
+        this.updator.worker.onmessage = (msg) => {
+            console.log(msg.data);
+            for (let child of this.children.values()) {
+                if (child) {
+                    child.update();
+                }
+            }
+            if (draw) {
+                this.childrenCanvas.ctx.resetTransform();
+                this.draw(false);
+            }
+        };
+
+        this.updator.worker.postMessage('update');
+
+        if (draw) {
+            this.draw(coors);
         }
     }
 
@@ -256,7 +246,10 @@ export default class Sketch {
             this.canvas.clear();
             this.coor.draw(this.canvas);
         }
+        // let vp = this.gs.viewport;
+        // this.childrenCanvas.clear(null, [vp.xmin, vp.ymin, vp.width, vp.height]);
         this.childrenCanvas.clear();
+
         for (let child of this.children.values()) {
             if (child) {
                 child.draw(this.childrenCanvas);

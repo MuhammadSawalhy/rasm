@@ -1,15 +1,16 @@
 import Transform from './Transform.js';
-
+import CoorManager from './CoorManager.js';
 export default class {
 
   constructor(sketch, width, height) {
     this.sketch = sketch;
     this._width = width;
     this._height = height;
-    this._center = new vector(this.width / 2, this.height / 2);
 
+    this.coorManager = new CoorManager();
     this.transform = new Transform(this);
-    this.transform.onchange();
+
+    this.center = new vector(this.width / 2, this.height / 2);
 
     this.physicsRun = false;
 
@@ -30,58 +31,29 @@ export default class {
     this.transform.onchange();
   }
 
-  /**
-   * @returns the i vector of the cartesian coordinates relative to (with respect to) the pixel coordinates
-   */
-  get iVector() {
-    return vector.fromAngle(-this.transform.xAngle).mult(this.transform.xScale);
-  }
-  /**
-  * @returns the j vector of the cartesian coordinates relative to (with respect to) the pixel coordinates
-  */
-  get jVector() {
-    return vector.fromAngle(-this.transform.yAngle).mult(this.transform.yScale);
+  get center() {
+    return this.transform.center;
   }
 
-  get center() { return this._center; }
+  set center(vec) {
+    this.transform.center = vec;
+  }
+
+  get iVector() {
+    return this.transform.iVector;
+  }
+
+  get jVector() {
+    return this.transform.jVector;
+  }
 
   centrate() {
-    this.transform.translate(new vector(
-      this.width / 2 - this.center.x,
-      this.height / 2 - this.center.y
-    ));
+    this.transform.center = new vector(this.width / 2, this.height / 2);
   }
 
   reset() {
     this.transform.reset();
   }
-
-  //#region convert { coor, px }
-
-  coorTOpx(x, y) {
-    return { x: this.xToPixel(x, y), y: this.yToPixel(x, y) };
-  }
-  pxTOcoor(x, y) {
-    return { x: this.xTOcoor(x, y), y: this.yTOcoor(x, y) };
-  }
-  xToPixel(xCoorValue, yCoorValue) {
-    return (this.center.x + (xCoorValue * this.transform.xScale) * Math.cos(this.transform.xAngle) + (yCoorValue * this.transform.yScale) * Math.cos(this.transform.yAngle));
-  }
-  yToPixel(xCoorValue, yCoorValue) {
-    return (this.center.y - ((yCoorValue * this.transform.yScale) * Math.sin(this.transform.yAngle) + (xCoorValue * this.transform.xScale) * Math.sin(this.transform.xAngle)));
-  }
-  xTOcoor(xPixelValue, yPixelValue) {
-    xPixelValue = xPixelValue - this.center.x;
-    yPixelValue = this.center.y - yPixelValue;
-    return ((Math.cos(this.transform.yAngle) * yPixelValue - Math.sin(this.transform.yAngle) * xPixelValue) / Math.sin(this.transform.xAngle - this.transform.yAngle)) / this.transform.xScale;
-  }
-  yTOcoor(xPixelValue, yPixelValue) {
-    xPixelValue = xPixelValue - this.center.x;
-    yPixelValue = this.center.y - yPixelValue;
-    return ((Math.cos(this.transform.xAngle) * yPixelValue - Math.sin(this.transform.xAngle) * xPixelValue) / Math.sin(this.transform.yAngle - this.transform.xAngle)) / this.transform.yScale;
-  }
-
-  //#endregion
 
   checkId(id) {
     if (!id) throw new Error('can\'t set a falsy value to the name of this sketch child.');

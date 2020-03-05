@@ -14,6 +14,7 @@ export default class GraphChild {
         this.sketch = options.sketch; /// avoid error when defining the sketch after the id
         Object.assign(this, options);
         this.gs = this.sketch.gs;
+        this.coorManager = this.gs.coorManager;
         this.gs.childrenIDs.push(options.id);
 
     }

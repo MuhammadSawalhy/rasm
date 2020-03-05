@@ -27,8 +27,8 @@ export default function canvasEvents() {
       Object.assign(subTools, {
          type: subTools.type,
          mouse: new vector(mouse.x, mouse.y),
-         iVector: mySketch.gs.iVector,
-         jVector: mySketch.gs.jVector
+         iVector: mySketch.gs.transform.iVector,
+         jVector: mySketch.gs.transform.jVector
       });
 
       if (subTools.type === 'move') {
@@ -40,7 +40,7 @@ export default function canvasEvents() {
             mouse.vel = { x: mouse.x - mouse.prev.x, y: mouse.y - mouse.prev.y };
             // mouse.acc = { x: mouse.vel.x - mouse.prevVel.x, y: mouse.vel.y - mouse.prevVel.y };
             mouse.prev = { x: mouse.x, y: mouse.y };
-         }, 10);
+         }, 20);
       }
       else if (subTools.type.search('axises') > -1) {
          let xEq = lines.lineEquation(-mySketch.gs.transform.xAngle, mySketch.gs.center),

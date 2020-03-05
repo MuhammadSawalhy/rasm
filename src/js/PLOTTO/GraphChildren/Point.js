@@ -42,7 +42,7 @@ export default class Point extends GraphChild {
             throw new Error('your str is empty :\'(');
     }
 
-    async render(canvas, handlerArgs = []) {
+    draw(canvas, handlerArgs = []) {
 
         if (this.renderable) {
             switch (this.pen.style) {
@@ -57,7 +57,7 @@ export default class Point extends GraphChild {
                     canvas.ctx.fillStyle(this.sketch.coor.coorSettings.background.toString());
                     break;
             }
-            let p = this.gs.coorTOpx(this.x.eval(), this.y.eval());
+            let p = this.coorManager.coorTOpx(this.x.eval(), this.y.eval());
             canvas.ellipse(p.x, p.y, this.pen.weight, this.pen.weight);
         }
 

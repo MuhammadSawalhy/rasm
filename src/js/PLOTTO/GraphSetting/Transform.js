@@ -2,32 +2,36 @@ export default class {
 
    constructor(gs) {
       this.gs = gs;
+      this.coorManager = gs.coorManager;
       this.handlers = {};
-      /** don't spacify the value of xAngle or yAngle before _xAngle and _yAngle
-       *  as the value of either depends upon the other */
-      /**
-       * here this.invokeOnchange is undefines so there is no use of put it to false
-       */
-      this._xAngle = 0;
-      this.xSpace = 80;
-      this.xSpaceValue = 2;
-      this.xSpaceModifier = 1;
-      this.xSpaceModifier = 1;
-
-      this._yAngle = Math.PI / 2;
-      this.ySpace = 80;
-      this.ySpaceValue = 2;
-      this.ySpaceModifier = 1;
-      this.ySpaceModifier = 1;
-
+      
       this.angleMargin = angles.deg(20);
       this.zoomLimits = [80, 180];
       this.zoomLimits[1] = (this.zoomLimits[1] * 2 / 5) < this.zoomLimits[0] ? this.zoomLimits[0] * 5 / 2 + 1 : this.zoomLimits[0];
       this.zoomRatio = 1.1;
 
-      this.xZoomingState = 2; this.yZoomingState = 2;
-
       this.invokeOnchange = true;
+      this.reset();
+   }
+
+   /**
+    * @returns the i vector of the cartesian coordinates relative to (with respect to) the pixel coordinates
+    */
+   get iVector() {
+      return vector.fromAngle(-this.xAngle).mult(this.xScale);
+   }
+   /**
+   * @returns the j vector of the cartesian coordinates relative to (with respect to) the pixel coordinates
+   */
+   get jVector() {
+      return vector.fromAngle(-this.yAngle).mult(this.yScale);
+   }
+
+   getTransform() {
+      let i = this.iVector;
+      let j = this.jVector;
+      let c = this.center;
+      return { a: i.x, b: i.y, c: j.x, d: j.y, e: c.x, f: c.y };
    }
 
    //#region transformation's origin
@@ -41,7 +45,7 @@ export default class {
          this._transformOrigin = {
             pxVector: pxVector
          };
-         let coor = this.gs.pxTOcoor(pxVector.x, pxVector.y);
+         let coor = this.coorManager.pxTOcoor(pxVector.x, pxVector.y);
          this._transformOrigin.coorVector = new vector(coor.x, coor.y);
       } else {
          this._transformOrigin = undefined;
@@ -162,17 +166,15 @@ export default class {
 
    //#region translate
 
+   get center() { return this._center; }
+
+   set center(vec) {
+      this._center = vec;
+      this.onchange(this.invokeOnchange, false);
+   }
+
    translate(value) {
-      this.gs._center = new vector(this.gs.center.x + value.x, this.gs.center.y + value.y);
-      this.onchange(this.invokeOnchange, false);
-   }
-   translateX(value) {
-      this.gs._center = new vector(this.gs.center.x + value.x, this.gs.center.y + value.y);
-      this.onchange(this.invokeOnchange, false);
-   }
-   translateY(value) {
-      this.gs._center = new vector(this.gs.center.x + value.x, this.gs.center.y + value.y);
-      this.onchange(this.invokeOnchange, false);
+      this.center = new vector(this._center.x + value.x, this._center.y + value.y);
    }
 
    //#endregion
@@ -184,9 +186,10 @@ export default class {
       centerOfZoom = centerOfZoom || new vector(this.gs.width / 2, this.gs.height / 2);
       this.transformOrigin = centerOfZoom;
 
+      let a = this.invokeOnchange;
       this.invokeOnchange = false;
       this.xZoomIn(); this.yZoomIn();
-      this.invokeOnchange = true;
+      this.invokeOnchange = a;
       this.onchange();
 
    }
@@ -195,9 +198,10 @@ export default class {
       centerOfZoom = centerOfZoom || new vector(this.gs.width / 2, this.gs.height / 2);
       this.transformOrigin = centerOfZoom;
 
+      let a = this.invokeOnchange;
       this.invokeOnchange = false;
       this.xZoomOut(); this.yZoomOut();
-      this.invokeOnchange = true;
+      this.invokeOnchange = a;
       this.onchange();
 
    }
@@ -253,7 +257,7 @@ export default class {
       viewport.ymin = viewport.ymin === 0 ? 0 : (viewport.ymin || this.gs.viewport.ymin);
       viewport.ymax = viewport.ymax === 0 ? 0 : (viewport.ymax || this.gs.viewport.ymax);
       let a = this.invokeOnchange; this.invokeOnchange = false;
-      let p = this.gs.pxTOcoor(this.gs.width / 2, this.gs.height / 2);
+      let p = this.coorManager.pxTOcoor(this.gs.width / 2, this.gs.height / 2);
 
       //#endregion
 
@@ -279,13 +283,13 @@ export default class {
 
       //#region aftercalulations
       this.invokeOnchange = true; this.onchange();
-      let tfCorner = this.gs.coorTOpx(viewport.xmin, viewport.ymax);
+      let tfCorner = this.coorManager.coorTOpx(viewport.xmin, viewport.ymax);
       tfCorner = new vector(tfCorner.x, tfCorner.y);
       /// translation::: put the top left corner as pixels after transformations on top of the one before transformation 
       this.translate(tfCorner.mult(-1));
       this.onchange();
       if (keepRatio) {
-         let p_ = this.gs.coorTOpx(p.x, (viewport.ymax + viewport.ymin) / 2);
+         let p_ = this.coorManager.coorTOpx(p.x, (viewport.ymax + viewport.ymin) / 2);
          this.translate(new vector(0, this.gs.height / 2 - p_.y));
       }
       this.onchange(); this.invokeOnchange = a;
@@ -298,10 +302,10 @@ export default class {
       pxViewport.ymin = pxViewport.ymin || 0;
       pxViewport.ymax = pxViewport.ymax || this.gs.height;
 
-      let xStart = this.gs.xTOcoor(pxViewport.xmin, Math.tan(this.yAngle) > 0 ? pxViewport.ymin : pxViewport.ymax);
-      let xEnd = this.gs.xTOcoor(pxViewport.xmax, Math.tan(this.yAngle) <= 0 ? pxViewport.ymin : pxViewport.ymax);
-      let yStart = this.gs.yTOcoor(Math.tan(this.xAngle) > 0 ? pxViewport.xmax : pxViewport.xmin, pxViewport.ymax);
-      let yEnd = this.gs.yTOcoor(Math.tan(this.xAngle) <= 0 ? pxViewport.xmax : pxViewport.xmin, pxViewport.ymin);
+      let xStart = this.coorManager.xTOcoor(pxViewport.xmin, Math.tan(this.yAngle) > 0 ? pxViewport.ymin : pxViewport.ymax);
+      let xEnd = this.coorManager.xTOcoor(pxViewport.xmax, Math.tan(this.yAngle) <= 0 ? pxViewport.ymin : pxViewport.ymax);
+      let yStart = this.coorManager.yTOcoor(Math.tan(this.xAngle) > 0 ? pxViewport.xmax : pxViewport.xmin, pxViewport.ymax);
+      let yEnd = this.coorManager.yTOcoor(Math.tan(this.xAngle) <= 0 ? pxViewport.xmax : pxViewport.xmin, pxViewport.ymin);
 
       return {
          xmin: xEnd < xStart ? xEnd : xStart,
@@ -408,7 +412,6 @@ export default class {
 
    reset() {
       this.transformOrigin = undefined;
-      this.invokeOnchange = false;
 
       this.xSpace = 80;
       this.xSpaceValue = 2;
@@ -423,12 +426,8 @@ export default class {
       this._xAngle = 0;
       this._yAngle = Math.PI / 2;
 
-      this.translate(new vector(
-         this.gs.width / 2 - this.gs.center.x,
-         this.gs.height / 2 - this.gs.center.y
-      ));
+      this._center = new vector(this.gs.width / 2, this.gs.height / 2);
 
-      this.invokeOnchange = true;
       this.onchange();
    }
 
@@ -440,48 +439,19 @@ export default class {
       /// updating
       if (change) {
 
-         let ysm = this.xSpaceModifier * Math.abs(Math.cos(this.xAngle - this.yAngle)) + 1;
-         let xsm = this.ySpaceModifier * Math.abs(Math.cos(this.xAngle - this.yAngle)) + 1;
+         let ysm = this.xSpaceModifier + Math.abs(Math.cos(this.xAngle - this.yAngle));
+         let xsm = this.ySpaceModifier + Math.abs(Math.cos(this.xAngle - this.yAngle));
          this.xScale = (this.xSpace * ysm / this.xSpaceValue);
          this.yScale = (this.ySpace * xsm / this.ySpaceValue);
 
-         let vp = this.getViewport({
-            xmin: 0, xmax: this.gs.width,
-            ymin: 0, ymax: this.gs.height
-         });
-         vp.width = vp.xmax - vp.xmin;
-         vp.height = vp.ymax - vp.ymin;
-         this.gs.viewport = vp;
-
-         this.gs.drawingStep = (this.gs.viewport.xmax - this.gs.viewport.xmin) / 10000;
-
-         if (this.transformOrigin && transToOrigin) {
-            let a = this.invokeOnchange;
-            this.invokeOnchange = false;
-            let p = this.gs.coorTOpx(...this.transformOrigin.coorVector.toArray());
-            this.translate(this.transformOrigin.pxVector.subtract(p));
-            this.onchange(true, false);
-            this.invokeOnchange = a;
-         }
-
-         //#region checking if valid.
-         let notValid = (this.gs.viewport.xmin + this.gs.drawingStep / 2 <= this.gs.viewport.xmin) ||
-            this.gs.viewport.xmax - this.gs.drawingStep / 2 >= this.gs.viewport.xmax ||
+         let notValid =
             !math.isNumeric(this.xScale) || !math.isNumeric(this.yScale) ||
-            !math.isNumeric(this.gs.viewport.xmin) || !math.isNumeric(this.gs.viewport.xmax) ||
-            !math.isNumeric(this.gs.viewport.ymin) || !math.isNumeric(this.gs.viewport.ymax) ||
-            !math.isNumeric(this.gs.drawingStep) ||
-            (this.gs.viewport.xmax - this.gs.viewport.xmin) > 10 ** 12 ||
-            (this.gs.viewport.ymax - this.gs.viewport.ymin) > 10 ** 12 ||
-            (this.gs.viewport.xmax - this.gs.viewport.xmin) < 10 ** -12 ||
-            (this.gs.viewport.ymax - this.gs.viewport.ymin) < 10 ** -12 ||
-            !math.isNumeric(this.gs.center.x) || !math.isNumeric(this.gs.center.y) ||
+            !math.isNumeric(this.center.x) || !math.isNumeric(this.center.y) ||
             (this.transformOrigin && transToOrigin &&
                (!math.isNumeric(this.transformOrigin.coorVector.x) || !math.isNumeric(this.transformOrigin.coorVector.y) ||
                   !math.isNumeric(this.transformOrigin.pxVector.x) || !math.isNumeric(this.transformOrigin.pxVector.y)));
-         //#endregion
 
-         if (notValid && this.lastEdition) {
+         if (notValid) {
             this.assign(this.lastEdition.transform);
             this.gs.viewport = Object.assign({}, this.lastEdition.viewport);
             this.gs.drawingStep = this.lastEdition.drawingStep;
@@ -489,20 +459,61 @@ export default class {
             return;
          }
 
-         if (this.handlers.onchange) {
-            this.handlers.onchange();
+         let vp = this.getViewport({
+            xmin: 0, xmax: this.gs.width,
+            ymin: 0, ymax: this.gs.height
+         });
+
+         vp.width = vp.xmax - vp.xmin;
+         vp.height = vp.ymax - vp.ymin;
+         this.gs.viewport = vp;
+
+         this.gs.drawingStep = (this.gs.viewport.xmax - this.gs.viewport.xmin) / 10000;
+
+         notValid = !math.isNumeric(this.gs.viewport.xmin) || !math.isNumeric(this.gs.viewport.xmax) ||
+            !math.isNumeric(this.gs.viewport.ymin) || !math.isNumeric(this.gs.viewport.ymax) ||
+            !math.isNumeric(this.gs.drawingStep) ||
+            (this.gs.viewport.xmax - this.gs.viewport.xmin) > 10 ** 12 ||
+            (this.gs.viewport.ymax - this.gs.viewport.ymin) > 10 ** 12 ||
+            (this.gs.viewport.xmax - this.gs.viewport.xmin) < 10 ** -12 ||
+            (this.gs.viewport.ymax - this.gs.viewport.ymin) < 10 ** -12 |
+            (this.gs.viewport.xmin + this.gs.drawingStep / 2 <= this.gs.viewport.xmin) ||
+            this.gs.viewport.xmax - this.gs.drawingStep / 2 >= this.gs.viewport.xmax;
+
+         if (notValid && this.lastEdition) {
+            this.assign(this.lastEdition.transform);
+            this.gs.viewport = Object.assign({}, this.lastEdition.viewport);
+            this.gs.drawingStep = this.lastEdition.drawingStep;
+            this.gs._center = Object.assign(new vector(), this.lastEdition.center);
+            return;
+         } else {
+
+            this.coorManager.transform = this.getTransform();
+
+            if (this.transformOrigin && transToOrigin) {
+               let a = this.invokeOnchange;
+               this.invokeOnchange = false;
+               let p = this.coorManager.coorTOpx(...this.transformOrigin.coorVector.toArray());
+               this.translate(this.transformOrigin.pxVector.subtract(p));
+               this.onchange(true, false);
+               this.invokeOnchange = a;
+            }
+
+            if (this.handlers.onchange) {
+               this.handlers.onchange();
+            }
+
+            this.lastEdition = {
+               transform: Object.assign({}, this),
+               viewport: Object.assign({}, this.gs.viewport),
+               drawingStep: this.gs.drawingStep,
+               center: Object.assign({}, this.center)
+            };
          }
-            
-         this.lastEdition = {
-            transform: Object.assign(new this.constructor(), this),
-            viewport: Object.assign({}, this.gs.viewport),
-            drawingStep: this.gs.drawingStep,
-            center: Object.assign(new vector(), this.gs.center)
-         };
 
       }
    }
 
    //#endregion
 
-};
+}

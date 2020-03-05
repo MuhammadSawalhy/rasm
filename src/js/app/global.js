@@ -13,7 +13,7 @@ export var subTools = {
       parent: document.querySelector('#canvas-parent')
    })
 };
-export var mouse = { x: undefined, y: undefined, friction: 1 /** used on draging the coordinates */ };
+export var mouse = { x: undefined, y: undefined};
 
 export var keypadSettings = {
    backspaceInterval: undefined,

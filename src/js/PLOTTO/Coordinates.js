@@ -3,6 +3,7 @@ export default class {
 
    constructor(gs, coorSettings) {
       this.gs = gs;
+      this.coorManager = this.gs.coorManager;
       let defaultCoorSettings = {
          type: 'default',
          xUnit: '',
@@ -82,12 +83,12 @@ export default class {
          this.coorSettings.penDecimalLines.setup(canvas);
          // x
          for (let i = start_x; i <= end_x; i += this.gs.transform.xSpaceValue * a / this.coorSettings.decimalLinesSpace)
-            canvas.line(this.gs.xToPixel(i, start_y), this.gs.yToPixel(i, start_y),
-               this.gs.xToPixel(i, end_y), this.gs.yToPixel(i, end_y));
+            canvas.line(this.coorManager.xToPixel(i, start_y), this.coorManager.yToPixel(i, start_y),
+               this.coorManager.xToPixel(i, end_y), this.coorManager.yToPixel(i, end_y));
          // y
          for (let i = start_y; i <= end_y; i += this.gs.transform.ySpaceValue / this.coorSettings.decimalLinesSpace)
-            canvas.line(this.gs.xToPixel(start_x, i), this.gs.yToPixel(start_x, i),
-               this.gs.xToPixel(end_x, i), this.gs.yToPixel(end_x, i));
+            canvas.line(this.coorManager.xToPixel(start_x, i), this.coorManager.yToPixel(start_x, i),
+               this.coorManager.xToPixel(end_x, i), this.coorManager.yToPixel(end_x, i));
          canvas.ctx.stroke();
       }
 
@@ -96,25 +97,25 @@ export default class {
          this.coorSettings.penMainLines.setup(canvas);
          // x
          for (let i = start_x; i <= end_x; i += this.gs.transform.xSpaceValue * a)
-            canvas.line(this.gs.xToPixel(i, start_y), this.gs.yToPixel(i, start_y),
-               this.gs.xToPixel(i, end_y), this.gs.yToPixel(i, end_y));
+            canvas.line(this.coorManager.xToPixel(i, start_y), this.coorManager.yToPixel(i, start_y),
+               this.coorManager.xToPixel(i, end_y), this.coorManager.yToPixel(i, end_y));
          // y
          for (let i = start_y; i <= end_y; i += this.gs.transform.ySpaceValue)
-            canvas.line(this.gs.xToPixel(start_x, i), this.gs.yToPixel(start_x, i),
-               this.gs.xToPixel(end_x, i), this.gs.yToPixel(end_x, i));
+            canvas.line(this.coorManager.xToPixel(start_x, i), this.coorManager.yToPixel(start_x, i),
+               this.coorManager.xToPixel(end_x, i), this.coorManager.yToPixel(end_x, i));
          canvas.ctx.stroke();
       }
 
       if (this.coorSettings.drawAxisesLines) {
          canvas.ctx.beginPath();
          this.coorSettings.penXaxis.setup(canvas);
-         canvas.line(this.gs.xToPixel(start_x, 0), this.gs.yToPixel(start_x, 0),
-            this.gs.xToPixel(end_x, 0), this.gs.yToPixel(end_x, 0));
+         canvas.line(this.coorManager.xToPixel(start_x, 0), this.coorManager.yToPixel(start_x, 0),
+            this.coorManager.xToPixel(end_x, 0), this.coorManager.yToPixel(end_x, 0));
          canvas.ctx.stroke();
          canvas.ctx.beginPath();
          this.coorSettings.penYaxis.setup(canvas);
-         canvas.line(this.gs.xToPixel(0, start_y), this.gs.yToPixel(0, start_y),
-            this.gs.xToPixel(0, end_y), this.gs.yToPixel(0, end_y));
+         canvas.line(this.coorManager.xToPixel(0, start_y), this.coorManager.yToPixel(0, start_y),
+            this.coorManager.xToPixel(0, end_y), this.coorManager.yToPixel(0, end_y));
          canvas.ctx.stroke();
       }
 
@@ -148,7 +149,7 @@ export default class {
                x.toFixed(3).replace(/0+$/, "").replace(/\.$/, ''); /// .toFixed(3) returns 32146.000 if you input an integer, so I want to remove all the zeros from the end, and if "." remians, then remove it too, other wise keep all thing such as 2343165.123 
             if (x != 0) {
                num += (a === Math.PI / 2 ? 'pi' : '') + this.coorSettings.xUnit;
-               let p = this.__getLabelPos(canvas, this.gs.coorTOpx(x, 0) , num, xD, this.gs.jVector); /// position of the label of x which the line, which is parallel to yAxis, intersect xAxis;
+               let p = this.__getLabelPos(canvas, this.coorManager.coorTOpx(x, 0) , num, xD, this.gs.transform.jVector); /// position of the label of x which the line, which is parallel to yAxis, intersect xAxis;
                canvas.ctx.strokeText(num, p.x, p.y);
                canvas.ctx.fillText(num, p.x, p.y);
             }
@@ -161,7 +162,7 @@ export default class {
                y.toFixed(3).replace(/0+$/, "").replace(/\.$/, '');
             if (y != 0) {
                num += this.coorSettings.yUnit;
-               let p = this.__getLabelPos(canvas, this.gs.coorTOpx(0, y), num, yD, this.gs.iVector);
+               let p = this.__getLabelPos(canvas, this.coorManager.coorTOpx(0, y), num, yD, this.gs.transform.iVector);
                canvas.ctx.strokeText(num, p.x, p.y);
                canvas.ctx.fillText(num, p.x, p.y);
             }

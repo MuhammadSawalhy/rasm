@@ -41,8 +41,8 @@ export default class Xfunction extends GraphChild {
             let p, previousP, midP, continous;
             let path = new Path2D();
             for (let x = this.gs.viewport.xmin; x <= this.gs.viewport.xmax; x += this.gs.drawingStep) {
-               p = this.gs.coorTOpx(x, this.expression(x));
-               midP = this.gs.coorTOpx(x - this.gs.drawingStep / 2, this.expression(x - this.gs.drawingStep / 2));
+               p = this.coorManager.coorTOpx(x, this.expression(x));
+               midP = this.coorManager.coorTOpx(x - this.gs.drawingStep / 2, this.expression(x - this.gs.drawingStep / 2));
                // if valid add new point, unless add the array of point if has more than point
                let valid = !isNaN(p.x) && !isNaN(p.y) &&
                   Math.abs(p.x) < 100000 && Math.abs(p.y) < 100000 &&
