@@ -1,11 +1,11 @@
 .sidebar-container {
-  transition: transform .3s;
+  transition: transform 0.3s;
   flex-basis: 300px;
-  width: 300px;
+  height: 100%; // at the beginning the app is set to the large screen and the sidebar is at the left
   min-width: var(--sidebar-min-width);
   max-width: var(--sidebar-max-width);
 
-  background: #e0e0e0;
+  background: rgba(184, 184, 184, 0.575);
 
   display: flex;
   flex-flow: column nowrap;
@@ -47,7 +47,7 @@
     #show-hide-sidebar {
       float: right;
     }
-    #add-more{
+    #add-more {
       float: left;
       visibility: hidden;
     }
@@ -69,27 +69,26 @@
 }
 
 #show-hide-sidebar {
-  .path {
-    stroke-width: 2px;
-    stroke: #31313188;
-    --left: path("M 8 0, 2 5, 8 10");
-    --right: path("M 2 0, 8 5, 2 10");
-    --up: path("M0 8, 5 2, 10 8");
-    --down: path("M 0 2, 5 8, 10 2");
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-
+  .arrow {
+    display: none;
+    font-size: 15px;
+  }
   &.unvisible {
     position: absolute;
     left: 5px;
     top: 5px;
-    .path {
-      d: var(--right);
+    .arrow.right {
+      display: block;
     }
   }
-
   &.visible {
-    .path {
-      d: var(--left);
+    .arrow.left {
+      display: block;
     }
   }
 }

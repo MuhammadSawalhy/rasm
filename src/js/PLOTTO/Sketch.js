@@ -1,9 +1,7 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-undef */
 import GraphSettings from './GraphSetting/GraphSettings.js';
 import Coordinates from './Coordinates.js';
 import Canvas from './Canvas.js';
-import { Xfunction, EvalExpr, Point, Variable, Empty, Slider } from './GraphChildren/index.js';
+import { Xfunction, EvalExpr, Point, Variable, Empty, Slider, Func } from './GraphChildren/index.js';
 export default class Sketch {
 
     constructor(canvasParent) {
@@ -24,13 +22,7 @@ export default class Sketch {
 
         this.childrenCanvas.ctx.miterLimit = 1;
 
-        this.updator = { worker: new Worker('./updateChildren.js'), data: { status: 'ready' } };
-    }
-
-    appendChild(child) {
-        if (!child.id) throw new Error('Your sketch child should have had an id :\'(');
-        let append = (child instanceof GraphChild ? child : this.childFromScript(child));
-        this.children.set(child.id, child);
+        // this.updator = { worker: new Worker('./updateChildren.js'), data: { status: 'ready' } };
     }
 
     childFromScript(script, propsTOset = {}) {
@@ -51,39 +43,34 @@ export default class Sketch {
             }
 
             //such : area( h , b , theta ) = 0.5 * h * b * sin( theta )
-            //such : f(x) = x^2
-            else if (left.check({ type: 'functionCalling' }) && !this.gs.reservedFunction.find(name => Math.hasOwnProperty(left.name))) {
+            //such : g(a) = a^2
+            else if (left.check({ type: 'functionCalling' })) {
                 // such : f(x) = x^2
                 if (left.args.length == 1 && left.args[0].check({ type: 'variable', name: 'x' }) && !right.contains({ type: 'variable', name: 'y' })) {
                     return new Xfunction({ sketch: this, expr: right, id: left.name });
                 }
-                /*
+
                 //such : area( h , b , theta) = 0.5 * h * b * sin( theta )
                 else {
-                    List < string > args = new List<string>();
-                    LNode Process = null;
-                    
-                    foreach(LNode arg in left.Args);
-                    {
-                        if (arg.IsId) {
-                            args.Add(arg.Name.Name);
+                    let params = [];
+                    let skip;
+                    if (left.args[0].check({ type: 'separator', name: ',' })) {
+                        for (let param of left.args[0].args) {
+                            if (param.type === 'variable') {
+                                params.push(param.name);
+                            } else {
+                                skip = true;
+                                continue;
+                            }
                         }
-                        else {
-                            throw new Exception($"The argument {arg.ToString().Substring(0, arg.ToString().length - 1)} of the function \"{name.ToString()}\" is invalid");
-                        }
+                    } else {
+                        if (left.args[0].type !== 'variable') skip = true;
+                        if (!skip) params.push(left.args[0].name);
                     }
-                    if (MathExpression(right)) {
-                        Process = right;
+                    if (!skip) {
+                        return new Func(Object.assign(propsTOset, { id: left.name, params, expr: right }));
                     }
-                    else {
-                        throw new Exception($"The process {right.ToString().Substring(0, right.ToString().length - 1)} of the function \"{name.ToString()}\" is invalid");
-                    }
-
-
-                    MathPackage.Operations.Func func = new MathPackage.Operations.Func(name, args, MathPackage.Transformer.GetNodeFromLoycNode(Process, GraphSettings.CalculationSettings));
-                    return func;
                 }
-                */
             }
 
             //such : a = 2
@@ -145,13 +132,13 @@ export default class Sketch {
             }
             /// it is a point
             else {
-                return new Point({ x: parsedString.args[0].args[0], y: parsedString.args[0].args[1], ...propsTOset });
+                return new Point(Object.assign({ x: parsedString.args[0].args[0], y: parsedString.args[0].args[1] }, propsTOset));
             }
         }
 
         {
             /*
-
+ 
         else {
             //#region "Add PointsDependant";
             if (PDsTypes().Contains(parsedString.Target.Name.ToString())) {
@@ -208,7 +195,7 @@ export default class Sketch {
                 }
             }
         }
-
+ 
     */
         }
 
@@ -224,20 +211,28 @@ export default class Sketch {
     }
 
     update(draw = true, coors = true) {
-
         // this.updator.worker.onmessage = (msg) => {
         // };
         // this.updator.worker.postMessage('update');
-
-        for (let child of this.children.values()) {
-            if (child) {
-                child.update();
+        if (this.status === 'updating' || this.status === 're-updating') {
+            this.status = 're-update';
+        } else {
+            this.status = 'updating';
+            for (let child of this.children.values()) {
+                if (child) {
+                    child.update();
+                }
+            }
+            if (draw) {
+                this.draw(coors);
+            }
+            if (this.status === 're-update') {
+                this.status = 'ready';
+                this.update(draw, coors);
+            } else {
+                this.status = 'ready';
             }
         }
-        if (draw) {
-            this.draw(coors);
-        }
-
     }
 
     draw(coors = true) {
@@ -257,4 +252,3 @@ export default class Sketch {
     }
 
 }
-// var childrenTrans;

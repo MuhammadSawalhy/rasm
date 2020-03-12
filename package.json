@@ -5,7 +5,8 @@
   "main": "src/js/app/app.js",
   "scripts": {
     "lint": "eslint ./src/js/**/*.js",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "server":  "npx http-server ./"
   },
   "author": "SciCave Team",
   "license": "copyrights reserved - you can not grap any snippet of this project without a compliance.",
@@ -36,5 +37,10 @@
     "geometry",
     "algebra",
     "curves"
+  ],
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11"
   ]
 }

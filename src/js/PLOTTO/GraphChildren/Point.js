@@ -2,12 +2,11 @@
 import GraphChild from './GraphChild.js';
 import { getJSfunction } from '../global.js';
 export default class Point extends GraphChild {
-    // color is rgb
-    // gs stands for graphSetting
+
     constructor(options) {
-        options.pen = options.pen || new drawing.pen(new drawing.color(0, 0, 255), 10);
         
         //#region 
+        options.pen = options.pen || new drawing.pen(new drawing.color(0, 0, 255), 10);
         let propName;
 
         propName = 'x';
@@ -21,9 +20,11 @@ export default class Point extends GraphChild {
         }
         //#endregion
 
-        super(options);
-        this.x = getJSfunction(this.x);
-        this.y = getJSfunction(this.y);
+        super(options, (me) => {
+            me.x = getJSfunction(me.x);
+            me.y = getJSfunction(me.y);
+        });
+
     }
 
     static fromString(str, sketch) {

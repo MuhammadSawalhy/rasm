@@ -9,9 +9,10 @@
     <meta name="description" content="PLOTTO - Graphing Calculator, Animations, Points, Geometry, Calculus, Easy to deal with">
     <title>PLOTTO - Graphing Calculator - sciCave</title>
     <!--plugins create by me -->
-    <link href="./libraries/SUI/dist/styles/all.css" rel="stylesheet" />
-    <script src="./libraries/SUI/dist/js/all.js"></script>
+    <link href="./libraries/SUI.css" rel="stylesheet" />
+    <script src="./libraries/SUI.js"></script>
     <!-- my own code -->
+    <link href="./libraries/balloon.min.css" rel="stylesheet" />
     <link href="./dist/styles/style.min.css" rel="stylesheet" />
 
     <style>
@@ -102,8 +103,8 @@
     </div>
 
     <div class="app-container">
-      <section class="container">
-        <div class="sidebar-container visible">
+      <section class="container" style='--app-main-width: 100%; --app-main-height: 100%;'>
+        <div class="sidebar-container visible" style="--sb-width: 100%; --sb-height: 100%">
           <div class="header">
             <div id="add-more">
               <button class="toggle transbtn-1">+</button>
@@ -118,14 +119,10 @@
 
             <div class=" visible" id="show-hide-sidebar">
               <button class="transbtn-1">
-                <svg width="10" height="10">
-                  <path
-                    class="path"
-                    fill="none"
-                    stroke="black"
-                    stroke-width="2"
-                  ></path>
-                </svg>
+                <span class="arrow left"><i class="fas fa-chevron-left"></i></span>
+                <span class="arrow right"><i class="fas fa-chevron-right"></i></span>
+                <span class="arrow up"><i class="fas fa-chevron-up"></i></span>
+                <span class="arrow down"><i class="fas fa-chevron-down"></i></span>
               </button>
             </div>
           </div>
@@ -958,7 +955,6 @@
     <script src="./libraries/jquery/jquery-3.4.1.min.js"></script>
     <link href="./libraries/jquery/jquery-ui.min.css" rel="stylesheet" defer />
     <script src="./libraries/jquery/jquery-ui.min.js"></script>
-    <script src="./libraries/jquery.balloon.min.js"></script>
 
     <!-- this should be here before MathPackage -->
     <script src="./libraries/tex2max.js"></script>
@@ -983,6 +979,10 @@
 
     <!--plugins -->
     <script src="./libraries/fontawesome-free-5.10.2-web/js/all.min.js"></script>
+
+    <script>
+      $('#loading-layer').fadeOut(1000);
+    </script>
 
     <script src="./src/js/app/app.js" type="module"></script>
 

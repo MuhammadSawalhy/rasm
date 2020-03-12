@@ -15,11 +15,10 @@ export default class Slider /** or slider */ extends GraphChild {
          throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
       }
       //#endregion
-      super(options);
-
-      if (!this.id.match(/[a-zA-Z_]+\d*/)) throw new Error(`${this.id} is invalid.`);
-      
-      Math[this.id] = this.value;
+      super(options, (me) => {
+         if (!me.id.match(/[a-zA-Z_]+\d*/)) throw new Error(`${me.id} is invalid.`);
+         Math[me.id] = me.value;
+      });
 
    }
 
@@ -32,11 +31,8 @@ export default class Slider /** or slider */ extends GraphChild {
       return Math[this.id];
    }
 
-   remove() {
+   _remove() {
       delete Math[this.id];
-      this.sketch.children.delete(this.id);
-      this.gs.childrenIDs = this.gs.childrenIDs.filter(a => a !== this.id);
-      if (this.handlers.remove) this.handlers.remove(...handlerArgs);
    }
 
 }

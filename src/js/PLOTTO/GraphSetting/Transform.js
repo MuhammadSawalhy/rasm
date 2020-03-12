@@ -124,10 +124,11 @@ export default class {
          if (type === 'deg') {
             a = a / 180 * Math.PI;
          }
+         let i = this.invokeOnchange;
          this.invokeOnchange = false;
          this.xAngle += a;
          this.yAngle += a;
-         this.invokeOnchange = true;
+         this.invokeOnchange = i;
          this.onchange();
       }
    }
@@ -137,12 +138,13 @@ export default class {
   */
    rotateX(a, type = 'rad') {
       if (!isNaN(a)) {
-         this.invokeOnchange = false;
          if (type === 'deg') {
             a = a / 180 * Math.PI;
          }
+         let i = this.invokeOnchange;
+         this.invokeOnchange = false;
          this.xAngle += a;
-         this.invokeOnchange = true;
+         this.invokeOnchange = i;
          this.onchange();
       }
    }
@@ -156,8 +158,10 @@ export default class {
          if (type === 'deg') {
             a = a / 180 * Math.PI;
          }
+         let i = this.invokeOnchange;
+         this.invokeOnchange = false;
          this.yAngle += a;
-         this.invokeOnchange = true;
+         this.invokeOnchange = i;
          this.onchange();
       }
    }

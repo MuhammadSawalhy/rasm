@@ -32,17 +32,21 @@ export default function canvasEvents() {
       });
 
       if (subTools.type === 'move') {
+         // canvasParent.style.cursor = 'grabbing';
+         // canvasParent.style.cursor = '-webkit-grabbing';
          mouse.prev = { x: mouse.x, y: mouse.y };
          mouse.vel = { x: 0, y: 0 };
          clearInterval(dragInterval);
-         dragInterval = setInterval(() => {
-            // mouse.prevVel = mouse.vel;
-            mouse.vel = { x: mouse.x - mouse.prev.x, y: mouse.y - mouse.prev.y };
-            // mouse.acc = { x: mouse.vel.x - mouse.prevVel.x, y: mouse.vel.y - mouse.prevVel.y };
-            mouse.prev = { x: mouse.x, y: mouse.y };
-         }, 20);
+         // dragInterval = setInterval(() => {
+         //    // mouse.prevVel = mouse.vel;
+         //    mouse.vel = { x: mouse.x - mouse.prev.x, y: mouse.y - mouse.prev.y };
+         //    // mouse.acc = { x: mouse.vel.x - mouse.prevVel.x, y: mouse.vel.y - mouse.prevVel.y };
+         //    mouse.prev = { x: mouse.x, y: mouse.y };
+         // }, 20);
       }
       else if (subTools.type.search('axises') > -1) {
+         // canvasParent.style.cursor = 'grabbing';
+         // canvasParent.style.cursor = '-webkit-grabbing';
          let xEq = lines.lineEquation(-mySketch.gs.transform.xAngle, mySketch.gs.center),
             yEq = lines.lineEquation(-mySketch.gs.transform.yAngle, mySketch.gs.center);
          let d = 30;
@@ -92,6 +96,7 @@ export default function canvasEvents() {
          subTools.increment = 0;
          mySketch.draw();
       } else if (subTools.type === 'zoom') {
+         // canvasParent.style.cursor = 'grabbing';
          /// setting the layer of zoomBox
          let boxElt = document.createElement('div');
          boxElt.classList.add('zoom-box');
@@ -107,17 +112,21 @@ export default function canvasEvents() {
    canvasParent.addEventListener('touchstart', startTransFunc);
 
    let updateTransFunc = (e) => {
-      let canvasPos = getPosittion(canvas.elt);
-      if (e.type === 'mousemove') {
-         mouse.x = e.clientX - canvasPos.left;
-         mouse.y = e.clientY - canvasPos.top;
-      } else {
-         //touchstart
-         let touch = e.touches[0];
-         mouse.x = touch.clientX - canvasPos.left;
-         mouse.y = touch.clientY - canvasPos.top;
-      }
+      //#region getting positions of mouse
+      
       if (mousepressed) {
+
+         let canvasPos = getPosittion(canvas.elt);
+         if (e.type === 'mousemove') {
+            mouse.x = e.clientX - canvasPos.left;
+            mouse.y = e.clientY - canvasPos.top;
+         } else {
+            //touchstart
+            let touch = e.touches[0];
+            mouse.x = touch.clientX - canvasPos.left;
+            mouse.y = touch.clientY - canvasPos.top;
+         }
+
          switch (subTools.type) {
             case 'move':
                {
@@ -158,8 +167,9 @@ export default function canvasEvents() {
    let transEndFunc = (e) => {
       if (mousepressed) {
          mousepressed = false;
-        
          if (subTools.type === 'move') {
+            // canvasParent.style.cursor = 'grab';
+            // canvasParent.style.cursor = '-webkit-grab';
             clearInterval(dragInterval);
             mouse.vel = new vector(mouse.vel.x, mouse.vel.y);
             while (mouse.vel.mag > 50) {
@@ -175,6 +185,8 @@ export default function canvasEvents() {
             }, 10);
          }
          else if (subTools.type.search('axises') > -1) {
+            // canvasParent.style.cursor = 'grab';
+            // canvasParent.style.cursor = '-webkit-grab';
             if (subTools.axis == 'x') {
                mySketch.coor.coorSettings.penXaxis.color = subTools.penColor;
             } else if (subTools.axis == 'y') {
@@ -183,6 +195,7 @@ export default function canvasEvents() {
                mySketch.coor.coorSettings.penXaxis.color = subTools.xPenColor;
                mySketch.coor.coorSettings.penYaxis.color = subTools.yPenColor;
             }
+            mySketch.draw();
          }
          else if (subTools.type === 'zoom') {
             subTools.boxElt.remove();
@@ -209,20 +222,23 @@ export default function canvasEvents() {
    window.addEventListener('touchend', transEndFunc);
 
    canvasParent.addEventListener('mousewheel', (e) => {
-      {
-         e.preventDefault();
-         let center = mySketch.gs.center;
-         let mousePos = mouse;
-         if (MathPackage.Core.dist(mouse.x, mouse.y, center.x, center.y) < 30) {
-            mousePos = center;
-         }
-         if (e.wheelDelta > 0) {
-            mySketch.gs.transform.zoomIn(new vector(mousePos.x, mousePos.y));
-            mySketch.update();
-         } else {
-            mySketch.gs.transform.zoomOut(new vector(mousePos.x, mousePos.y));
-            mySketch.update();
-         }
+      e.preventDefault();
+
+      let canvasPos = getPosittion(canvas.elt);
+      mouse.x = e.clientX - canvasPos.left;
+      mouse.y = e.clientY - canvasPos.top;
+
+      let center = mySketch.gs.center;
+      let mousePos = mouse;
+      if (MathPackage.Core.dist(mouse.x, mouse.y, center.x, center.y) < 30) {
+         mousePos = center;
+      }
+      if (e.wheelDelta > 0) {
+         mySketch.gs.transform.zoomIn(new vector(mousePos.x, mousePos.y));
+         mySketch.update();
+      } else {
+         mySketch.gs.transform.zoomOut(new vector(mousePos.x, mousePos.y));
+         mySketch.update();
       }
    });
 
@@ -231,7 +247,7 @@ export default function canvasEvents() {
    function moveCoor(e) {
       mySketch.gs.transform.translate(new vector(mouse.x, mouse.y).subtract(subTools.mouse));
       mySketch.update();
-      canvas.ellipse(mouse.x, mouse.y, 5);
+      // canvas.ellipse(mouse.x, mouse.y, 5);
       subTools.mouse = new vector(mouse.x, mouse.y);
    }
 
@@ -254,8 +270,8 @@ export default function canvasEvents() {
 
          mySketch.gs.transform.onchange(true);
          mySketch.update();
-         canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
-         canvas.ellipse(mouse.x, mouse.y, 5);
+         // canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
+         // canvas.ellipse(mouse.x, mouse.y, 5);
 
          showTransDetails([
             `*${(mySketch.gs.iVector.mag / subTools.iVector.mag).toFixed(2)}`
@@ -279,8 +295,8 @@ export default function canvasEvents() {
 
          mySketch.gs.transform.onchange(true);
          mySketch.update();
-         canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
-         canvas.ellipse(mouse.x, mouse.y, 5);
+         // canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
+         // canvas.ellipse(mouse.x, mouse.y, 5);
          showTransDetails([
             `*${(mySketch.gs.jVector.mag / subTools.jVector.mag).toFixed(2)}`
          ]);
@@ -308,8 +324,8 @@ export default function canvasEvents() {
 
          mySketch.gs.transform.onchange(true);
          mySketch.update();
-         canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
-         canvas.ellipse(mouse.x, mouse.y, 5);
+         // canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
+         // canvas.ellipse(mouse.x, mouse.y, 5);
          showTransDetails([
             `*${(mySketch.gs.jVector.mag / subTools.jVector.mag).toFixed(2)}`
          ]);
@@ -320,7 +336,7 @@ export default function canvasEvents() {
       if (subTools.axis == 'x') {
          if (math.dist(mySketch.gs.center.x, mySketch.gs.center.y, mouse.x, mouse.y) > 10) {
             let rotatedMouse = subTools.mouse;
-            let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(mouse.x, mouse.y).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), 'vectors');
+            let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(mouse.x, mouse.y).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)));
             rotationAngle = angles.constrainAngle(rotationAngle);
             if (!isNaN(rotationAngle)) {
                // mySketch.gs.transform.xAngle = snapAngle(subTools.angle - rotationAngle);
@@ -334,8 +350,8 @@ export default function canvasEvents() {
             mySketch.gs.transform.onchange();
             mySketch.update();
 
-            canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
-            canvas.ellipse(mouse.x, mouse.y, 5);
+            // canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
+            // canvas.ellipse(mouse.x, mouse.y, 5);
             showTransDetails([
                `xAngle: ${angles.stringDegAngle(mySketch.gs.transform.xAngle.toFixed(2))}`,
                `rotationAngle: ${angles.stringDegAngle(-rotationAngle)}`
@@ -345,10 +361,10 @@ export default function canvasEvents() {
          if (math.dist(mySketch.gs.center.x, mySketch.gs.center.y, mouse.x, mouse.y) > 10) {
 
             let rotatedMouse = subTools.mouse;
-            let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(mouse.x, mouse.y).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), 'vectors');
+            let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(mouse.x, mouse.y).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)));
             rotationAngle = angles.constrainAngle(rotationAngle);
             if (!isNaN(rotationAngle)) {
-               mySketch.gs.transform.yAngle = angles.snapAngle(subTools.angle - rotationAngle);
+               mySketch.gs.transform.yAngle = angles.snapAngle(subTools.angle - rotationAngle, [Math.PI / 2, 3*Math.PI/2]);
                let center = mySketch.gs.center;
                rotatedMouse = center.add(subTools.mouse.subtract(center).rotate(rotationAngle));
             }
@@ -356,8 +372,8 @@ export default function canvasEvents() {
             mySketch.gs.transform.invokeOnchange = true;
             mySketch.gs.transform.onchange();
             mySketch.update();
-            canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
-            canvas.ellipse(mouse.x, mouse.y, 5);
+            // canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
+            // canvas.ellipse(mouse.x, mouse.y, 5);
             showTransDetails([
                `yAngle: ${angles.stringDegAngle(mySketch.gs.transform.yAngle.toFixed(2))}`,
                `rotationAngle: ${angles.stringDegAngle(-rotationAngle)}`
@@ -366,7 +382,7 @@ export default function canvasEvents() {
       } else if (subTools.axis == 'xy') {
          if (math.dist(mySketch.gs.center.x, mySketch.gs.center.y, mouse.x, mouse.y) > 10) {
             let rotatedMouse = subTools.mouse;
-            let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(mouse.x, mouse.y).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), 'vectors');
+            let rotationAngle = angles.angle(subTools.mouse.subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)), new vector(mouse.x, mouse.y).subtract(new vector(mySketch.gs.center.x, mySketch.gs.center.y)));
             rotationAngle = angles.constrainAngle(rotationAngle);
             if (!isNaN(rotationAngle)) {
                mySketch.gs.transform.xAngle = subTools.xAngle - rotationAngle;
@@ -378,8 +394,8 @@ export default function canvasEvents() {
             mySketch.gs.transform.invokeOnchange = true;
             mySketch.gs.transform.onchange();
             mySketch.update();
-            canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
-            canvas.ellipse(mouse.x, mouse.y, 5);
+            // canvas.ellipse(rotatedMouse.x, rotatedMouse.y, 5);
+            // canvas.ellipse(mouse.x, mouse.y, 5);
             showTransDetails([
                `xAngle: ${angles.stringDegAngle(mySketch.gs.transform.xAngle)}`,
                `yAngle: ${angles.stringDegAngle(mySketch.gs.transform.yAngle)}`,

@@ -3,6 +3,7 @@ import XYfunction from './functions/XYfunction.js';
 import Point from './Point.js';
 import EvalExpr from './EvalExpr.js';
 import Variable from './Variable.js';
+import Func from './Func.js';
 import Empty from './Empty.js';
 import Slider from './Slider.js';
 
@@ -12,8 +13,9 @@ export default {
    Point,
    EvalExpr,
    Variable,
+   Func,
    Empty,
-   Slider
+   Slider,
 };
 
 export {
@@ -22,6 +24,7 @@ export {
    Point,
    EvalExpr,
    Variable,
+   Func,
    Empty,
-   Slider
+   Slider,
 };

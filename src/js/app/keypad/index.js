@@ -1,10 +1,9 @@
 import keypadEvents from './events.js';
-import { keypadSettings, resize, checkSM } from '../global.js';
+import { keypadSettings, resize, checkSM, sidebar } from '../global.js';
 
 export default function setupKeypad() {
 
    keypadSettings.showHideKeyBtn.addEventListener("click", function (e) {
-      let sidebar = document.querySelector(".sidebar-container");
       let sidebarShown = /\svisible\s|^visible\s|\svisible$/.test(sidebar.className); // hasClass
       if (!sidebarShown) {
          document.querySelector("#show-hide-sidebar").click();

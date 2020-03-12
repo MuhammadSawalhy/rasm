@@ -10,10 +10,10 @@ export var subTools = {
       position: { bottom: 20, left: 20 },
       duration: 2500, // to make it fixed
       content: '<p style="background: green; color:white;">There is no god but Allah',
-      parent: document.querySelector('#canvas-parent')
+      parent: document.querySelector('#canvas-parent').parentElement,
    })
 };
-export var mouse = { x: undefined, y: undefined};
+export var mouse = { x: undefined, y: undefined };
 
 export var keypadSettings = {
    backspaceInterval: undefined,
@@ -21,6 +21,9 @@ export var keypadSettings = {
    showHideKeyBtn: document.querySelector(".sh-keypad"),
    mathField: document.querySelector('.script')
 };
+
+export var sidebar = document.querySelector('.sidebar-container');
+
 //#endregion
 
 //#region methods
@@ -29,12 +32,17 @@ export function updateObjsOrder() {
    let objs = document.querySelectorAll('.controls li');
    let order = 1;
    for (let obj of objs) {
-      obj.setAttribute('index', order -1);
+      obj.setAttribute('index', order - 1);
       obj.querySelector('.order').textContent = order++;
    }
 }
 
-export function addControl(control, index = 'last', autoFocus = true) {
+export function addControl(input, index = 'last', autoFocus = true) {
+   let control = input;
+   if ((typeof input).toLowerCase() === 'string') {
+      control = new ChildControl();
+      control.mathField.latex(input);
+   }
    var controls = document.querySelector('.controls');
    index = (math.isNumeric(index) && index > controls.childElementCount - 1) ? 'last' : index;
    let i = index === 'last' ? controls.childElementCount - 1 : index;
@@ -48,6 +56,7 @@ export function addControl(control, index = 'last', autoFocus = true) {
       controls.appendChild(control.elt);
    }
    if (autoFocus) control.focus();
+
 }
 
 export function removeControl(control) {
@@ -82,11 +91,18 @@ export function addTOsketch(child, controlIndex = 'last' /* the index */) {
 export function resize(setContainment = true) {
    checkSM();
 
-   document.body.style = `--window-width: ${window.innerWidth}px; --window-height: ${window.innerHeight}px`;
-   
+   let appMainContainer = document.querySelector('.app-container .container');
+   appMainContainer.setAttribute('style', appMainContainer.getAttribute('style').replace(/--app-main-(width|height)\s*:\s*(.*?)($|;)/g, (match, dimension) => {
+      return dimension ? `--app-main-width: ${appMainContainer.clientWidth}px;` : `--app-main-height: ${appMainContainer.clientHeight}px;`;
+   }));
+
+   sidebar.setAttribute('style', sidebar.getAttribute('style').replace(/--sb-(width|height)\s*:\s*(.*?)($|;)/g, (match, dimension) => {
+      return dimension ? `--sb-width: ${sidebar.clientWidth}px;` : `--sb-height: ${sidebar.clientHeight}px;`;
+   }));
+
    mySketch.canvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
    mySketch.childrenCanvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
-  
+
    mySketch.gs.transform.invokeOnchange = false;
 
    mySketch.gs.width = canvasParent.clientWidth;
@@ -102,23 +118,23 @@ export function resize(setContainment = true) {
    // }
 
    if (setContainment) {
-      let sideBar = document.querySelector('.sidebar-container');
-
-      $(".resizer", sideBar)
-         .draggable('option', 'containment', getContainment(sideBar));
+      $(".resizer", sidebar)
+         .draggable('option', 'containment', getContainment(sidebar));
       // .css({ left: document.querySelector('.sidebar-container').clientWidth + 'px' });
    }
 
    mySketch.update();
    resize.prevSize = { width: window.innerWidth, height: window.innerHeight };
 }
-export function checkSM(){
+export function checkSM() {
    if (window.innerWidth <= 600 && resize.prevSize.width > 600) {
       /// changing the element layout
-      checkSM.smallScreen = true;
+      document.body.querySelector('.app-container').classList.remove('large-screen');
+      document.body.querySelector('.app-container').classList.add('small-screen');
    } else if (window.innerWidth > 600 && resize.prevSize.width <= 600) {
       /// changing the element layout
-      checkSM.smallScreen = false;
+      document.body.querySelector('.app-container').classList.add('large-screen');
+      document.body.querySelector('.app-container').classList.remove('small-screen');
    }
 }
 checkSM.prevSize = { width: window.innerWidth, height: window.innerHeight };
@@ -144,14 +160,141 @@ export function getContainment(elt) {
    }
 
 }
-
 export function genRandomName() {
    let num = 0;
    /// randomNameNum is here to avoid getting the same random name if the code is implemented so fast
 
-   return (Date.now() + genRandomName.randomNameNum++).toString(36);
+   return (Date.now() + genRandomName.randomNameNum++)
+      .toString(36)
+      .replace(/\d/g, (num) => {
+         return String.fromCharCode(97 + parseInt(num));
+      });
 }
 genRandomName.randomNameNum = 0;
+
+export function hassClass(elt, c) {
+   for (let _c of elt.classList) {
+      if (c === _c) return true;
+   }
+   return false;
+}
+
+
+export var slidersController = {
+
+   workingSliders: [],
+   interval: 0,
+   status: 'all-stoped',
+
+   /**
+    * @param {ChildControl} sliderControl 
+    */
+   push: function (sliderControl) {
+
+      let $slider = sliderControl.specialProps.$slider;
+      let slider = $slider[0];
+      let attrs = sliderControl.specialProps.attrs;
+      let sliderConfig = {
+         min: parseFloat(slider.min),
+         max: parseFloat(slider.max),
+         step: parseFloat(slider.step),
+         value: sliderControl.graphChild.getValue(),
+      };
+      let stepConfig = {
+         current: (sliderConfig.value - sliderConfig.min) / sliderConfig.step,
+         prev: (sliderConfig.value - sliderConfig.min) / sliderConfig.step,
+         max: (sliderConfig.max - sliderConfig.min) / sliderConfig.step,
+      };
+
+      this.workingSliders.push({ sliderControl, stepConfig, sliderConfig, attrs, $slider });
+
+      if (this.status === 'all-stoped') {
+         this.status = 'working';
+         this.startSlidersInterval();
+      }
+   },
+
+   /**
+    * @param {ChildControl} sliderControl
+    */
+   pop: function (sliderControl) {
+      for (let i = 0; i < this.workingSliders.length; i++) {
+         if (sliderControl === this.workingSliders[i].sliderControl) {
+            this.workingSliders.splice(i, 1);
+         }
+      }
+      if (this.workingSliders.length === 0) {
+         this.status = 'all-stoped';
+         clearInterval(this.interval);
+      }
+   },
+
+   startSlidersInterval: function () {
+      let intervalSleepDur = 15; /// in ms
+      // let setNew = true;
+      // let times = 0; 
+      this.interval = setInterval(() => {
+         // if (setNew) {
+         //    setNew = false;
+         //    setTimeout(() => {
+         //       console.log((times * 15), 'fps');
+         //       times = 0;
+         //       setNew = true;
+         //    }, 1000);
+         // }
+         // times++;
+         // updating all working slliders
+         for (let slider of this.workingSliders) {
+            let stepConfig = slider.stepConfig;
+            let sliderConfig = slider.sliderConfig;
+            let $slider = slider.$slider;
+            //#region stepConfig.current
+            /**
+             * the attrs.speed is in (step per second),
+             * so let devide it bty 1000 to get the speed in (ms),
+             * then multiply by the duration of sleeping of the interval,
+             * with this computation, the slider will give an illusion of the given speed,
+             * moreover, users eyes won't recognize what is happening.
+             */
+            stepConfig.current += (slider.attrs.speed * slider.attrs.speedModifier / 1000 * intervalSleepDur);
+            //#endregion
+            if (Math.abs(stepConfig.current - stepConfig.prev) > 1) {
+               switch (slider.attrs.dir) {
+                  case 'oscillate': {
+                     let value = sliderConfig.min + (stepConfig.current * sliderConfig.step);
+                     if (stepConfig.current < 0 || stepConfig.current > stepConfig.max) slider.attrs.speedModifier *= -1;
+                     else {
+                        $slider[0].value = value;
+                        $slider.trigger('change', true, false);
+                     }
+                     break;
+                  }
+                  case 'forwards': {
+                     let value = sliderConfig.min + (stepConfig.current * sliderConfig.step);
+                     if (stepConfig.current > stepConfig.max) stepConfig.current = 0;
+                     else {
+                        $slider[0].value = value;
+                        $slider.trigger('change', true, false);
+                     }
+                     break;
+                  }
+                  case 'backwards': {
+                     let value = sliderConfig.min + (stepConfig.current * sliderConfig.step);
+                     if (stepConfig.current < 0) stepConfig.current = stepConfig.max;
+                     else {
+                        $slider[0].value = value;
+                        $slider.trigger('change', true, false);
+                     }
+                     break;
+                  }
+               }
+               stepConfig.prev = stepConfig.current;
+            }
+         }
+         mySketch.update(true, false);
+      }, intervalSleepDur);
+   }
+};
 
 
 //#endregion

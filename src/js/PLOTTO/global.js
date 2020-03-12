@@ -1,4 +1,4 @@
-
+import { UndefError } from './Errors/index.js';
 export function generateName() {
    return (Date.now() + generateName.randomNameNum++).toString(36);
 }
@@ -27,7 +27,6 @@ generateName.randomNameNum = 0;
 // };
 
 let mathFunc = {
-
    log: function (x, base = 10) {
       return Math.log10(x) / Math.log10(base);
    },
@@ -36,13 +35,26 @@ let mathFunc = {
    sec: x => 1 / Math.cos(x),
    csc: x => 1 / Math.sin(x),
    cot: x => 1 / Math.tan(x),
+   asec: x => Math.acos(1/x),
+   acsc: x => Math.asin(1/x),
+   acot: x => Math.atan(1/x),
 
    sinh: x => (Math.exp(x) - Math.exp(-x)) / 2,
    cosh: x => (Math.exp(x) + Math.exp(-x)) / 2,
    tanh: x => Math.sinh(x) / Math.cosh(-x),
-   asinh: x => Math.log,
-   acosh: x => (Math.exp(x) + Math.exp(-x)) / 2,
-   atanh: x => Math.sinh(x) / Math.cosh(-x),
+   asinh: x => Math.ln(x + Math.sqrt(x ** 2 + 1)),
+   acosh: x => Math.ln(x + Math.sqrt(x ** 2 - 1)),
+   atanh: x => 0.5 * Math.ln((1 + x)/(1 - x)),
+
+   sech: x => 1 / Math.cosh(x),
+   csch: x => 1 / Math.sinh(x),
+   coth: x => 1 / Math.tanh(x),
+   asech: x => Math.acosh(1 / x),
+   acsch: x => Math.asinh(1 / x),
+   acoth: x => Math.atanh(1 / x),
+
+   fact: x => (x % 1 !== 0 || x < 0) ? NaN : Math.__fact(x), 
+   __fact: x => x === 0 ? 1 : (x * Math.__fact(x - 1)),
 
    gcd: (...values)=>{
       let gcd_ = Math.abs(values[0]);
@@ -60,31 +72,11 @@ let mathFunc = {
 
       return gcd_;
    },
-   
-   gcd2: (a, b) => {
-      a = Math.abs(a);
-      b = Math.abs(b);
-
-      if (b === 0 || a === 0) {
+   gcd2(a, b) {
+      if (b == 0)
          return a;
-      }
-      else if (a === b) {
-         return a;
-      }
-      else if (a % b === 0) {
-         return b;
-      }
-      else {
-         if (a - b > b) {
-            return Math.gcd(a - b, b);
-         }
-         else {
-            return Math.gcd(b, a - b);
-         }
-      }
-      return NaN;
+      return Math.gcd(b, a % b);
    },
-
    lcm: (...values) => {
       let product = 1;
       let a;
@@ -112,12 +104,19 @@ let vars = {
 
 Object.assign(Math, vars);
 
-export function getJSfunction(input, params, parse = true) {
-   if (input instanceof Function)
-      return input;
-   else if (input instanceof MagicalParser.Node) {
-      return MathPackage.Parser.parsedTOjsFunction(input, params);
+export function getJSfunction(input, params, usestrict = true, undefThrowError = true) {
+   let result;
+   if (input instanceof MagicalParser.Node) {
+      result = MathPackage.Parser.parsedTOjsFunction(input, params, 'Math', usestrict);
+   } else if ((typeof input).toLowerCase() === 'object') {
+      result = MathPackage.Parser.maximaTOjsFunction(MathPackage.Parser.latexTOmaxima(input.value), params, 'Math', usestrict);
    } else {
-      return MathPackage.Parser.maximaTOjsFunction(input, params, parse);
+      result = MathPackage.Parser.maximaTOjsFunction(input, params, 'Math', usestrict);
+   }
+   if (undefThrowError) {
+      if (result.undef.vars.length > 0 || result.undef.funcs.length > 0) throw new UndefError(result.undef);
+      return result.func;
+   } else {
+      return result.func;
    }
 }

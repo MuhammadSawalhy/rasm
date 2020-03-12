@@ -1,18 +1,21 @@
 .control {
   --script-background: white;
-  --r-side-background: linear-gradient(#f0f0f09a, #ecececf1);
-  --l-side-background: #f0f0f09a;
+  --r-side-background: linear-gradient(
+    rgba(240, 240, 240, 0.604),
+    rgba(236, 236, 236, 0.945)
+  );
+  --l-side-background: rgba(240, 240, 240, 0.604);
 
   min-height: var(--min-height);
   overflow: hidden;
   background: var(--script-background);
-  border-bottom: 1px solid #adadad75;
-  border-top: 1px solid #adadad75;
+  border-bottom: 1px solid rgba(173, 173, 173, 0.459);
+  border-top: 1px solid rgba(173, 173, 173, 0.459);
   &:first-of-type {
     border-top: none;
   }
   display: grid;
-  grid-template: "status main ctrl" / 50px 1fr 30px;
+  grid-template: "status main ctrl" / 50px calc(var(--sb-width) - 80px) 30px;
 
   &.dragging {
     @extend %oc-focused;
@@ -92,7 +95,7 @@
         darken($color-ledge, 5%) 100%
       ) !default;
       $thumb-color: $color-primary !default;
-
+      $thumb-border-color: invert($thumb-color) !default;
       $thumb-radius: 7.5px !default;
       $thumb-height: 15px !default;
       $thumb-width: 15px !default;
@@ -118,6 +121,14 @@
         cursor: pointer;
         height: $thumb-height;
         width: $thumb-width;
+        box-shadow: 0 0 0 0px transparentize($thumb-color, $amount: 0.5);
+        border: 0px solid $thumb-border-color;
+        transition: box-shadow 0.3s ease-in-out, border .3s ease-in-out;
+        &:hover{
+          border: 1.5px solid $thumb-border-color;
+          box-shadow: 0 0 0 4px transparentize($thumb-color, $amount: 0.5);
+        }
+
       }
 
       .slider {
@@ -196,25 +207,44 @@
         display: flex;
         flex-flow: row nowrap;
         align-items: center;
+      }
+      .slider-controller-toggle,
+      .play-pause {
+        padding: 3px;
+        margin: 3px;
+        border-radius: 3px;
+        &:hover {
+          background: silver;
+          color: rgb(31, 48, 56);
+        }
+        &:active {
+          position: relative;
+          top: 2px;
+        }
+      }
 
-        .slider-controller-toggle,
-        .play-pause {
-          padding: 3px;
-          margin: 3px;
-          border-radius: 3px;
+      .slider-controller-toggle {
+        .right {
+          transition: transform 0.3s ease-in-out;
+        }
+      }
 
-          &:hover {
-            background: silver;
-            color: rgb(31, 48, 56);
-          }
-          &:active {
-            position: relative;
-            top: 2px;
-          }
+      .play-pause {
+        --play-path: path(
+          "M 424.4 214.7 L 72.4 6.6 C 43.8 -10.3 0 6.1 0 47.9 V 464 c 0 37.5 40.7 60.1 72.4 41.3 l 352 -208 c 31.4 -18.5 31.5 -64.1 0 -82.6 Z"
+        );
+        --pause-path: path(
+          "M 144 479 H 48 c -26.5 0 -48 -21.5 -48 -48 V 79 c 0 -26.5 21.5 -48 48 -48 h 96 c 26.5 0 48 21.5 48 48 v 352 c 0 26.5 -21.5 48 -48 48 Z m 304 -48 V 79 c 0 -26.5 -21.5 -48 -48 -48 h -96 c -26.5 0 -48 21.5 -48 48 v 352 c 0 26.5 21.5 48 48 48 h 96 c 26.5 0 48 -21.5 48 -48 Z"
+        );
+        .path {
+          transition: d 0.8s ease-in-out;
+          d: var(--play-path);
         }
       }
 
       .slider-controller {
+        overflow: hidden;
+        height: 0;
         .math-field {
           border-radius: 5px;
           border: 1px grey solid;
@@ -226,6 +256,34 @@
             border: 1px aqua solid;
           }
         }
+      }
+
+      &.play {
+        .play-pause {
+          .path {
+            d: var(--pause-path);
+          }
+        }
+      }
+
+      &.controller-opended {
+        .slider-controller {
+          height: auto;
+        }
+        .slider-controller-toggle {
+          .right {
+            transform: rotate(90deg);
+          }
+        }
+      }
+    }
+
+    .not-exist {
+      button {
+        min-width: 30px;
+        border-radius: 20%;
+        padding: 5px;
+        margin: 5px;
       }
     }
   }
@@ -293,24 +351,38 @@
       user-select: none;
     }
 
-    .visible {
+    .visible-elt {
       width: 30px;
       height: 30px;
       border-radius: 50%;
-      border: 1px solid grey;
       position: relative;
       top: 3px;
       overflow: hidden;
       position: relative;
+      border: 2px solid var(--border-color);
+
+      &:not(.visible) {
+        .inner {
+          background: transparent;
+        }
+      }
+
+      &:hover {
+        .inner {
+          filter: brightness(1.5);
+          filter: brightness(1.5);
+        }
+      }
 
       .inner {
+        transition: background 0.3s ease;
         position: absolute;
-        width: 100%;
-        height: 100%;
+        border-radius: 50%;
+        top: 10%;
+        left: 10%;
+        bottom: 10%;
+        right: 10%;
         background: var(--color, rgba(128, 128, 128, 0.253));
-        &:hover {
-          filter: hue-rotate(10deg);
-        }
       }
     }
 

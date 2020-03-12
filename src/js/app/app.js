@@ -1,4 +1,4 @@
-import { getContainment, updateObjsOrder, resize, checkSM, addControl, keypadSettings } from './global.js';
+import { getContainment, updateObjsOrder, resize, checkSM, addControl, keypadSettings, sidebar } from './global.js';
 import Sketch from '../PLOTTO/Sketch.js';
 import drawing from '../PLOTTO/drawing/index.js';
 import setEvents from './events/index.js';
@@ -10,7 +10,7 @@ import { Variable } from '../PLOTTO/GraphChildren/index.js';
  * app folder is associated with PLOTTO folder, both of them depends upon the other.
  */
 export default function setupAPP(canvasParent) {
-  document.body.style.height = window.innerHeight + 'px';
+  // document.body.style.height = window.innerHeight + 'px';
 
   window.MP = MathPackage;
   window.angles = MP.Angles;
@@ -75,20 +75,16 @@ export default function setupAPP(canvasParent) {
   mySketch.gs.centrate();
   mySketch.update();
 
-  $('#loading-layer').fadeOut(1000, () => {
-    let oc = new ChildControl();
-    addControl(oc);
-  });
-
   console.log('%cPLOTTO', 'background: black; color: white; font: 50px consolas;');
   console.log('%cWe are sciCave', 'color: blue; font: 25px consolas;');
+
+  addControl(new ChildControl());
 }
 
 function setupResizer(){
 
   //#region sidebar-resizer
 
-  var sidebar = document.querySelector(".sidebar-container");
   var sidebarResizer = sidebar.querySelector(".resizer");
   let srDraggingConfig = {}; // sidebarResizerDraggingConfig
 

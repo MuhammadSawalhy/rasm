@@ -1,7 +1,7 @@
 import GraphChild from "./GraphChild.js";
 import { getJSfunction } from '../global.js';
 
-export default class EvalExpr extends GraphChild{
+export default class EvalExpr extends GraphChild {
    constructor(options) {
       //#region 
       let propName;
@@ -10,18 +10,11 @@ export default class EvalExpr extends GraphChild{
          throw new Error('Your options passed to the shetchChild is not valid, it doesn\'t has ' + propName + ' property, or it is falsy value');
       }
       //#endregion
-      super(options);
 
-      if (this.expr.check({ type: 'operator', name: '=' })) {
-         this.eval = new Function(
-            'return ' +
-            MathPackage.Parser.__generateJS(this.expr.args[0]) +
-            ' === ' +
-            MathPackage.Parser.__generateJS(this.expr.args[1])
-         );         
-      } else {
-         this.evalFunc = getJSfunction(this.expr);
-      }
+      super(options, (me) => {
+         me.evalFunc = getJSfunction(me.expr);
+      });
+
    }
 
    static fromString(str, sketch) {

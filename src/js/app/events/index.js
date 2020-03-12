@@ -1,7 +1,7 @@
 import canvasEvents from "./canvasEvents.js";
 import toolsEvents from "./toolsEvents.js";
 import ChildControl from "../ChildControl.js";
-import { addControl, resize, keypadSettings, checkSM } from "../global.js";
+import { addControl, resize, keypadSettings, checkSM, sidebar } from "../global.js";
 
 export default function setEvents () {
    //#region window events
@@ -53,23 +53,10 @@ export default function setEvents () {
          to = __visible ? "unvisible" : "visible";
      
          // let path = this.querySelector('path');
-      let sidebar = document.body.querySelector('.sidebar-container');
       if (__visible) {
-         
-         if (checkSM.smallScreen) {
-            sidebar.style = 'width: ' + sidebar.clientWidth + 'px';
-            sidebar.style = 'height: ' + sidebar.clientHeight + 'px';
-         } else {
-            sidebar.style = 'width: ' + sidebar.clientWidth + 'px';
-            sidebar.style = 'height: ' + sidebar.clientHeight + 'px';
-         }
-
          document.body.querySelector('.app-container').appendChild(this);
-         // path.setAttribute('d', path.getAttribute('right'));
       } else {
-         sidebar.style = '';
          sidebar.querySelector('.header').append(this);
-         // path.setAttribute('d', path.getAttribute('left'));
       }
 
       $this.removeClass(from);

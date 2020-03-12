@@ -35,8 +35,7 @@ body {
   padding: 0;
   overflow: hidden;
   user-select: none;
-  width: var(--window-width);
-  height: var(--window-height);
+  height: 100vh;
 }
 
 /* main layout */

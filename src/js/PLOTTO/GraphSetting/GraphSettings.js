@@ -1,5 +1,7 @@
 import Transform from './Transform.js';
 import CoorManager from './CoorManager.js';
+import { ExistBefore } from '../Errors/index.js';
+
 export default class {
 
   constructor(sketch, width, height) {
@@ -14,8 +16,6 @@ export default class {
 
     this.physicsRun = false;
 
-    this.childrenIDs = [];
-  
   }
 
   get coor() { return this.sketch.coor; }
@@ -57,14 +57,15 @@ export default class {
 
   checkId(id) {
     if (!id) throw new Error('can\'t set a falsy value to the name of this sketch child.');
-    let __id = id.replace(/^\s*([_a-zA-z\d]+)\s*$/, '$1');
+    let __id = id.replace(/^\s*([_a-zA-z]+\d*)\s*$/, '$1');
     if (!__id)
       throw new Error(`"${id}" is not valid to use.`);
     else {
-      if (this.childrenIDs.find(a=> a === id)) {
-        throw new Error(`"${id}" is used before.`);
+      if (this.sketch.children.has(id)) {
+        throw new ExistBefore(id);
       }
     }
+    if (Math.hasOwnProperty(id)) throw new ExistBefore(id);
     return __id;
   }
 
