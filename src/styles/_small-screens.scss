@@ -78,20 +78,17 @@ $small-width: 600px;
 }
 
 @media (max-width: 850px) {
-  .subtools-container {
-    display: none;
-  }
+  // .subtools-container {
+  //   display: none;
+  // }
 
   .canvas-outer-container {
     .tools {
-      button {
-        height: 40px;
-        width: 40px;
-      }
-    }
-    .main-tools-container {
-      .subtools-btn {
-        display: inline-block;
+      .main-tools-container{
+        button {
+          height: 40px;
+          width: 40px;
+        }
       }
     }
   }

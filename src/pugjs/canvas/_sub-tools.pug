@@ -1,35 +1,33 @@
 .subtools-container
    .merged-buttons.row
-      button#centrate.btn-2
+      button#centrate.btn-2(data-balloonpos='bottom', aria-label='go to the center')
          label
-            i.fas.fa-crosshairs
+            i.fas.fa-crosshairs.subtools-icon
+      
       input#subtools-scale-axises(type='radio', name='subtools', data-type='scale-axises')
-      
-      button.btn-2
+      button.btn-2(data-balloonpos='bottom', aria-label='scale-axises')
          label(for='subtools-scale-axises') 
-            span scale-axises 
-            i.fas.fa-arrows-alt-h
+            //- span.subtools-tag scale-axises 
+            i.fas.fa-arrows-alt-h.subtools-icon
+
       input#subtools-rotate-axises(type='radio', name='subtools', data-type='rotate-axises')
-      
-      button.btn-2
+      button.btn-2(data-balloonpos='bottom', aria-label='rotate-axises')
          label(for='subtools-rotate-axises') 
-            span rotate-axises 
-            i.fas.fa-undo
+            //- span.subtools-tag rotate-axises 
+            i.fas.fa-undo.subtools-icon
+
       input#subtools-zoom(type='radio', name='subtools', data-type='zoom')
-      
-      button#subtools-zoom-btn.btn-2
+      button#subtools-zoom-btn.btn-2(data-balloonpos='bottom', aria-label='zoom - with a box')
          label(for='subtools-zoom', onclick='')
-            span zoom 
-            i.fas.fa-crop-alt
-      input#subtools-zoom-rr(type='checkbox')
-      label#label-zoom-rr(for='subtools-zoom-rr', data-tip='Conserve Prespective Ratio')
-         label(for='subtools-zoom', onclick='')
-            span aspect-ratio 
-            i.fas.fa-percent
+            //- span.subtools-tag zoom 
+            i.fas.fa-crop-alt.subtools-icon
+         input#subtools-zoom-rr(type='checkbox')
+         label#label-zoom-rr(for='subtools-zoom-rr', data-balloonpos='right', aria-label='Conserve Prespective Ratio')
+            //- span.subtools-tag aspect-ratio 
+            i.fas.fa-percent.subtools-icon
       
       input#subtools-move(type='radio', name='subtools', checked='', data-type='move')
-      button.btn-2
-         span rotate-axises 
+      button.btn-2(data-balloonpos='bottom', aria-label='move')
          label(for='subtools-move')
-            span move 
-            i.fas.fa-arrows-alt
+            //- span.subtools-tag move 
+            i.fas.fa-arrows-alt.subtools-icon

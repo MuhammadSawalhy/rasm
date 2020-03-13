@@ -6,7 +6,11 @@
   );
   --l-side-background: rgba(240, 240, 240, 0.604);
 
-  min-height: var(--min-height);
+  --oc-min-height: 60px;
+  --side-status-width: 50px;
+  --side-ctrl-width: 30px;
+
+  min-height: var(--oc-min-height);
   overflow: hidden;
   background: var(--script-background);
   border-bottom: 1px solid rgba(173, 173, 173, 0.459);
@@ -14,8 +18,13 @@
   &:first-of-type {
     border-top: none;
   }
-  display: grid;
-  grid-template: "status main ctrl" / 50px calc(var(--sb-width) - 80px) 30px;
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  padding-right: var(--side-ctrl-width);
+  padding-left: var(--side-status-width);
 
   &.dragging {
     @extend %oc-focused;
@@ -35,24 +44,25 @@
   }
 
   .main {
-    min-height: var(--oc-min-height);
-    grid-area: main;
     font-size: 18px;
     padding: 0;
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
-    justify-content: center;
+    flex-grow: 1;
+    width: 100%;
 
     .script-container {
+      cursor: text;
+      width: 100%;
+      flex-grow: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      width: 100%;
+
       .script {
         width: 100%;
         padding: 10px 3px;
-        height: auto;
         border: none;
         text-align: center;
       }
@@ -123,12 +133,11 @@
         width: $thumb-width;
         box-shadow: 0 0 0 0px transparentize($thumb-color, $amount: 0.5);
         border: 0px solid $thumb-border-color;
-        transition: box-shadow 0.3s ease-in-out, border .3s ease-in-out;
-        &:hover{
+        transition: box-shadow 0.3s ease-in-out, border 0.3s ease-in-out;
+        &:hover {
           border: 1.5px solid $thumb-border-color;
           box-shadow: 0 0 0 4px transparentize($thumb-color, $amount: 0.5);
         }
-
       }
 
       .slider {
@@ -289,9 +298,14 @@
   }
 
   .side-ctrl {
-    grid-area: ctrl;
     background: var(--r-side-background);
     border-left: 1px solid #adadad75;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: var(--side-ctrl-width);
 
     display: grid;
     grid-auto-rows: auto 1fr;
@@ -331,14 +345,19 @@
   .side-status {
     background: var(--l-side-background);
     box-shadow: 2px 0 10px 0px rgba(128, 128, 128, 0.411);
-    min-height: var(--oc-min-height);
-    grid-area: status;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--side-status-width);
+
     display: flex;
     flex-flow: column nowrap;
     justify-content: center;
     align-items: center;
+
     transition: background 0.3s ease-in-out;
-    position: relative;
 
     .order-container {
       position: absolute;

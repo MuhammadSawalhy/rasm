@@ -8,24 +8,26 @@ export default class ChildControl {
       this.elt = document.createElement('div');
       this.elt.innerHTML = `
       <li class="control" id="${this.id}">
-        <div class="side-status" cancel-move>
-          <div class="order-container">
-            <span class='order'>12</span>
-          </div>
-        </div>
-        <div class="main" cancel-move cancel-hiding-keypad>
-         <div class=script-container><span type="text" class="script"></span></div>
-        </div>
-        <div class="side-ctrl">
-          <button class="closebtn-2 remove" cancel-move><div class="inner"></div></button>
-          <span class="move">
-            <div>
-              <span>..</span>
-              <span>..</span>
-              <span>..</span>
+         <div class="side-status" cancel-move>
+            <div class="order-container">
+               <span class='order'>12</span>
             </div>
-          </span>
-        </div>
+         </div>
+         <div class='main' cancel-move>
+            <div class=script-container>
+               <span type="text" class="script"></span>
+            </div>
+         </div>
+         <div class="side-ctrl">
+            <button class="closebtn-2 remove" cancel-move><div class="inner"></div></button>
+            <span class="move">
+               <div>
+                  <span>..</span>
+                  <span>..</span>
+                  <span>..</span>
+               </div>
+            </span>
+         </div>
       </li>
       `;
       this.elt = (this.elt.childNodes[1]);

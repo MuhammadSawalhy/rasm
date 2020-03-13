@@ -1,13 +1,20 @@
-$background: #eee;
+$background: linear-gradient(rgba(182, 182, 182, 0.5), rgb(218, 218, 218));
+$num-background: linear-gradient(rgb(177, 177, 177), rgb(206, 206, 206));
+$backspace-background: $background;
+$enter-background: linear-gradient(rgba(113, 189, 219, 0.699), rgb(206, 206, 206));
+$shift-background: $background;
+$equal-background: $background;
+
 $radius: var(--kb-radius);
 $lineHeight: var(--line-height);
 @mixin generalStyle() {
 
   font: 1em -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
     Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-  background-color: $background;
+  background: $background;
   color: #777;
   border: 0;
+  box-shadow: 1px 2px 3px silver;
   border-radius: $radius;
   font-size: 1em;
   height: $lineHeight;
@@ -18,8 +25,6 @@ $lineHeight: var(--line-height);
   cursor: pointer;
   box-sizing: border-box;
   padding: 0;
-  border: 1px solid rgba(31, 31, 31, 0.74);
-  border-bottom: 3px solid rgba(31, 31, 31, 0.74);
 
   &:not(:last-of-type) {
     margin-right: var(--gap);
@@ -37,8 +42,8 @@ $lineHeight: var(--line-height);
   }
 
   &:active {
-    border-bottom: 1px solid rgba(31, 31, 31, 0.74);
-    font-weight: bolder;
+    position: relative;
+    transform: translateY(2px);
   }
   &:hover,
   &:focus {
@@ -65,7 +70,7 @@ button {
 
   &.shiftable {
     > span:not(.active) {
-      color: #313131aa;
+      color: rgba(49, 49, 49, 0.667);
       font-size: 0.8em;
       top: 2px;
       right: 2px;
@@ -103,12 +108,23 @@ button {
   }
 
   &.shift.lock {
-    background-color: rgb(179, 179, 179);
     color: rgb(0, 110, 153);
   }
   
   &.num-btn{
-      background: darken($background, 15%);;
+      background: $num-background;
+  }
+  &.shift{
+    background: $shift-background;
+  }
+  &.equal-sign{
+    background: $equal-background;
+  }
+  &.enter{
+      background: $enter-background;
+  }
+  &.backspace{
+      background: $backspace-background;
   }
 
 }

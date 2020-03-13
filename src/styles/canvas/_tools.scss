@@ -1,73 +1,9 @@
 /* for tools */
 /* for tools */
 /* for tools */
-.main-tools-container {
-  position: absolute;
-  display: flex;
-  flex-flow: column nowrap;
-  right: 0;
-  top: 0;
 
-  button {
-    padding: 0;
-    height: 50px;
-    width: 50px;
-    border-radius: var(--buttons-radius);
-    margin: var(--buttons-margin);
-    font-size: 1.1em;
-  }
-}
-
-.subtools-container {
-  position: absolute;
-  top: 0;
-  right: 60px;
-  opacity: 0.5;
-  transition: opacity 0.3s;
-
-  &:hover {
-    opacity: 1;
-  }
-
-  #subtools-zoom-rr {
-    display: none;
-
-    &:checked + #label-zoom-rr {
-      background: var(--secondary-color);
-      color: black;
-    }
-  }
-
-  #label-zoom-rr {
-    display: inline-flex;
-    margin: 0;
-    margin-left: 2px;
-    border-radius: 3px;
-    opacity: 0.8;
-  }
-
-  button {
-    padding: 0;
-    border-radius: var(--buttons-radius);
-    margin: var(--buttons-margin);
-    font-size: 1.1em;
-    transition: background 0.5s;
-
-    > label {
-      padding: 5px 10px;
-      display: inline-block;
-    }
-  }
-
-  input[type*="radio"] {
-    display: none;
-
-    &:checked + button {
-      background: var(--primary-color);
-      color: white;
-    }
-  }
-}
+@import 'sub-tools';
+@import 'main-tools';
 
 .do-redo {
   display: none;

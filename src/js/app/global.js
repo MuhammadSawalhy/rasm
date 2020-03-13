@@ -91,15 +91,6 @@ export function addTOsketch(child, controlIndex = 'last' /* the index */) {
 export function resize(setContainment = true) {
    checkSM();
 
-   let appMainContainer = document.querySelector('.app-container .container');
-   appMainContainer.setAttribute('style', appMainContainer.getAttribute('style').replace(/--app-main-(width|height)\s*:\s*(.*?)($|;)/g, (match, dimension) => {
-      return dimension ? `--app-main-width: ${appMainContainer.clientWidth}px;` : `--app-main-height: ${appMainContainer.clientHeight}px;`;
-   }));
-
-   sidebar.setAttribute('style', sidebar.getAttribute('style').replace(/--sb-(width|height)\s*:\s*(.*?)($|;)/g, (match, dimension) => {
-      return dimension ? `--sb-width: ${sidebar.clientWidth}px;` : `--sb-height: ${sidebar.clientHeight}px;`;
-   }));
-
    mySketch.canvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
    mySketch.childrenCanvas.resize(canvasParent.clientWidth, canvasParent.clientHeight);
 

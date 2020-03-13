@@ -9,7 +9,7 @@ const gulp = require('gulp'),
    // autoprefixer = require('gulp-autoprefixer'),
    // minify = require('gulp-minify'),
    // notify = require('gulp-notify'),
-   // concat = require('gulp-concat'),
+   concat = require('gulp-concat'),
    sourcemaps = require('gulp-sourcemaps'),
    browserSync = require('browser-sync').create();
 
@@ -63,7 +63,7 @@ function stylesCompileAll(source, dest, options = {}) {
       source = gulp.src(source);
    }
    let defaultOptions = {
-      fileName: 'all',
+      fileName: 'style',
       outputStyle: 'expanded'
    };
    options = { ...defaultOptions, ...options };
@@ -83,8 +83,8 @@ function stylesCompileAll(source, dest, options = {}) {
       last = source
          .pipe(sourcemaps.init({ largeFile: true, loadMaps: false }))
          .pipe(sass({ outputStyle: outStyle }))
-         .pipe(concat(filename))
          .pipe(autoprefixer('last 2 versions'))
+         .pipe(concat(filename))
          .pipe(sourcemaps.write('.', { includeContent: mapsIncludeContent }))
          .pipe(gulp.dest(dest))
          .pipe(browserSync.stream());
@@ -200,14 +200,14 @@ gulp.task('watch', watchMyProject);
 let serveMyProject = function () {
    browserSync.init({
       server: {
-         baseDir: ".",
+         baseDir: "./dist/",
       }
    });
 
    return watchMyProject();
 };
 
-gulp.task('live-server', serveMyProject);
+gulp.task('server', serveMyProject);
 
 //#endregion
 

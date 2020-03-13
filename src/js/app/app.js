@@ -49,7 +49,7 @@ export default function setupAPP(canvasParent) {
           </div>
         </div>
         <div class="main" cancel-move cancel-hiding-keypad>
-         <div class=script-container><span type="text" class="script">NEW</span></div>
+          <div class=script-container><span type="text" class="script">NEW</span></div>
         </div>
         <div class="side-ctrl">
           <button class="closebtn-2 remove" cancel-move><div class="inner"></div></button>

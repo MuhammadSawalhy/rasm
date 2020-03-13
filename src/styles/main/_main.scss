@@ -11,13 +11,21 @@
 :root {
   --buttons-radius: 10px;
   --buttons-margin: 5px;
-  --oc-min-height: 60px;
+
   --sidebar-min-width: 300px;
   --sidebar-max-width: 60vw;
+  
   --border-color: rgb(40, 117, 206);
-  --primary-color:  rgb(74, 74, 74)
-  --secondary-color:  rgb(138, 138, 138);
-  --background-color: rgb(255, 255, 255);
+
+  --primary-background:  rgb(48, 48, 48);
+  --primary-color:  rgb(255, 255, 255);
+  --secondary-background:  rgb(138, 138, 138);
+  --secondary-color:  rgb(0, 0, 0);
+
+  --primary2-background:  rgb(77, 77, 77);
+  --primary2-color:  rgb(226, 226, 226);
+  --secondary2-background:  rgb(197, 197, 197);
+  --secondary2-color:  rgb(0, 0, 0);
 
   // these are here as the sh button will be outside the keypad container on hiding the keypad
   --shkbBTNposition: 5px;
