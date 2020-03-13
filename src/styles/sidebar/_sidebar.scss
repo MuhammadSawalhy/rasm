@@ -5,8 +5,6 @@
   min-width: var(--sidebar-min-width);
   max-width: var(--sidebar-max-width);
 
-  background: rgba(184, 184, 184, 0.575);
-
   display: flex;
   flex-flow: column nowrap;
   position: relative;
@@ -41,8 +39,28 @@
   }
 
   .header {
-    padding: 5px 5px;
-    border-bottom: 1px solid var(--border-color);
+    /// the border-color
+    position: relative;
+    background: linear-gradient(10deg, rgb(91, 91, 91), var(--primary-color));
+
+    padding: 12px 5px;
+
+    &:after,
+    &:before {
+      content: '';
+      position: absolute;
+      background: linear-gradient(45deg, #c6c6c6 20%, #7d7d7d);
+      height: 6px;
+      width: 100%;
+      left: 0;
+    }
+    &:after{
+      bottom: 0;
+    }
+     &:before{
+      top: 0;
+    }
+    
 
     #show-hide-sidebar {
       float: right;
@@ -51,21 +69,13 @@
       float: left;
       visibility: hidden;
     }
-  }
-}
 
-.transbtn-1 {
-  border-radius: 15%;
-  width: 30px;
-  height: 30px;
-  font-size: 1.2em;
-  color: #31313196;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3px;
-  background: rgba(192, 192, 192, 0.575);
-  border: 1px solid var(--border-color);
+    .transbtn {
+      &:hover {
+        color: rgb(196, 196, 196);
+      }
+    }
+  }
 }
 
 #show-hide-sidebar {
@@ -84,6 +94,9 @@
     top: 5px;
     .arrow.right {
       display: block;
+    }
+    > button:hover {
+      color: rgb(34, 34, 34);
     }
   }
   &.visible {

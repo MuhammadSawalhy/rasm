@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint ./src/js/**/*.js",
     "build": "rollup -c",
-    "server":  "npx http-server ./"
+    "server": "npx http-server ./"
   },
   "author": "SciCave Team",
   "license": "copyrights reserved - you can not grap any snippet of this project without a compliance.",
@@ -17,6 +17,13 @@
     "eslint": "^6.8.0",
     "eslint-config-p5js": "^1.0.1",
     "eslint-plugin-import": "^2.18.2",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^7.0.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-pug": "^4.0.1",
+    "gulp-sass": "^4.0.2",
+    "gulp-sourcemaps": "^2.6.5",
+    "gulp-terser": "^1.2.0",
     "rollup": "^1.31.0",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-terser": "^5.2.0"

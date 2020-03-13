@@ -1,0 +1,239 @@
+.alpha-keypad(style='--columns-count:10; --rows-count: 5;')
+  .rows
+    .row
+      button.num-btn(mq-write='1')
+        span 1
+      button.num-btn(mq-write='2')
+        span 2
+      button.num-btn(mq-write='3')
+        span 3
+      button.num-btn(mq-write='4')
+        span 4
+      button.num-btn(mq-write='5')
+        span 5
+      button.num-btn(mq-write='6')
+        span 6
+      button.num-btn(mq-write='7')
+        span 7
+      button.num-btn(mq-write='8')
+        span 8
+      button.num-btn(mq-write='9')
+        span 9
+      button.num-btn(mq-write='0')
+        span 0
+    .row
+      button.double-shiftable(mq-write='q')
+        .latin.active
+          span.active(mq-write='q') q
+          span(mq-write='Q') Q
+        .greek(mq-write='ϕ')
+          span.active(mq-write='ϕ') &phiv;
+          span(mq-write='Φ') &Phi;
+      button.double-shiftable(mq-write='w')
+        .latin.active(mq-write='w')
+          span.active(mq-write='w') w
+          span(mq-write='W') W
+        .greek(mq-write='ς')
+          span.active(mq-write='ς') &sigmaf;
+          span(mq-write='Σ') &Sigma;
+      button.double-shiftable(mq-write='e')
+        .latin.active(mq-write='e')
+          span.active(mq-write='e') e
+          span(mq-write='E') E
+        .greek(mq-write='ε')
+          span.active(mq-write='ε') &epsi;
+          span(mq-write='Ε') &Epsilon;
+      button.double-shiftable(mq-write='r')
+        .latin.active(mq-write='r')
+          span.active(mq-write='r') r
+          span(mq-write='R') R
+        .greek(mq-write='p')
+          span.active(mq-write='p') &rho;
+          span(mq-write='P') &Rho;
+      button.double-shiftable(mq-write='t')
+        .latin.active(mq-write='t')
+          span.active(mq-write='t') t
+          span(mq-write='T') T
+        .greek
+          span.active(mq-write='τ') &tau;
+          span(mq-write='Τ') &Tau;
+      button.double-shiftable(mq-write='y')
+        .latin.active
+          span.active(mq-write='y') y
+          span(mq-write='Y') Y
+        .greek
+          span.active(mq-write='υ') &upsi;
+          span(mq-write='Y') &Upsilon;
+      button.double-shiftable(mq-write='υ')
+        .latin.active
+          span.active(mq-write='υ') u
+          span(mq-write='U') U
+        .greek
+          span.active(mq-write='θ') &theta;
+          span(mq-write='Θ') &Theta;
+      button.double-shiftable(mq-write='i')
+        .latin.active
+          span.active(mq-write='i') i
+          span(mq-write='I') I
+        .greek
+          span.active(mq-write='ι') &iota;
+          span(mq-write='I') &Iota;
+      button.double-shiftable(mq-write='o')
+        .latin.active(mq-write='o')
+          span.active(mq-write='o') o
+          span(mq-write='O') O
+        .greek
+          span.active(mq-write='o') &omicron;
+          span(mq-write='O') &Omicron;
+      button.double-shiftable(mq-write='p')
+        .latin.active
+          span.active(mq-write='p') p
+          span(mq-write='P') P
+        .greek
+          span.active(mq-write='π') &pi;
+          span(mq-write='Π') &Pi;
+    .row(style='--grid-template-columns: 0.5fr repeat(9, 1fr) 0.5fr;')
+      .take-space
+      button.double-shiftable(mq-write='a')
+        .latin.active
+          span.active(mq-write='a') a
+          span(mq-write='A') A
+        .greek
+          span.active(mq-write='α') &alpha;
+          span(mq-write='A') &Alpha;
+      button.double-shiftable(mq-write='s')
+        .latin.active
+          span.active(mq-write='s') s
+          span(mq-write='S') S
+        .greek
+          span.active(mq-write='σ') &sigma;
+          span(mq-write='Σ') &Sigma;
+      button.double-shiftable(mq-write='d')
+        .latin.active
+          span.active(mq-write='d') d
+          span(mq-write='D') D
+        .greek
+          span.active(mq-write='δ') &delta;
+          span(mq-write='Δ') &Delta;
+      button.double-shiftable(mq-write='f')
+        .latin.active
+          span.active(mq-write='f') f
+          span(mq-write='F') F
+        .greek
+          span.active(mq-write='φ') &phi;
+          span(mq-write='Φ') &Phi;
+      button.double-shiftable(mq-write='g')
+        .latin.active
+          span.active(mq-write='g') g
+          span(mq-write='G') G
+        .greek
+          span.active(mq-write='γ') &gamma;
+          span(mq-write='Γ') &Gamma;
+      button.double-shiftable(mq-write='h')
+        .latin.active
+          span.active(mq-write='h') h
+          span(mq-write='H') H
+        .greek
+          span.active(mq-write='η') &eta;
+          span(mq-write='H') &Eta;
+      button.double-shiftable(mq-write='j')
+        .latin.active
+          span.active(mq-write='j') j
+          span(mq-write='J') J
+        .greek
+          span.active(mq-write='ξ') &xi;
+          span(mq-write='Ξ') &Xi;
+      button.double-shiftable(mq-write='k')
+        .latin.active
+          span.active(mq-write='k') k
+          span(mq-write='k') K
+        .greek
+          span.active(mq-write='κ') &kappa;
+          span(mq-write='K') &Kappa;
+      button.double-shiftable(mq-write='l')
+        .latin.active
+          span.active(mq-write='l') l
+          span(mq-write='L') L
+        .greek
+          span.active(mq-write='λ') &lambda;
+          span(mq-write='Λ') &Lambda;
+      .take-space(style='flex-grow:.5')
+    .row(style='--grid-template-columns: 1.5fr repeat(7, 1fr) 1.5fr;')
+      div
+        button.shift
+          span
+            i.fas.fa-exchange-alt
+      button.double-shiftable(mq-write='z')
+        .latin.active
+          span.active(mq-write='z') z
+          span(mq-write='Z') Z
+        .greek
+          span.active(mq-write='ζ') &zeta;
+          span(mq-write='Ζ') &Zeta;
+      button.double-shiftable(mq-write='x')
+        .latin.active
+          span.active(mq-write='x') x
+          span(mq-write='X') X
+        .greek
+          span.active(mq-write='χ') &chi;
+          span(mq-write='Χ') &Chi;
+      button.double-shiftable(mq-write='c')
+        .latin.active
+          span.active(mq-write='c') c
+          span(mq-write='C') C
+        .greek
+          span.active(mq-write='ψ') &psi;
+          span(mq-write='Ψ') &Psi;
+      button.double-shiftable(mq-write='v')
+        .latin.active
+          span.active(mq-write='v') v
+          span(mq-write='V') V
+        .greek
+          span.active(mq-write='ω') &omega;
+          span(mq-write='Ω') &ohm;
+      button.double-shiftable(mq-write='b')
+        .latin.active
+          span.active(mq-write='b') b
+          span B
+        .greek
+          span.active(mq-write='β') &beta;
+          span(mq-write='Β') &Beta;
+      button.double-shiftable(mq-write='n')
+        .latin.active
+          span.active(mq-write='n') n
+          span(mq-write='N') N
+        .greek
+          span.active(mq-write='v') &nu;
+          span(mq-write='Ν') &Nu;
+      button.double-shiftable(mq-write='m')
+        .latin.active
+          span.active(mq-write='m') m
+          span(mq-write='M') M
+        .greek
+          span.active(mq-write='μ') &mu;
+          span(mq-write='Μ') &Mu;
+      div
+        button.backspace
+          span
+            i.fas.fa-backspace
+    .row(style='--grid-template-columns: repeat(7, 1fr)')
+      button.double-shift
+        span
+          i.fas.fa-random
+      button.go-down
+        span
+          i.fas.fa-arrow-down
+      button.go-up
+        span
+          i.fas.fa-arrow-up
+      button.space(mq-write='\ ')
+        span space
+      button.go-left
+        span
+          i.fas.fa-arrow-left
+      button.go-right
+        span
+          i.fas.fa-arrow-right
+      button.enter
+        span
+          i.fas.fa-level-down-alt

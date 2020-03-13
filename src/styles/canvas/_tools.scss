@@ -33,7 +33,7 @@
     display: none;
 
     &:checked + #label-zoom-rr {
-      background: #97c4fe;
+      background: var(--secondary-color);
       color: black;
     }
   }
@@ -63,7 +63,7 @@
     display: none;
 
     &:checked + button {
-      background: #1e62d0;
+      background: var(--primary-color);
       color: white;
     }
   }

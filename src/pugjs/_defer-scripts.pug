@@ -1,0 +1,30 @@
+// plugins
+script(src='./libraries/jquery/jquery-3.4.1.min.js')
+link(href='./libraries/jquery/jquery-ui.min.css', rel='stylesheet', defer='')
+script(src='./libraries/jquery/jquery-ui.min.js')
+
+// this should be here before MathPackage
+script(src='./libraries/tex2max.js') 
+// this should be here before MathPackage
+script(src='./libraries/MagicalParser.js') 
+script(src='./libraries/MathPackage.js')
+
+// plugins
+link(href='./libraries/mathquill-0.10.1/mathquill.css', rel='stylesheet', defer='')
+script.
+  var device;
+  var disableNativeKeypad;
+  window.navigator.userAgent.replace(/(android|iphone|ipad)/i, match => {
+  device = match.toLowerCase();
+  });
+  disableNativeKeypad = !!device;
+script(src='./libraries/mathquill-0.10.1/mathquill.js')
+
+// plugins
+script(src='./libraries/fontawesome-free-5.10.2-web/js/all.min.js')
+
+script.
+  $('#loading-layer').fadeOut(1000);
+
+script(src='../src/js/app/app.js', type='module')
+// <script src="./dist/js/app.js"></script>

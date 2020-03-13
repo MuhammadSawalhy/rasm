@@ -51,6 +51,17 @@ export default class ChildControl {
    }
 
    set graphChild(value) {
+      if (value instanceof EvalExpr) {
+         value.handlers.onupdate = () => {
+            this.__updateEvalExpr();
+         };
+      } else if (value instanceof Slider) {
+         value.handlers.onchange = (updateSlider = true, updateSketch = true) => {
+            if (updateSlider) this.specialProps.$slider[0].value = this._graphChild.getValue();
+            if (updateSketch) mySketch.update(true, false);
+         };
+      }
+      
       this._graphChild = value;
       this.id = value.id;
    }
@@ -419,6 +430,7 @@ export default class ChildControl {
       $visibleElt.bind('click', ()=> {
          $visibleElt.toggleClass('visible');
          this.graphChild.renderable = $visibleElt.hasClass('visible');
+         this.graphChild.update();
          mySketch.draw();
       });
       sideStatus.append($visibleElt[0]);
@@ -463,17 +475,10 @@ export default class ChildControl {
          valueType: valueType[0],
          valueElt: value[0]
       };
-      this.graphChild.handlers.onupdate = () => {
-         this.__updateEvalExpr();
-      };
       // this.__updateEvalExpr(); /// will be done on updating the sktech
    }
 
    __updateEvalExpr() {
-      this.graphChild.handlers.onupdate = () => {
-         this.__updateEvalExpr();
-      };
-
       try {
          let value = this.graphChild.eval();
          if (!isNaN(value)) {
@@ -646,11 +651,6 @@ export default class ChildControl {
    __updateSlider() {
       let slider = this.specialProps.$slider[0];
       let value = this.graphChild.getValue();
-
-      this.graphChild.handlers.onchange = (updateSlider = true, updateSketch = true) => {
-         if (updateSlider) slider.value = this.graphChild.getValue();
-         if (updateSketch) mySketch.update(true, false);
-      };
 
       this.specialProps.attrs.min.latex(Math.min(parseFloat(slider.min), parseFloat(value)));
       this.specialProps.attrs.max.latex(Math.max(parseFloat(slider.max), parseFloat(value)));

@@ -1,0 +1,87 @@
+.functions-keypad
+  .rows(style='--grid-template-columns: repeat(3, 1fr) auto 1fr;')
+    .row
+      button.double-shiftable(mq-func='sin')
+        .active
+          span.active(mq-func='sin') sin
+          span.math-field(mq-func='\sin ^{-1}') sin^{-1}
+        div
+          span.active(mq-func='csc') csc
+          span.math-field(mq-func='csc^{-1}') csc^{-1}
+      button.double-shiftable(mq-func='cos')
+        .active
+          span.active(mq-func='cos') cos
+          span.math-field(mq-func='cos^{-1}') cos^{-1}
+        div
+          span.active(mq-func='sec') sec
+          span.math-field(mq-func='sec^{-1}') sec^{-1}
+      button.double-shiftable(mq-func='tan')
+        .active
+          span.active(mq-func='tan') tan
+          span.math-field(mq-func='tan^{-1}') tan^{-1}
+        div
+          span.active(mq-func='cot') cot
+          span.math-field(mq-func='cot^{-1}') cot^{-1}
+      .take-space
+      button(mq-cmd='sum')
+        span(mq-cmd='sum') &sum;
+    .row
+      button.double-shiftable(mq-func='sinh')
+        .active
+          span.active(mq-func='sinh') sinh
+          span.math-field(mq-func='sinh^{-1}') sinh^{-1}
+        div
+          span.active(mq-func='csch') csch
+          span.math-field(mq-func='csch^{-1}') csch^{-1}
+      button.double-shiftable(mq-func='coch')
+        .active
+          span.active(mq-func='coch') cosh
+          span.math-field(mq-func='cosh^{-1}') cosh^{-1}
+        div
+          span.active(mq-func='sech') sech
+          span.math-field(mq-func='sech^{-1}') sech^{-1}
+      button.double-shiftable(mq-func='tanh')
+        .active
+          span.active(mq-func='tanh') tanh
+          span.math-field(mq-func='tanh^{-1}') tanh^{-1}
+        div
+          span.active(mq-func='coth') coth
+          span.math-field(mq-func='coth^{-1}') coth^{-1}
+      .take-space
+      button(mq-write='\prod_{n=}^{ }')
+        span(mq-write='\prod_{n=}^{ }') &prod;
+    .row
+      button.shiftable(mq-func='floor')
+        span.active(mq-func='floor') floor
+        span(mq-func='ceil') ceil
+      button.shiftable(mq-func='gcd')
+        span.active(mq-func='gcd') gcd
+        span(mq-func='lcm') lcm
+      button.shiftable(mq-func='round')
+        span.active(mq-func='round') round
+        span(mq-func='mod') mod
+      .take-space
+      button(mq-write='!')
+        span.math-filed(mq-write='!') !
+    .row
+      button.shift
+        span
+          i.fas.fa-exchange-alt
+      button(mq-func='\ln')
+        span(mq-func='\ln') ln
+      button(mq-func='log')
+        span(mq-func='log') log
+      .take-space
+      button(mq-cmd='int')
+        span.math-field(mq-cmd='int') \int
+    .row
+      button.double-shift
+        span
+          i.fas.fa-random
+      button(mq-write='e^{...}')
+        span.math-field(mq-write='e^{...}') e^{...}
+      button(mq-func='\log_a')
+        span.math-field(mq-write='\log_a') log_a
+      .take-space
+      button(mq-write='\frac{d}{dx}')
+        span.math-field \frac{d}{dx}

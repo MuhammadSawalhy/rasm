@@ -1,0 +1,35 @@
+.subtools-container
+   .merged-buttons.row
+      button#centrate.btn-2
+         label
+            i.fas.fa-crosshairs
+      input#subtools-scale-axises(type='radio', name='subtools', data-type='scale-axises')
+      
+      button.btn-2
+         label(for='subtools-scale-axises') 
+            span scale-axises 
+            i.fas.fa-arrows-alt-h
+      input#subtools-rotate-axises(type='radio', name='subtools', data-type='rotate-axises')
+      
+      button.btn-2
+         label(for='subtools-rotate-axises') 
+            span rotate-axises 
+            i.fas.fa-undo
+      input#subtools-zoom(type='radio', name='subtools', data-type='zoom')
+      
+      button#subtools-zoom-btn.btn-2
+         label(for='subtools-zoom', onclick='')
+            span zoom 
+            i.fas.fa-crop-alt
+      input#subtools-zoom-rr(type='checkbox')
+      label#label-zoom-rr(for='subtools-zoom-rr', data-tip='Conserve Prespective Ratio')
+         label(for='subtools-zoom', onclick='')
+            span aspect-ratio 
+            i.fas.fa-percent
+      
+      input#subtools-move(type='radio', name='subtools', checked='', data-type='move')
+      button.btn-2
+         span rotate-axises 
+         label(for='subtools-move')
+            span move 
+            i.fas.fa-arrows-alt

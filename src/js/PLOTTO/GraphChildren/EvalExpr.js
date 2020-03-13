@@ -14,7 +14,6 @@ export default class EvalExpr extends GraphChild {
       super(options, (me) => {
          me.evalFunc = getJSfunction(me.expr);
       });
-
    }
 
    static fromString(str, sketch) {
@@ -27,11 +26,7 @@ export default class EvalExpr extends GraphChild {
    }
 
    eval() {
-      try {
-         return this.evalFunc();
-      } catch (e) {
-         this.error(e);
-      }
+      return this.evalFunc();
    }
 
 }

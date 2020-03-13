@@ -1,0 +1,63 @@
+head
+  meta(charset='UTF-8')
+  meta(name='viewport', content='width=device-width, initial-scale=1.0')
+  link(rel='icon', href='assets/icon256.png', type='image/ico', sizes='256x256')
+  meta(name='keywords', content='Graphing,Calculator,Animation,Geometry,Math,Latex,Calculus')
+  meta(name='author', content="scicave's team")
+  meta(name='description', content='PLOTTO - Graphing Calculator, Animations, Points, Geometry, Calculus, Easy to deal with')
+  title PLOTTO - Graphing Calculator - sciCave
+  // plugins create by me
+  link(href='./libraries/SUI.css', rel='stylesheet')
+  script(src='./libraries/SUI.js')
+  // my own code
+  link(href='./libraries/balloon.min.css', rel='stylesheet')
+  link(href='./styles/style.min.css', rel='stylesheet')
+
+  style.
+    #loading-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      right: 0;
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #313131;
+    }
+    #loading-layer::after {
+      content: "";
+      background-color: #ffffff34;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 40%;
+      height: 30%;
+      clip-path: polygon(100% 0, 100% 100%, 0 100%);
+    }
+    #loading-layer::before {
+      content: "";
+      background-color: #ffffff13;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 30%;
+      height: 40%;
+      clip-path: polygon(0 0, 0 100%, 100% 0);
+    }
+    #loading-layer .inner {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: stretch;
+    }
+    #loading-layer .inner .load-wrapper {
+    background: transparent;
+    }
+    #loading-layer .inner .letter {
+    font: 20px monospace;
+    color: white;
+    }
+    #loading-layer .inner .line {
+    background-color: white;
+    }
