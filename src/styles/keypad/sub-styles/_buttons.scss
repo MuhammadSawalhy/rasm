@@ -1,20 +1,59 @@
-$background: linear-gradient(rgba(182, 182, 182, 0.5), rgb(218, 218, 218));
-$num-background: linear-gradient(rgb(177, 177, 177), rgb(206, 206, 206));
+/// backgrounds
+$background: linear-gradient(
+  to top,
+  rgba(182, 182, 182, 0.5),
+  rgb(218, 218, 218)
+);
+$background-active: linear-gradient(
+  to bottom,
+  rgba(182, 182, 182, 0.5),
+  rgb(218, 218, 218)
+);
+
+$num-background: linear-gradient(
+  to top,
+  rgb(177, 177, 177),
+  rgb(206, 206, 206)
+);
+$num-background-active: linear-gradient(
+  to bottom,
+  rgb(177, 177, 177),
+  rgb(206, 206, 206)
+);
+
 $backspace-background: $background;
-$enter-background: linear-gradient(rgba(113, 189, 219, 0.699), rgb(206, 206, 206));
+
+$enter-background: linear-gradient(
+  to top,
+  rgb(206, 206, 206),
+  rgba(113, 189, 219, 0.699)
+);
+$enter-background-active: linear-gradient(
+  to bottom,
+  rgb(206, 206, 206),
+  rgba(113, 189, 219, 0.699)
+);
+
+
 $shift-background: $background;
+
 $equal-background: $background;
+
+/// shadows
+$shadow: 1px 2px 3px rgba(192, 192, 192, 0.63);
+
+/// border
+$border: 1px solid silver;
 
 $radius: var(--kb-radius);
 $lineHeight: var(--line-height);
 @mixin generalStyle() {
-
   font: 1em -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
     Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   background: $background;
   color: #777;
-  border: 0;
-  box-shadow: 1px 2px 3px silver;
+  border: $border;
+  box-shadow: $shadow;
   border-radius: $radius;
   font-size: 1em;
   height: $lineHeight;
@@ -43,7 +82,8 @@ $lineHeight: var(--line-height);
 
   &:active {
     position: relative;
-    transform: translateY(2px);
+    transform: translateY(1px);
+    background: $background-active;
   }
   &:hover,
   &:focus {
@@ -52,7 +92,6 @@ $lineHeight: var(--line-height);
 }
 
 button {
-
   @include generalStyle();
 
   position: relative;
@@ -110,21 +149,26 @@ button {
   &.shift.lock {
     color: rgb(0, 110, 153);
   }
-  
-  &.num-btn{
-      background: $num-background;
+
+  &.num-btn {
+    background: $num-background;
+    &:active {
+      background: $num-background-active;
+    }
   }
-  &.shift{
+  &.shift {
     background: $shift-background;
   }
-  &.equal-sign{
+  &.equal-sign {
     background: $equal-background;
   }
-  &.enter{
-      background: $enter-background;
+  &.enter {
+    background: $enter-background;
+    &:active {
+      background: $enter-background-active;
+    }
   }
-  &.backspace{
-      background: $backspace-background;
+  &.backspace {
+    background: $backspace-background;
   }
-
 }
