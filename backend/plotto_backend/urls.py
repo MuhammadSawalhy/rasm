@@ -33,7 +33,7 @@ contact=openapi.Contact(email="muh.aly@outlook.com"),
 license=openapi.License(name="BSD License"),
 ),
 public=True,
-permission_classes=(permissions.IsAuthenticated,),
+permission_classes=(permissions.AllowAny,),
 )
 
 
