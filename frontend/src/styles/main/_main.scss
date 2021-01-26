@@ -1,0 +1,101 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+*:focus {
+  outline: none;
+}
+
+:root {
+  --buttons-radius: 10px;
+  --buttons-margin: 5px;
+
+  --sidebar-min-width: 300px;
+  --sidebar-max-width: 60vw;
+  
+  --border-color: rgb(40, 117, 206);
+
+  --primary-background:  rgb(77, 77, 77);
+  --primary-color:  rgb(255, 255, 255);
+  --secondary-background:  rgb(138, 138, 138);
+  --secondary-color:  rgb(0, 0, 0);
+
+  --primary2-background:  rgb(30, 104, 194);
+  --primary2-color:  rgb(226, 226, 226);
+  --secondary2-background:  rgb(123, 182, 255);
+  --secondary2-color:  rgb(0, 0, 0);
+
+  // these are here as the sh button will be outside the keypad container on hiding the keypad
+  --shkbBTNposition: 5px;
+  --kb-background: white;
+  --kb-border: 1px solid var(--border-color);
+  --kb-radius: 5px;
+}
+
+body {
+  // position: absolute;
+  // top: 0;
+  // right: 0;
+  // left: 0;
+  // bottom: 0;
+
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  user-select: none;
+  height: 100vh;
+}
+
+/* main layout */
+/* main layout */
+/* main layout */
+.app-container {
+  display: flex;
+  flex-flow: column nowrap;
+  height: 100%;
+
+  .container {
+    display: flex;
+    flex-flow: row nowrap;
+    flex-grow: 1;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  footer {
+    padding: 10px;
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+    background-color: #a7a7a788;
+    > p {
+      margin: 0;
+      text-align: center;
+
+      color: #4d4d4d;
+    }
+  }
+}
+
+.transbtn {
+  background-color: rgba(141, 141, 141, 0.603);
+  transition: background 0.3s ease-out;
+  border: none;
+  &:hover {
+    background-color: transparent;
+  }
+
+  /// this is not global ::: keep then here for a while
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.2em;
+  border-radius: 15%;
+  width: 30px;
+  height: 30px;
+  padding: 3px;
+  color: rgba(0, 0, 0, 0.588);
+}

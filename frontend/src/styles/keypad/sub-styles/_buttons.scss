@@ -1,0 +1,174 @@
+/// backgrounds
+$background: linear-gradient(
+  to top,
+  rgba(182, 182, 182, 0.5),
+  rgb(218, 218, 218)
+);
+$background-active: linear-gradient(
+  to bottom,
+  rgba(182, 182, 182, 0.5),
+  rgb(218, 218, 218)
+);
+
+$num-background: linear-gradient(
+  to top,
+  rgb(177, 177, 177),
+  rgb(206, 206, 206)
+);
+$num-background-active: linear-gradient(
+  to bottom,
+  rgb(177, 177, 177),
+  rgb(206, 206, 206)
+);
+
+$backspace-background: $background;
+
+$enter-background: linear-gradient(
+  to top,
+  rgb(206, 206, 206),
+  rgba(113, 189, 219, 0.699)
+);
+$enter-background-active: linear-gradient(
+  to bottom,
+  rgb(206, 206, 206),
+  rgba(113, 189, 219, 0.699)
+);
+
+
+$shift-background: $background;
+
+$equal-background: $background;
+
+/// shadows
+$shadow: 1px 2px 3px rgba(192, 192, 192, 0.63);
+
+/// border
+$border: 1px solid silver;
+
+$radius: var(--kb-radius);
+$lineHeight: var(--line-height);
+@mixin generalStyle() {
+  font: 1em -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans,
+    Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  background: $background;
+  color: #777;
+  border: $border;
+  box-shadow: $shadow;
+  border-radius: $radius;
+  font-size: 1em;
+  height: $lineHeight;
+  vertical-align: top;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  padding: 0;
+
+  &:not(:last-of-type) {
+    margin-right: var(--gap);
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.3s ease-in-out;
+    width: 100%;
+    height: 100%;
+  }
+
+  &:active {
+    position: relative;
+    transform: translateY(1px);
+    background: $background-active;
+  }
+  &:hover,
+  &:focus {
+    outline: 0;
+  }
+}
+
+button {
+  @include generalStyle();
+
+  position: relative;
+  width: 100%;
+  height: 40px;
+
+  > span {
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    // transition: transform 0.3s ease-in-out, top 0.3s ease-in-out,
+    //   right 0.3s ease-in-out;
+  }
+
+  &.shiftable {
+    > span:not(.active) {
+      color: rgba(49, 49, 49, 0.667);
+      font-size: 0.8em;
+      top: 2px;
+      right: 2px;
+      transform: translate(0, 0);
+    }
+  }
+
+  &.double-shiftable > div {
+    position: absolute;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
+    display: none;
+    transition: opacity 0.3s ease-in;
+
+    &.active {
+      display: block;
+    }
+
+    > span {
+      display: block;
+    }
+
+    > span:not(.active) {
+      display: none;
+    }
+  }
+
+  &.shift.active,
+  &.double-shift.active {
+    span {
+      color: rgb(42, 141, 255);
+      text-shadow: 1px 2px 4px rgb(98, 182, 255);
+    }
+  }
+
+  &.shift.lock {
+    color: rgb(0, 110, 153);
+  }
+
+  &.num-btn {
+    background: $num-background;
+    &:active {
+      background: $num-background-active;
+    }
+  }
+  &.shift {
+    background: $shift-background;
+  }
+  &.equal-sign {
+    background: $equal-background;
+  }
+  &.enter {
+    background: $enter-background;
+    &:active {
+      background: $enter-background-active;
+    }
+  }
+  &.backspace {
+    background: $backspace-background;
+  }
+}

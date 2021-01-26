@@ -1,0 +1,16 @@
+.main-tools-container {
+  position: absolute;
+  display: flex;
+  flex-flow: column nowrap;
+  right: 0;
+  top: 0;
+
+  button {
+    padding: 0;
+    height: 50px;
+    width: 50px;
+    border-radius: var(--buttons-radius);
+    margin: var(--buttons-margin);
+    font-size: 1.1em;
+  }
+}

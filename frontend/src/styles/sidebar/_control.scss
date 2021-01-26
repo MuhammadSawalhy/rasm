@@ -1,0 +1,442 @@
+.control {
+  --script-background: white;
+  --r-side-background: linear-gradient(
+    rgba(240, 240, 240, 0.604),
+    rgba(236, 236, 236, 0.945)
+  );
+  --l-side-background: rgba(240, 240, 240, 0.604);
+
+  --oc-min-height: 60px;
+  --side-status-width: 50px;
+  --side-ctrl-width: 30px;
+
+  min-height: var(--oc-min-height);
+  overflow: hidden;
+  background: var(--script-background);
+  border-bottom: 1px solid rgba(173, 173, 173, 0.459);
+  border-top: 1px solid rgba(173, 173, 173, 0.459);
+  &:first-of-type {
+    border-top: none;
+  }
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  padding-right: var(--side-ctrl-width);
+  padding-left: var(--side-status-width);
+
+  &.dragging {
+    @extend %oc-focused;
+    box-sizing: content-box;
+    border: none;
+    box-shadow: 0 0 10px 0 black;
+    //box-shadow: 0 0 15px 0px rgba(42, 195, 255, 0.411) !important;
+    position: relative;
+    left: 2px;
+  }
+
+  &.focus {
+    @extend %oc-focused;
+    &:first-of-type {
+      border-top: none;
+    }
+  }
+
+  .main {
+    font-size: 18px;
+    padding: 0;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    flex-grow: 1;
+    width: 100%;
+
+    .script-container {
+      cursor: text;
+      width: 100%;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      .script {
+        width: 100%;
+        padding: 10px 3px;
+        border: none;
+        text-align: center;
+      }
+    }
+
+    .value {
+      width: 100%;
+      > span {
+        background: rgba(192, 192, 192, 0.486);
+        color: #3c3c3c;
+        // box-shadow: inset 0 0 3px 0 rgba(172, 172, 172, 0.623);
+
+        border-radius: 5px;
+        padding: 3px;
+        margin: 3px;
+        margin-right: 10px;
+        float: right;
+      }
+    }
+
+    .slider-outer {
+      width: 100%;
+      padding: 0px 1em;
+
+      // Styling input ranges is painful
+
+      // Styling Cross-Browser Compatible Range Inputs with Sass
+      // Github: https://github.com/darlanrod/input-range-sass
+      // Author: Darlan Rod https://github.com/darlanrod
+      // Version 1.4.1
+      // MIT License
+      $color-primary: #000000;
+      $color-ledge: #cac1c1;
+
+      $track-color: linear-gradient(
+        to bottom,
+        $color-ledge,
+        $color-ledge 49.9%,
+        darken($color-ledge, 5%) 50%,
+        darken($color-ledge, 5%) 100%
+      ) !default;
+      $thumb-color: $color-primary !default;
+      $thumb-border-color: invert($thumb-color) !default;
+      $thumb-radius: 7.5px !default;
+      $thumb-height: 15px !default;
+      $thumb-width: 15px !default;
+
+      $track-width: 100% !default;
+      $track-height: 10px !default;
+      $track-shadow-color: rgba(0, 0, 0, 0.2) !default;
+      $track-border-width: 1px !default;
+      $track-border-color: $color-primary !default;
+
+      $track-radius: 25px !default;
+
+      @mixin track {
+        cursor: pointer;
+        height: $track-height;
+        transition: all 0.2s ease;
+        width: $track-width;
+      }
+
+      @mixin thumb {
+        background: $thumb-color;
+        border-radius: $thumb-radius;
+        cursor: pointer;
+        height: $thumb-height;
+        width: $thumb-width;
+        box-shadow: 0 0 0 0px transparentize($thumb-color, $amount: 0.5);
+        border: 0px solid $thumb-border-color;
+        transition: box-shadow 0.3s ease-in-out, border 0.3s ease-in-out;
+        &:hover {
+          border: 1.5px solid $thumb-border-color;
+          box-shadow: 0 0 0 4px transparentize($thumb-color, $amount: 0.5);
+        }
+      }
+
+      .slider {
+        -webkit-appearance: none;
+        margin: $thumb-height / 2 0;
+        width: $track-width;
+
+        &:focus {
+          outline: 0;
+
+          &::-webkit-slider-runnable-track {
+            background: $track-color;
+          }
+
+          &::-ms-fill-lower {
+            background: $track-color;
+          }
+
+          &::-ms-fill-upper {
+            background: $track-color;
+          }
+        }
+
+        &::-webkit-slider-runnable-track {
+          @include track;
+          background: $track-color;
+          border: $track-border-width solid $track-border-color;
+          border-radius: $track-radius;
+        }
+
+        &::-webkit-slider-thumb {
+          @include thumb;
+          -webkit-appearance: none;
+          margin-top: ((-$track-border-width * 2 + $track-height) / 2) -
+            ($thumb-height / 2);
+        }
+
+        &::-moz-range-track {
+          @include track;
+          background: $track-color;
+          border: $track-border-width solid $track-border-color;
+          border-radius: $track-radius;
+        }
+
+        &::-moz-range-thumb {
+          @include thumb;
+        }
+
+        &::-ms-track {
+          @include track;
+          background: transparent;
+          border-color: transparent;
+          border-width: ($thumb-height / 2) 0;
+          color: transparent;
+        }
+
+        &::-ms-fill-lower {
+          background: $track-color;
+          border: $track-border-width solid $track-border-color;
+          border-radius: $track-radius * 2;
+        }
+
+        &::-ms-fill-upper {
+          background: $track-color;
+          border: $track-border-width solid $track-border-color;
+          border-radius: $track-radius * 2;
+        }
+
+        &::-ms-thumb {
+          @include thumb;
+          margin-top: 0;
+        }
+      }
+
+      .range-container {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+      }
+      .slider-controller-toggle,
+      .play-pause {
+        padding: 3px;
+        margin: 3px;
+        border-radius: 3px;
+        &:hover {
+          background: silver;
+          color: rgb(31, 48, 56);
+        }
+        &:active {
+          position: relative;
+          top: 2px;
+        }
+      }
+
+      .slider-controller-toggle {
+        .right {
+          transition: transform 0.3s ease-in-out;
+        }
+      }
+
+      .play-pause {
+        --play-path: path(
+          "M 424.4 214.7 L 72.4 6.6 C 43.8 -10.3 0 6.1 0 47.9 V 464 c 0 37.5 40.7 60.1 72.4 41.3 l 352 -208 c 31.4 -18.5 31.5 -64.1 0 -82.6 Z"
+        );
+        --pause-path: path(
+          "M 144 479 H 48 c -26.5 0 -48 -21.5 -48 -48 V 79 c 0 -26.5 21.5 -48 48 -48 h 96 c 26.5 0 48 21.5 48 48 v 352 c 0 26.5 -21.5 48 -48 48 Z m 304 -48 V 79 c 0 -26.5 -21.5 -48 -48 -48 h -96 c -26.5 0 -48 21.5 -48 48 v 352 c 0 26.5 21.5 48 48 48 h 96 c 26.5 0 48 -21.5 48 -48 Z"
+        );
+        .path {
+          transition: d 0.8s ease-in-out;
+          d: var(--play-path);
+        }
+      }
+
+      .slider-controller {
+        overflow: hidden;
+        height: 0;
+        .math-field {
+          border-radius: 5px;
+          border: 1px grey solid;
+          margin: 3px;
+          color: grey;
+
+          &:focus {
+            color: black;
+            border: 1px aqua solid;
+          }
+        }
+      }
+
+      &.play {
+        .play-pause {
+          .path {
+            d: var(--pause-path);
+          }
+        }
+      }
+
+      &.controller-opended {
+        .slider-controller {
+          height: auto;
+        }
+        .slider-controller-toggle {
+          .right {
+            transform: rotate(90deg);
+          }
+        }
+      }
+    }
+
+    .not-exist {
+      button {
+        min-width: 30px;
+        border-radius: 20%;
+        padding: 5px;
+        margin: 5px;
+      }
+    }
+  }
+
+  .side-ctrl {
+    background: var(--r-side-background);
+    border-left: 1px solid #adadad75;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    width: var(--side-ctrl-width);
+
+    display: grid;
+    grid-auto-rows: auto 1fr;
+
+    button[class^="closebtn"] {
+      height: 30px;
+      width: 30px;
+      padding: 4px;
+    }
+
+    .move {
+      cursor: move;
+      flex-grow: 1;
+      width: 100%;
+      font-weight: bolder;
+      color: rgba(128, 128, 128, 0.5);
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+
+      > div {
+        display: flex;
+        flex-flow: row wrap;
+        width: 10px;
+        position: relative;
+        top: -10px;
+        > span {
+          width: 10px;
+          height: 8px;
+        }
+      }
+    }
+  }
+
+  .side-status {
+    background: var(--l-side-background);
+    box-shadow: 2px 0 10px 0px rgba(128, 128, 128, 0.411);
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--side-status-width);
+
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: center;
+    align-items: center;
+
+    transition: background 0.3s ease-in-out;
+
+    .order-container {
+      position: absolute;
+      padding: 2px;
+      padding-left: 5px;
+      top: 0;
+      left: 0;
+      color: rgb(158, 158, 158);
+      font-size: 12px;
+      user-select: none;
+    }
+
+    .visible-elt {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      position: relative;
+      top: 3px;
+      overflow: hidden;
+      position: relative;
+      border: 2px solid var(--border-color);
+
+      &:not(.visible) {
+        .inner {
+          background: transparent;
+        }
+      }
+
+      &:hover {
+        .inner {
+          filter: brightness(1.5);
+          filter: brightness(1.5);
+        }
+      }
+
+      .inner {
+        transition: background 0.3s ease;
+        position: absolute;
+        border-radius: 50%;
+        top: 10%;
+        left: 10%;
+        bottom: 10%;
+        right: 10%;
+        background: var(--color, rgba(128, 128, 128, 0.253));
+      }
+    }
+
+    .value-type {
+      background-color: rgba(128, 128, 128, 0.493);
+      color: black;
+      border-radius: 5px;
+      padding: 5px;
+
+      &:hover {
+        background-color: rgba(192, 192, 192, 0.473);
+      }
+    }
+
+    .error-elt {
+      position: absolute;
+      color: rgba(255, 0, 0, 0.397);
+      top: 3px;
+      right: 3px;
+    }
+  }
+}
+
+%oc-focused {
+  --script-background: white;
+  --r-side-background: linear-gradient(#a7a7a79a, #ecececf1);
+  --l-side-background: linear-gradient(#a7a7a79a, #ecececf1);
+  border: 1px solid var(--border-color);
+
+  border-right: none;
+  border-left: none;
+
+  .order {
+    color: black;
+  }
+}
+
+@import "./animation";

@@ -1,0 +1,113 @@
+/* for small screens - media queries*/
+/* for small screens - media queries*/
+/* for small screens - media queries*/
+$small-width: 600px;
+@media (max-width: $small-width) {
+  .app-container .container {
+    flex-flow: column nowrap;
+  }
+
+  .canvas-outer-container {
+    order: 1;
+    flex-grow: 1;
+    height: 35%;
+    width: 100%;
+  }
+
+  .sidebar-container {
+    order: 2;
+    flex-grow: 1;
+    --h: 55%;
+    flex-basis: var(--h);
+    height: var(--h);
+    width: 100%;
+    max-width: 100vw;
+    border-right: none;
+    
+    &.visible {
+      position: relative;
+      transition: transform 0.3s;
+      transform: translate(0, 0);
+    }
+
+    &.unvisible {
+      bottom: 0;
+      position: absolute;
+      transform: translate(0, 100%);
+    }
+
+    .resizer {
+      display: none;
+    }
+  }
+
+  .keypad-container {
+    order: 3;
+    &.visible {
+      position: relative;
+      transition: transform 0.3s;
+      transform: translateY(0%);
+    }
+  }
+
+  #show-hide-sidebar {
+    &.unvisible {
+      position: absolute;
+      bottom: 5px;
+      right: 5px;
+      top: initial;
+      left: initial;
+      .arrow.up {
+        display: block;
+      }
+      .arrow.right {
+        display: none;
+      }
+    }
+
+    &.visible {
+      .arrow.down {
+        display: block;
+      }
+      .arrow.left {
+        display: none;
+      }
+      
+    }
+  }
+}
+
+@media (max-width: 850px) {
+  // .subtools-container {
+  //   display: none;
+  // }
+
+  .canvas-outer-container {
+    .tools {
+      .main-tools-container{
+        button {
+          height: 40px;
+          width: 40px;
+        }
+      }
+    }
+  }
+
+  .keypad-container {
+    .main-keypad {
+      .take-space {
+        width: 1.5vw;
+      }
+    }
+
+    .functions-keypad {
+      .take-space {
+        width: 1.5vw;
+      }
+    }
+  }
+
+  footer {
+    display: none;
+  }
+}

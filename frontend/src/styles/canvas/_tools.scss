@@ -1,0 +1,17 @@
+/* for tools */
+/* for tools */
+/* for tools */
+
+@import 'sub-tools';
+@import 'main-tools';
+
+.do-redo {
+  display: none;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+
+  button {
+    color: rgb(83, 83, 83);
+  }
+}

@@ -1,0 +1,32 @@
+
+
+@import './sub-styles/tabs';
+
+/* 
+  keypad container
+*/
+
+@import './sub-styles/keypad-container';
+
+/*
+  show-hide keypad btn
+*/
+
+@import './sub-styles/sh-key-btn';
+
+/* 
+  keypad
+**/
+
+@import './sub-styles/keypad';
+
+/* on small screens */
+
+@media screen and (max-width: 400px) {
+  .keypad-container {
+    --gap: 2px;
+    button.shiftable > span:not(.active) {
+      display: none;
+    }
+  }
+}

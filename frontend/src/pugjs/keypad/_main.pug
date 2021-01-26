@@ -1,0 +1,103 @@
+.main-keypad(style='--columns-count:9; --rows-count: 5;')
+   .rows(style='--grid-template-columns: 1fr auto repeat(5, 1fr) auto 1fr;')
+      .row
+         // 1
+         button(mq-write='^2')
+            span.math-field a^2
+         .take-space
+         button.shiftable(mq-cmd='^')
+            span.math-field.active(mq-cmd='^') a^{...}
+            span.math-field(mq-cmd='_') a_{...}
+         button.shiftable(mq-cmd='(')
+            span.active(mq-cmd='(') (
+            span(mq-cmd='[') [
+         button.shiftable(mq-cmd=')')
+            span.active(mq-cmd=')') )
+            span(mq-cmd=']') ]
+         button(mq-cmd='/')
+            span &div;
+         button(mq-cmd='\\sqrt')
+            span.math-field \sqrt{a}
+         .take-space
+         button.shiftable(mq-write='\\lt')
+            span.active(mq-write='\\lt') &lt;
+            span.math-field(mq-write='\\let') \leq
+      .row
+         // 2
+         button.name-btn(mq-write='x')
+            span.math-field x
+         .take-space
+         button.num-btn(mq-write='7')
+            span 7
+         button.num-btn(mq-write='8')
+            span 8
+         button.num-btn(mq-write='9')
+            span 9
+         button(mq-write='\\cdot')
+            span &times;
+         button(mq-write='\\sqrt[]{}')
+            span.math-field \sqrt[b]{a}
+         .take-space
+         button.shiftable(mq-write='>')
+            span.active(mq-write='>') &gt;
+            span.math-field(mq-write='\\ge') \geq
+      .row
+         // 3
+         button.name-btn(mq-write='y')
+            span.math-field y
+         .take-space
+         button.num-btn(mq-write='4')
+            span 4
+         button.num-btn(mq-write='5')
+            span 5
+         button.num-btn(mq-write='6')
+            span 6
+         button(mq-write='+')
+            span +
+         button(mq-write='e')
+            span.math-field e
+         .take-space
+         button(mq-write='i')
+            span.math-field i
+      .row
+         // 4
+         button.name-btn(mq-write='z')
+            span z
+         .take-space
+         button.num-btn(mq-write='1')
+            span 1
+         button.num-btn(mq-write='2')
+            span 2
+         button.num-btn(mq-write='3')
+            span 3
+         button(mq-write='-')
+            span -
+         button.name-btn(mq-write='\\pi')
+            span.math-field \pi
+         .take-space
+         button.backspace
+            span
+            i.fas.fa-backspace
+      .row
+         // 5
+         button.shift
+            span
+            i.fas.fa-exchange-alt
+         .take-space
+         button.shiftable(mq-write='.')
+            span.active(mq-write='.') .
+            span.math-field(mq-write='\\pm') \pm
+         button.num-btn(mq-write='0')
+            span 0
+         button.go-left
+            span
+            i.fas.fa-arrow-left
+         button.go-right
+            span
+            i.fas.fa-arrow-right
+         button(mq-write='=', class='equal-sign')
+            span =
+         .take-space
+         button.enter
+            span
+            i.fas.fa-level-down-alt

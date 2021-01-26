@@ -1,0 +1,24 @@
+
+button.unvisible.sh-keypad
+  .sh-keypad-content(data-balloon-pos='up', aria-label='show keypad')
+    i.far.fa-keyboard
+    .arrow
+      svg(width='10', height='5')
+        path(d='M 0 5, 5 0, 10 5')
+
+.keypad-container.unvisible(cancel-hiding-keypad='')
+  section.tabs-1
+    ul.tabs
+      li.active
+        span main
+      li
+        span alpha
+      li
+        span functions
+    ul.tabs-content
+      li.active
+         include ./_main.pug
+      li
+         include ./_alpha.pug
+      li
+         include ./_functions.pug
