@@ -29,6 +29,7 @@ We will have, insha'Allah:
 - `creation_date: Date`
 - `last_modified_at: date`
 - `data: JSON`
+- `tags: string`, e.g., `'tag1,tag2,tag3'`
 - `thumbnail: Image`, the server will response with a url to the image, which will be stored at the basck end, we may generate it at the backend with the javascript code used in the front end, may by using `selenium-webdriver`
 
 ### RasmaEdition
