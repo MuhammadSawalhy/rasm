@@ -1,39 +1,39 @@
 from django.db import models
 from django.contrib.auth.models import User
-from phone_field import PhoneField
 from django.utils import timezone
 
 class Rasma(models.Model):
-    user=models.ForeignKey(User,on_delete=models.CASCADE)
-    id_set=models.IntegerField()
-    title=models.CharField(max_length=80)
-    description= models.TextField()
-    version=models.FloatField()
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    title = models.CharField(max_length=80, blank=False)
+    description = models.TextField(default="")
+    version = models.FloatField()
+    data = models.TextField(blank=False)
+    tags = models.CharField(max_length=100, default="")
+    # TODO: unified timezone in the dackend databases
     creation_date = models.DateTimeField(default=timezone.now)
-    last_modified =models.DateTimeField(auto_now=True)
-    thumbnail=models.ImageField(upload_to='images')
+    last_modified_at = models.DateTimeField(default=timezone.now)
+    # TODO: thumbnail to be in the POST API
+    thumbnail = models.ImageField(upload_to='images')
 
     def __str__(self):
         return self.title
+
+
+# TODO: thumbnail to be in the POST API
+# remove this model
 class RasmaImage(models.Model):
     image=models.ImageField(max_length=None)
-    id_set=models.IntegerField()
     rasma=models.ForeignKey(Rasma,on_delete=models.CASCADE)
     version=models.FloatField()
 
-    def __int__(self):
-        return self.id_set
+    #  def __int__(self):
+    #      return self.id_set
 
-class About(models.Model):
-    name=models.CharField(max_length=255)
-    job=models.TextField(max_length=255)
-    
-    def __str__(self):
-        return self.name
-        
+
 class Feedback(models.Model):
-    name=models.CharField(max_length=255)
-    phone = PhoneField(blank=True, help_text='phone number')
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    feedback = models.TextField(default="")
     
     def __str__(self):
-        return self.name
+        return self.user.name
+
