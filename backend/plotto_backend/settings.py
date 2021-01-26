@@ -11,21 +11,28 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+from pathlib import Path
+import environ
+#BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = Path(__file__).resolve().parent.parent
+# reading .env file
+env = environ.Env(SECRET_KEY=str,DJANGO_DEBUG=bool,DJANGO_ALLOWED_HOSTS=str,)
+environ.Env.read_env(os.path.join(BASE_DIR / '.env'))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 't#7j!pm3v6c-=$@%z$*xrg%%o09vrjg7sq_0+tvft&&a#127+%'
-
+#SECRET_KEY = 't#7j!pm3v6c-=$@%z$*xrg%%o09vrjg7sq_0+tvft&&a#127+%'
+SECRET_KEY = env('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DJANGO_DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [env('DJANGO_ALLOWED_HOSTS')]
 
 
 # Application definition
@@ -53,8 +60,12 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.twitter',
+     # for react
+    'corsheaders',
 
 ]
+
+CORS_ALLOW_ALL_ORIGINS=True
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # new
 SITE_ID = 1 # new
@@ -63,6 +74,7 @@ SITE_ID = 1 # new
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -106,7 +118,7 @@ REST_FRAMEWORK={
          'rest_framework.permissions.IsAuthenticated',
      },
       'DEFAULT_AUTHENTICATION_CLASSES': [ # new
-         #'rest_framework.authentication.SessionAuthentication',
+         'rest_framework.authentication.SessionAuthentication',
          'rest_framework.authentication.TokenAuthentication', 
          
 ],
