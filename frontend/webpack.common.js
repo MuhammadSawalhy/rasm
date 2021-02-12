@@ -3,8 +3,6 @@
  * 1. CssExtractPlugin is seperated due to contenthash in the name
  * 2. Here is the Html Plugin, names are the same in both stages
  */
-const path = require('path');
-// minification will be set at webpack.prod.config;
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -12,10 +10,12 @@ module.exports = {
   entry: {
     app: './src/js/index.js',
   },
+  output: {
+    publicPath: '',
+  },
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/pugjs/index.pug',
-      chunks: ['admin'],
     }),
   ],
   module: {
@@ -41,7 +41,6 @@ module.exports = {
         use: 'babel-loader',
       },
       {
-        // scss and css files
         test: /\.css$/,
         use: [
           MiniCssExtractPlugin.loader, // 2. Extract css into files
@@ -49,7 +48,6 @@ module.exports = {
         ],
       },
       {
-        // scss and css files
         test: /\.scss$/,
         use: [
           MiniCssExtractPlugin.loader, // 3. Extract css into files
@@ -57,9 +55,9 @@ module.exports = {
           'sass-loader', // 1. Turns sass into css
         ],
       },
+      // fonsts and images
       {
-        // fonsts and images
-        test: /\.(svg|png|jpg|gif|eot|ttf|woff2?)$/,
+        test: /\.(svg|png|jpg|gif|eot|otf|ttf|woff2?(\?v=[0-9]\.[0-9]\.[0-9])?)$/,
         use: {
           loader: 'file-loader',
           options: {
